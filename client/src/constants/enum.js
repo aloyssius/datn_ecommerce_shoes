@@ -3,6 +3,10 @@ export const All = {
   VI: 'Tất cả',
 }
 
+export const ProductStatusTabs = {
+}
+
+
 export const Color = {
   INFO: 'info',
   SUCCESS: 'success',
