@@ -125,8 +125,8 @@ export default function Router() {
             {
               path: 'promotion',
               children: [
-                { element: <Navigate to="/dashboard/discount/promotion/list" replace />, index: true },
-                { path: 'list', element: <VoucherList /> },
+                { element: <Navigate to="/dashboard/discount/Promotion/list" replace />, index: true },
+                { path: 'list', element: <Promotion /> },
                 // { path: ':id', element: <InvoiceDetails /> },
                 // { path: ':id/edit', element: <InvoiceEdit /> },
                 // { path: 'new', element: <InvoiceCreate /> },
@@ -246,6 +246,8 @@ export default function Router() {
 
 // VOUCHER
 const VoucherList = Loadable(lazy(() => import('../pages/dashboard/voucher/list/VoucherList')))
+
+const Promotion = Loadable(lazy(() => import('../pages/dashboard/promotion/list/Promotion')))
 
 // ACCOUNT
 const AccountCustomerList = Loadable(lazy(() => import('../pages/dashboard/account/customer/list/AccountCustomerList')))
