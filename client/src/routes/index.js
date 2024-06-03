@@ -76,7 +76,7 @@ export default function Router() {
           path: 'order',
           children: [
             { element: <Navigate to="/dashboard/order/list" replace />, index: true },
-            // { path: 'list', element: <EcommerceProductList /> },
+            { path: 'list', element: <OrderList /> },
             // { path: 'product/new', element: <EcommerceProductCreate /> },
             // { path: 'product/:id/edit', element: <EcommerceProductCreate /> },
           ],
@@ -252,6 +252,7 @@ const VoucherList = Loadable(lazy(() => import('../pages/dashboard/voucher/list/
 // PROMOTION
 // PRODUCT
 // ORDER
+const OrderList = Loadable(lazy(() => import('../pages/dashboard/order/list/OrderList')))
 // POS
 
 
