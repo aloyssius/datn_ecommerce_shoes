@@ -5,7 +5,7 @@ import { useState } from 'react';
 export default function useTable(props) {
   const [dense, setDense] = useState(props?.defaultDense || false);
 
-  const [orderBy, setOrderBy] = useState(props?.defaultOrderBy || 'code');
+  const [orderBy, setOrderBy] = useState(props?.defaultOrderBy || 'createdAt');
 
   const [order, setOrder] = useState(props?.defaultOrder || 'desc');
 
@@ -56,7 +56,7 @@ export default function useTable(props) {
 
   const onChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
+    // setPage(0);
   };
 
   const onChangeDense = (event) => {
