@@ -40,3 +40,49 @@ export const VoucherTypeOptions = {
     PRIVATE: 'Cá nhân',
   },
 };
+
+// Customer
+export const CustomerStatusTab = {
+  en: {
+    ACTIVE: 'ACTIVE',
+    INACTIVE: 'INACTIVE',
+  },
+  vi: {
+    ACTIVE: 'Hoạt động',
+    UNACTIVE: 'Ngừng hoạt động',
+  },
+};
+
+export const CustomerTypeOptions = {
+  en: {
+    MEN: 'MEN',
+    WOMEN: 'WOMEN',
+  },
+  vi: {
+    MEN: 'Nam',
+    WOMEN: 'Nữ',
+  },
+};
+
+// Employee
+export const EmployeeStatusTab = {
+  en: {
+    ACTIVE: 'ACTIVE',
+    INACTIVE: 'INACTIVE',
+  },
+  vi: {
+    ACTIVE: 'Hoạt động',
+    UNACTIVE: 'Ngừng hoạt động',
+  },
+}
+
+export const EmployeeTypeOptions = {
+  en: {
+    MEN: 'MEN',
+    WOMEN: 'WOMEN',
+  },
+  vi: {
+    MEN: 'Nam',
+    WOMEN: 'Nữ',
+  },
+}

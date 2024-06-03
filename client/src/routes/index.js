@@ -100,7 +100,7 @@ export default function Router() {
               path: 'customer',
               children: [
                 { element: <Navigate to="/dashboard/account/customer/list" replace />, index: true },
-                { path: 'list', element: <AccountCustomerList /> },
+                { path: 'list', element: <CustomerList /> },
                 // { path: ':id', element: <InvoiceDetails /> },
                 // { path: ':id/edit', element: <InvoiceEdit /> },
                 // { path: 'new', element: <InvoiceCreate /> },
@@ -110,7 +110,7 @@ export default function Router() {
               path: 'employee',
               children: [
                 { element: <Navigate to="/dashboard/account/employee/list" replace />, index: true },
-                // { path: 'list', element: <VoucherList /> },
+                { path: 'list', element: <EmployeeList /> },
                 // { path: ':id', element: <InvoiceDetails /> },
                 // { path: ':id/edit', element: <InvoiceEdit /> },
                 // { path: 'new', element: <InvoiceCreate /> },
@@ -248,7 +248,9 @@ export default function Router() {
 const VoucherList = Loadable(lazy(() => import('../pages/dashboard/voucher/list/VoucherList')))
 
 // ACCOUNT
-const AccountCustomerList = Loadable(lazy(() => import('../pages/dashboard/account/customer/list/AccountCustomerList')))
+const CustomerList = Loadable(lazy(() => import('../pages/dashboard/customer/list/CustomerList')))
+// Employee
+const EmployeeList = Loadable(lazy(() => import('../pages/dashboard/employee/list/EmployeeList')))
 // PROMOTION
 // PRODUCT
 // ORDER
