@@ -3,9 +3,6 @@ export const All = {
   VI: 'Tất cả',
 }
 
-export const ProductStatusTabs = {
-}
-
 export const Color = {
   INFO: 'info',
   SUCCESS: 'success',
@@ -14,7 +11,7 @@ export const Color = {
   DEFAULT: 'default',
 }
 
-export const OrderTypeOptions = {
+export const OrderTypeOption = {
   en: {
     AT_THE_COUNTER: 'at_the_counter',
     DELIVERY: 'delivery',
@@ -25,7 +22,7 @@ export const OrderTypeOptions = {
   }
 };
 
-export const OrderStatusTabs = {
+export const OrderStatusTab = {
   en: {
     PENDING_CONFIRM: 'pending_confirm',
     WAITTING_DELIVERY: 'watting_delivery',
@@ -42,28 +39,66 @@ export const OrderStatusTabs = {
   }
 };
 
-export const VoucherStatusTabs = {
+export const ProductStockOption = {
+  IN_STOCK: 'Còn hàng',
+  LOW_STOCK: 'Sắp hết hàng',
+  OUT_OF_STOCK: 'Hết hàng',
+}
+
+export const ProductStatusTab = {
   en: {
-    ACTIVE: 'ACTIVE',
-    UNACTIVE: 'UNACTIVE',
-    EXPIRED: 'EXPIRED',
-    DRAFT: 'DRAFT',
+    IS_ACTIVE: 'is_active',
+    UN_ACTIVE: 'un_active',
   },
   vi: {
-    ACTIVE: 'Hoạt động',
-    UNACTIVE: 'Ngừng hoạt động',
-    EXPIRED: 'Hết hạn',
-    DRAFT: 'Nháp',
+    IS_ACTIVE: 'Kinh doanh',
+    UN_ACTIVE: 'Ngừng kinh doanh',
+  },
+};
+
+export const DiscountStatusTab = {
+  en: {
+    ON_GOING: 'on_going',
+    UP_COMMING: 'up_comming',
+    FINISHED: 'finished',
+  },
+  vi: {
+    ON_GOING: 'Đang diễn ra',
+    UP_COMMING: 'Sắp diễn ra',
+    FINISHED: 'Đã kết thúc',
   }
 };
 
-export const VoucherTypeOptions = {
+export const VoucherTypeOption = {
   en: {
-    PUBLIC: 'PUBLIC',
-    PRIVATE: 'PRIVATE',
+    PUBLIC: 'public',
+    PRIVATE: 'private',
   },
   vi: {
     PUBLIC: 'Công khai',
     PRIVATE: 'Cá nhân',
   },
 };
+
+export const AccountStatusTab = {
+  en: {
+    IS_ACTIVE: 'is_active',
+    UN_ACTIVE: 'un_active',
+  },
+  vi: {
+    IS_ACTIVE: 'Hoạt động',
+    UN_ACTIVE: 'Ngừng hoạt động',
+  },
+};
+
+export const AccountGenderOption = {
+  en: {
+    MEN: 'men',
+    WOMEN: 'women',
+  },
+  vi: {
+    MEN: 'Nam',
+    WOMEN: 'Nữ',
+  },
+};
+

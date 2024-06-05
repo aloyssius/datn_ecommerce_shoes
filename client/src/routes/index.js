@@ -85,7 +85,7 @@ export default function Router() {
           path: 'product',
           children: [
             { element: <Navigate to="/dashboard/product/list" replace />, index: true },
-            { path: 'list', element: <EcommerceProductList /> },
+            { path: 'list', element: <ProductList /> },
             // { path: 'product/new', element: <EcommerceProductCreate /> },
             // { path: 'product/:id/edit', element: <EcommerceProductCreate /> },
           ],
@@ -100,7 +100,7 @@ export default function Router() {
               path: 'customer',
               children: [
                 { element: <Navigate to="/dashboard/account/customer/list" replace />, index: true },
-                // { path: 'list', element: <AccountCustomerList /> },
+                { path: 'list', element: <CustomerList /> },
                 // { path: ':id', element: <InvoiceDetails /> },
                 // { path: ':id/edit', element: <InvoiceEdit /> },
                 // { path: 'new', element: <InvoiceCreate /> },
@@ -110,7 +110,7 @@ export default function Router() {
               path: 'employee',
               children: [
                 { element: <Navigate to="/dashboard/account/employee/list" replace />, index: true },
-                // { path: 'list', element: <VoucherList /> },
+                { path: 'list', element: <EmployeeList /> },
                 // { path: ':id', element: <InvoiceDetails /> },
                 // { path: ':id/edit', element: <InvoiceEdit /> },
                 // { path: 'new', element: <InvoiceCreate /> },
@@ -126,7 +126,7 @@ export default function Router() {
               path: 'promotion',
               children: [
                 { element: <Navigate to="/dashboard/discount/Promotion/list" replace />, index: true },
-                { path: 'list', element: <Promotion /> },
+                { path: 'list', element: <PromotionList /> },
                 // { path: ':id', element: <InvoiceDetails /> },
                 // { path: ':id/edit', element: <InvoiceEdit /> },
                 // { path: 'new', element: <InvoiceCreate /> },
@@ -247,12 +247,15 @@ export default function Router() {
 // VOUCHER
 const VoucherList = Loadable(lazy(() => import('../pages/dashboard/voucher/list/VoucherList')))
 
-const Promotion = Loadable(lazy(() => import('../pages/dashboard/promotion/list/Promotion')))
+const PromotionList = Loadable(lazy(() => import('../pages/dashboard/promotion/list/PromotionList')))
 
-// ACCOUNT
-// const AccountCustomerList = Loadable(lazy(() => import('../pages/dashboard/account/customer/list/AccountCustomerList')))
+// CUSTOMER
+const CustomerList = Loadable(lazy(() => import('../pages/dashboard/customer/list/CustomerList')))
+// Employee
+const EmployeeList = Loadable(lazy(() => import('../pages/dashboard/employee/list/EmployeeList')))
 // PROMOTION
 // PRODUCT
+const ProductList = Loadable(lazy(() => import('../pages/dashboard/product/list/ProductList')))
 // ORDER
 const OrderList = Loadable(lazy(() => import('../pages/dashboard/order/list/OrderList')))
 // POS
