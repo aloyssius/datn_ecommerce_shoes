@@ -19,7 +19,7 @@ import {
   Pagination,
   Typography,
 } from '@mui/material';
-import { All, OrderStatusTab, OrderTypeOption } from '../../../../constants/enum';
+import { All, VoucherTypeOption, OrderStatusTab, OrderTypeOption, ProductStatusTab, ProductStockOption } from '../../../../constants/enum';
 // routes
 import { PATH_DASHBOARD } from '../../../../routes/paths';
 // hooks
@@ -36,30 +36,30 @@ import Scrollbar from '../../../../components/Scrollbar';
 import HeaderBreadcrumbs from '../../../../components/HeaderBreadcrumbs';
 import { TableEmptyRows, TableHeadCustom, TableNoData, TableSelectedActions } from '../../../../components/table';
 // sections
-import OrderTableRow from './OrderTableRow';
-import OrderTableToolBar from './OrderTableToolBar';
-import OrderTagFiltered from './OrderTagFiltered';
+import ProductTableRow from './ProductTableRow';
+import ProductTableToolbar from './ProductTableToolBar';
+import ProductTagFiltered from './ProductTagFiltered';
 
 // ----------------------------------------------------------------------
 
-const TYPE_OPTIONS = [
-  All.VI,
-  OrderTypeOption.vi.AT_THE_COUNTER,
-  OrderTypeOption.vi.DELIVERY,
-];
+const STOCK_OPTIONS = [
+  ProductStockOption.IN_STOCK,
+  ProductStockOption.LOW_STOCK,
+  ProductStockOption.OUT_OF_STOCK,
+]
 
 const TABLE_HEAD = [
-  { id: 'code', label: 'Mã đơn hàng', align: 'left' },
-  { id: 'customer', label: 'Khách hàng', align: 'left' },
+  { id: 'product', label: 'Sản phẩm', align: 'left' },
   { id: 'createdAt', label: 'Ngày tạo', align: 'left' },
-  { id: 'totalMoney', label: 'Tổng tiền', align: 'left' },
+  { id: 'quantity', label: 'Số lượng tồn', align: 'left' },
+  { id: 'sku', label: 'SKU', align: 'left' },
   { id: 'status', label: 'Trạng thái', align: 'left' },
   { id: 'action', label: 'Thao tác', align: 'left' },
 ];
 
 // ----------------------------------------------------------------------
 
-export default function OrderList() {
+export default function ProductList() {
   const { themeStretch } = useSettings();
 
   const navigate = useNavigate();
@@ -78,48 +78,75 @@ export default function OrderList() {
   const [tabs, setTabs] = useState(
     [
       { value: All.EN, label: All.VI, color: 'info', count: 0 },
-      { value: OrderStatusTab.en.PENDING_CONFIRM, label: OrderStatusTab.vi.PENDING_CONFIRM, color: 'warning', count: 0 },
-      { value: OrderStatusTab.en.WAITTING_DELIVERY, label: OrderStatusTab.vi.WAITTING_DELIVERY, color: 'success', count: 0 },
-      { value: OrderStatusTab.en.DELIVERING, label: OrderStatusTab.vi.DELIVERING, color: 'info', count: 0 },
-      { value: OrderStatusTab.en.COMPLETED, label: OrderStatusTab.vi.COMPLETED, color: 'success', count: 0 },
-      { value: OrderStatusTab.en.CANCELED, label: OrderStatusTab.vi.CANCELED, color: 'error', count: 0 },
+      { value: ProductStatusTab.en.IS_ACTIVE, label: ProductStatusTab.vi.IS_ACTIVE, color: 'success', count: 0 },
+      { value: ProductStatusTab.en.UN_ACTIVE, label: ProductStatusTab.vi.UN_ACTIVE, color: 'error', count: 0 },
     ]
   );
 
   const [tableData, setTableData] = useState([
     {
       id: 1,
-      code: '123123',
-      fullName: 'Trần Quang Hà',
-      phoneNumber: '0912837618',
+      sku: '123123',
+      name: 'Nike Air Force 1 NDESTRUKT',
+      brand: 'Nike',
+      quantity: 50,
       createdAt: '2023-10-20',
-      totalMoney: 500000,
-      status: 'Chờ xác nhận',
+      status: 'is_active',
     },
   ]);
 
   const [filterSearch, setFilterSearch] = useState('');
 
-  const [filterStartDate, setFilterStartDate] = useState(null);
-
-  const [filterEndDate, setFilterEndDate] = useState(null);
-
   const { currentTab: filterStatus, onChangeTab: onFilterStatus } = useTabs(All.EN);
 
-  const [foundLengthData, setFoundLengthData] = useState(0);
+  const [stockSelecteds, setStockSelecteds] = useState([]);
 
-  const isDefault =
-    filterStartDate === null &&
-    filterEndDate === null &&
-    filterStatus === All.EN;
+  const [brandSelecteds, setBrandSelecteds] = useState([]);
+
+  const [categorySelecteds, setCategorySelecteds] = useState([]);
+
+  const [foundLengthData, setFoundLengthData] = useState(0);
 
   const handleFilterSearch = (filterSearch) => {
     setFilterSearch(filterSearch);
   };
 
+  const handleFilterStock = (event) => {
+    setStockSelecteds(event.target.value);
+  };
+
+  const handleFilterBrand = (event) => {
+    setBrandSelecteds(event.target.value);
+  };
+
+  const handleFilterCategory = (event) => {
+    setCategorySelecteds(event.target.value);
+  };
+
+  const handleRemoveStock = (value) => {
+    const newValue = stockSelecteds.filter((item) => item !== value);
+    setStockSelecteds(newValue);
+  };
+
+  const handleRemoveBrand = (value) => {
+    const newValue = brandSelecteds.filter((item) => item !== value);
+    setBrandSelecteds(newValue);
+  };
+
+  const handleRemoveCategory = (value) => {
+    const newValue = categorySelecteds.filter((item) => item !== value);
+    setCategorySelecteds(newValue);
+  };
+
   const handleEditRow = (id) => {
     navigate(PATH_DASHBOARD.discount.voucher.edit(id));
   };
+
+  const isDefault =
+    categorySelecteds.length === 0 &&
+    stockSelecteds.length === 0 &&
+    brandSelecteds.length === 0 &&
+    filterStatus === All.EN;
 
   const dataFiltered = applySortFilter({
     tableData,
@@ -127,13 +154,13 @@ export default function OrderList() {
   });
 
   return (
-    <Page title="Quản lý đơn hàng - Danh sách đơn hàng">
+    <Page title="Quản lý sản phẩm - Danh sách sản phẩm">
       <Container maxWidth={themeStretch ? false : 'lg'}>
         <HeaderBreadcrumbs
-          heading="Danh sách đơn hàng"
+          heading="Danh sách sản phẩm"
           links={[
-            { name: 'Quản lý đơn hàng', href: PATH_DASHBOARD.order.list },
-            { name: 'Danh sách đơn hàng' },
+            { name: 'Quản lý sản phẩm', href: PATH_DASHBOARD.product.list },
+            { name: 'Danh sách sản phẩm' },
           ]}
         />
 
@@ -178,17 +205,18 @@ export default function OrderList() {
 
           <Divider />
 
-          <OrderTableToolBar
+          <ProductTableToolbar
+            optionsStock={STOCK_OPTIONS}
+            optionsCategory={STOCK_OPTIONS}
+            optionsBrand={STOCK_OPTIONS}
             filterSearch={filterSearch}
-            filterStartDate={filterStartDate}
-            filterEndDate={filterEndDate}
+            filterCategory={categorySelecteds}
+            filterBrand={brandSelecteds}
+            filterStock={stockSelecteds}
             onFilterSearch={handleFilterSearch}
-            onFilterStartDate={(newValue) => {
-              setFilterStartDate(newValue);
-            }}
-            onFilterEndDate={(newValue) => {
-              setFilterEndDate(newValue);
-            }}
+            onFilterStock={handleFilterStock}
+            onFilterBrand={handleFilterBrand}
+            onFilterCategory={handleFilterCategory}
           />
 
           {!isDefault &&
@@ -196,27 +224,29 @@ export default function OrderList() {
               <>
                 <Typography sx={{ px: 1 }} variant="body2" gutterBottom>
                   <strong>{foundLengthData}</strong>
-                  &nbsp; Đơn hàng được tìm thấy
+                  &nbsp; Sản phẩm được tìm thấy
                 </Typography>
-                <OrderTagFiltered
+                <ProductTagFiltered
                   isShowReset={isDefault}
                   status={filterStatus}
-                  startDate={filterStartDate}
-                  endDate={filterEndDate}
+                  stocks={stockSelecteds}
+                  brands={brandSelecteds}
+                  categories={categorySelecteds}
                   onRemoveStatus={() => onFilterStatus(null, All.EN)}
-                  onRemoveDate={() => {
-                    setFilterEndDate(null);
-                    setFilterStartDate(null);
-                  }}
+                  onRemoveStock={handleRemoveStock}
+                  onRemoveBrand={handleRemoveBrand}
+                  onRemoveCategory={handleRemoveCategory}
                   onResetAll={() => {
                     onFilterStatus(null, All.EN)
-                    setFilterEndDate(null);
-                    setFilterStartDate(null);
+                    setCategorySelecteds([]);
+                    setBrandSelecteds([]);
+                    setStockSelecteds([]);
                   }}
                 />
               </>
             </Stack>
           }
+
 
           <Scrollbar>
             <TableContainer sx={{ minWidth: 800, position: 'relative' }}>
@@ -260,7 +290,7 @@ export default function OrderList() {
 
                 <TableBody>
                   {dataFiltered.map((row) => (
-                    <OrderTableRow
+                    <ProductTableRow
                       key={row.id}
                       row={row}
                       selected={selected.includes(row.id)}

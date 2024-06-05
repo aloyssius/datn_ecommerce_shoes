@@ -5,7 +5,7 @@ import { useTheme, styled } from '@mui/material/styles';
 import { Chip, Typography, Stack, Button } from '@mui/material';
 import { All } from '../../../../constants/enum';
 // utils
-import { convertOrderStatus } from '../../../../utils/ConvertEnum';
+import { convertProductStatus } from '../../../../utils/ConvertEnum';
 import getColorName from '../../../../utils/getColorName';
 // components
 import Iconify from '../../../../components/Iconify';
@@ -50,45 +50,31 @@ function labelPriceRange(range) {
   return 'Above $75';
 }
 
-OrderTagFiltered.propTypes = {
+ProductTagFiltered.propTypes = {
   status: PropTypes.string,
-  startDate: PropTypes.instanceOf(Date),
-  endDate: PropTypes.instanceOf(Date),
+  brands: PropTypes.arrayOf(PropTypes.string),
+  categories: PropTypes.arrayOf(PropTypes.string),
+  stocks: PropTypes.arrayOf(PropTypes.string),
   isShowReset: PropTypes.bool,
   onRemoveStatus: PropTypes.func,
-  onRemoveDate: PropTypes.func,
+  onRemoveStock: PropTypes.func,
+  onRemoveBrand: PropTypes.func,
+  onRemoveCategory: PropTypes.func,
   onResetAll: PropTypes.func,
 };
 
-export default function OrderTagFiltered({
+export default function ProductTagFiltered({
   status,
-  startDate,
-  endDate,
+  stocks,
+  brands,
+  categories,
   onRemoveStatus,
-  onRemoveDate,
+  onRemoveStock,
+  onRemoveBrand,
+  onRemoveCategory,
   isShowReset,
   onResetAll,
 }) {
-  const dateCurrent = new Date();
-
-  const monthNames = [...Array(12).keys()].map(month =>
-    new Intl.DateTimeFormat('vi-VN', { month: 'long' }).format(new Date(2024, month))
-  );
-
-  const getDateLabel = (startDate, endDate) => {
-    const monthName = monthNames[dateCurrent.getMonth()];
-
-    if (startDate && !endDate) {
-      return `${startDate.getDate()} - ? ${monthName} 2024`;
-    }
-    if (endDate && !startDate) {
-      return `? - ${endDate.getDate()} ${monthName} 2024`;
-    }
-    if (startDate && endDate) {
-      return `${startDate.getDate()} - ${endDate.getDate()} ${monthName} 2024`;
-    }
-    return 'No Dates Available';
-  };
 
   return (
     <RootStyle>
@@ -96,16 +82,63 @@ export default function OrderTagFiltered({
         <WrapperStyle>
           <LabelStyle>Trạng thái:</LabelStyle>
           <Stack direction="row" flexWrap="wrap" sx={{ p: 0.75 }}>
-            <Chip size="small" color='primary' label={convertOrderStatus(status)} deleteIcon={'ic:round-clear-all'} onDelete={onRemoveStatus} sx={{ m: 0.5 }} />
+            <Chip size="small" color='primary' label={convertProductStatus(status)} deleteIcon={'ic:round-clear-all'} onDelete={onRemoveStatus} sx={{ m: 0.5 }} />
           </Stack>
         </WrapperStyle>
       )}
 
-      {(startDate || endDate) && (
+      {stocks.length > 0 && (
         <WrapperStyle>
-          <LabelStyle>Ngày tạo:</LabelStyle>
+          <LabelStyle>Số lượng tồn:</LabelStyle>
           <Stack direction="row" flexWrap="wrap" sx={{ p: 0.75 }}>
-            <Chip size="small" color='primary' label={getDateLabel(startDate, endDate)} deleteIcon={'ic:round-clear-all'} onDelete={onRemoveDate} sx={{ m: 0.5 }} />
+            {stocks.map((s) => (
+              <Chip
+                key={s}
+                color='primary'
+                deleteIcon={'ic:round-clear-all'}
+                label={s}
+                size="small"
+                onDelete={() => onRemoveStock(s)}
+                sx={{ m: 0.5 }}
+              />
+            ))}
+          </Stack>
+        </WrapperStyle>
+      )}
+
+      {categories.length > 0 && (
+        <WrapperStyle>
+          <LabelStyle>Danh mục:</LabelStyle>
+          <Stack direction="row" flexWrap="wrap" sx={{ p: 0.75 }}>
+            {categories.map((s) => (
+              <Chip
+                key={s}
+                deleteIcon={'ic:round-clear-all'}
+                label={s}
+                color='primary'
+                size="small"
+                onDelete={() => onRemoveCategory(s)}
+                sx={{ m: 0.5 }}
+              />
+            ))}
+          </Stack>
+        </WrapperStyle>
+      )}
+      {brands.length > 0 && (
+        <WrapperStyle>
+          <LabelStyle>Thương hiệu:</LabelStyle>
+          <Stack direction="row" flexWrap="wrap" sx={{ p: 0.75 }}>
+            {brands.map((s) => (
+              <Chip
+                key={s}
+                label={s}
+                color='primary'
+                deleteIcon={'ic:round-clear-all'}
+                size="small"
+                onDelete={() => onRemoveBrand(s)}
+                sx={{ m: 0.5 }}
+              />
+            ))}
           </Stack>
         </WrapperStyle>
       )}

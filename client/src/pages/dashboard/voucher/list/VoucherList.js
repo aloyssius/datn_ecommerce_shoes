@@ -15,8 +15,11 @@ import {
   Container,
   IconButton,
   TableContainer,
+  TablePagination,
+  Pagination,
+  Typography,
 } from '@mui/material';
-import { All, VoucherTypeOptions, VoucherStatusTabs } from '../../../../constants/enum';
+import { All, VoucherTypeOption, DiscountStatusTab } from '../../../../constants/enum';
 // routes
 import { PATH_DASHBOARD } from '../../../../routes/paths';
 // hooks
@@ -35,13 +38,14 @@ import { TableEmptyRows, TableHeadCustom, TableNoData, TableSelectedActions } fr
 // sections
 import VoucherTableToolbar from './VoucherTableToolBar';
 import VoucherTableRow from './VoucherTableRow';
+import VoucherTagFiltered from './VoucherTagFiltered';
 
 // ----------------------------------------------------------------------
 
 const TYPE_OPTIONS = [
-  All.VI,
-  VoucherTypeOptions.vi.PUBLIC,
-  VoucherTypeOptions.vi.PRIVATE,
+  All.EN,
+  VoucherTypeOption.en.PUBLIC,
+  VoucherTypeOption.en.PRIVATE,
 ];
 
 const TABLE_HEAD = [
@@ -50,7 +54,7 @@ const TABLE_HEAD = [
   { id: 'type', label: 'Loại', align: 'left' },
   { id: 'value', label: 'Giá trị', align: 'left' },
   { id: 'quantity', label: 'Số lượng', align: 'left' },
-  { id: 'dateTimeRange', label: 'Thời gian', align: 'left' },
+  { id: 'dateTime', label: 'Thời gian', align: 'left' },
   { id: 'status', label: 'Trạng Thái', align: 'left' },
   { id: 'action', label: 'Thao tác', align: 'center' },
 ];
@@ -69,15 +73,16 @@ export default function VoucherList() {
     onSelectRow,
     onSelectAllRows,
     onSort,
-  } = useTable({ defaultOrderBy: 'value' });
+    rowsPerPage,
+    onChangeRowsPerPage,
+  } = useTable({});
 
   const [tabs, setTabs] = useState(
     [
       { value: All.EN, label: All.VI, color: 'info', count: 0 },
-      { value: VoucherStatusTabs.en.ACTIVE, label: VoucherStatusTabs.vi.ACTIVE, color: 'success', count: 0 },
-      { value: VoucherStatusTabs.en.UNACTIVE, label: VoucherStatusTabs.vi.UNACTIVE, color: 'warning', count: 0 },
-      { value: VoucherStatusTabs.en.EXPIRED, label: VoucherStatusTabs.vi.EXPIRED, color: 'error', count: 0 },
-      { value: VoucherStatusTabs.en.DRAFT, label: VoucherStatusTabs.vi.DRAFT, color: 'default', count: 0 },
+      { value: DiscountStatusTab.en.UP_COMMING, label: DiscountStatusTab.vi.UP_COMMING, color: 'warning', count: 0 },
+      { value: DiscountStatusTab.en.ON_GOING, label: DiscountStatusTab.vi.ON_GOING, color: 'success', count: 0 },
+      { value: DiscountStatusTab.en.FINISHED, label: DiscountStatusTab.vi.FINISHED, color: 'error', count: 0 },
     ]
   );
 
@@ -89,8 +94,8 @@ export default function VoucherList() {
       type: 'Công khai',
       value: 500000,
       quantity: 500,
-      dateTimeRange: '17/05/2023 - 18/05/2024',
-      status: 'ACTIVE',
+      dateTime: '17/05/2023 - 18/05/2024',
+      status: 'on_going',
     },
     {
       id: 2,
@@ -99,8 +104,8 @@ export default function VoucherList() {
       type: 'Cá nhân',
       value: 100000,
       quantity: 200,
-      dateTimeRange: '17/05/2023 - 18/05/2024',
-      status: 'ACTIVE',
+      dateTime: '17/05/2023 - 18/05/2024',
+      status: 'up_comming',
     },
     {
       id: 3,
@@ -109,8 +114,8 @@ export default function VoucherList() {
       type: 'Công khai',
       value: 400000,
       quantity: 400,
-      dateTimeRange: '17/05/2023 - 18/05/2024',
-      status: 'ACTIVE',
+      dateTime: '17/05/2023 - 18/05/2024',
+      status: 'finished',
     },
     {
       id: 4,
@@ -119,7 +124,7 @@ export default function VoucherList() {
       type: 'Công khai',
       value: 300000,
       quantity: 300,
-      dateTimeRange: '17/05/2023 - 18/05/2024',
+      dateTime: '17/05/2023 - 18/05/2024',
       status: 'UNACTIVE',
     },
     {
@@ -129,7 +134,7 @@ export default function VoucherList() {
       type: 'Cá nhân',
       value: 200000,
       quantity: 200,
-      dateTimeRange: '17/05/2023 - 18/05/2024',
+      dateTime: '17/05/2023 - 18/05/2024',
       status: 'EXPIRED',
     },
     {
@@ -139,26 +144,28 @@ export default function VoucherList() {
       type: 'Công khai',
       value: 600000,
       quantity: 600,
-      dateTimeRange: '17/05/2023 - 18/05/2024',
+      dateTime: '17/05/2023 - 18/05/2024',
       status: 'ACTIVE',
     },
   ]);
 
   const [filterSearch, setFilterSearch] = useState('');
 
-  const [filterDiscountValue, setFilterDiscountValue] = useState('');
-
-  const [filterQuantity, setFilterQuantity] = useState('');
-
-  const [filterTypeDiscount, setFilterTypeDiscount] = useState('');
-
-  const [filterType, setFilterType] = useState(All.VI);
+  const [filterType, setFilterType] = useState(All.EN);
 
   const [filterStartDate, setFilterStartDate] = useState(null);
 
   const [filterEndDate, setFilterEndDate] = useState(null);
 
   const { currentTab: filterStatus, onChangeTab: onFilterStatus } = useTabs(All.EN);
+
+  const [foundLengthData, setFoundLengthData] = useState(0);
+
+  const isDefault =
+    filterStartDate === null &&
+    filterEndDate === null &&
+    filterStatus === All.EN &&
+    filterType === All.EN;
 
   const handleFilterSearch = (filterSearch) => {
     setFilterSearch(filterSearch);
@@ -213,7 +220,7 @@ export default function VoucherList() {
               bgcolor: 'background.neutral',
             }}
           >
-            {tabs.map((tab) => (
+            {tabs.map((tab, index) => (
               <Tab
                 disableRipple
                 key={tab.value}
@@ -222,7 +229,7 @@ export default function VoucherList() {
                   <Stack spacing={1} direction="row" alignItems="center">
                     <div>{tab.label}</div>
                     <Label
-                      variant={filterStatus === tab.value ? 'filled' : 'ghost'}
+                      variant={filterStatus === tab.value || index === 0 ? 'filled' : 'ghost'}
                       sx={{
                         transition: 'all 0.3s ease',
                         cursor: 'pointer',
@@ -240,9 +247,6 @@ export default function VoucherList() {
           <Divider />
 
           <VoucherTableToolbar
-            filterDiscountValue={filterDiscountValue}
-            filterQuantity={filterQuantity}
-            filterTypeDiscount={filterTypeDiscount}
             filterSearch={filterSearch}
             filterType={filterType}
             filterStartDate={filterStartDate}
@@ -257,6 +261,36 @@ export default function VoucherList() {
             }}
             optionsType={TYPE_OPTIONS}
           />
+
+          {!isDefault &&
+            <Stack sx={{ mb: 3, px: 2 }}>
+              <>
+                <Typography sx={{ px: 1 }} variant="body2" gutterBottom>
+                  <strong>{foundLengthData}</strong>
+                  &nbsp; Mã giảm giá được tìm thấy
+                </Typography>
+                <VoucherTagFiltered
+                  isShowReset={isDefault}
+                  status={filterStatus}
+                  type={filterType}
+                  startDate={filterStartDate}
+                  endDate={filterEndDate}
+                  onRemoveStatus={() => onFilterStatus(null, All.EN)}
+                  onRemoveType={() => setFilterType(All.EN)}
+                  onRemoveDate={() => {
+                    setFilterEndDate(null);
+                    setFilterStartDate(null);
+                  }}
+                  onResetAll={() => {
+                    onFilterStatus(null, All.EN)
+                    setFilterType(All.EN)
+                    setFilterEndDate(null);
+                    setFilterStartDate(null);
+                  }}
+                />
+              </>
+            </Stack>
+          }
 
           <Scrollbar>
             <TableContainer sx={{ minWidth: 800, position: 'relative' }}>
@@ -315,6 +349,28 @@ export default function VoucherList() {
               </Table>
             </TableContainer>
           </Scrollbar>
+
+          <Divider />
+
+          <Box sx={{ position: 'relative', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', alignItems: 'center' }}>
+            <TablePagination
+              rowsPerPageOptions={[5, 10, 25]}
+              component="div"
+              rowsPerPage={rowsPerPage}
+              onRowsPerPageChange={onChangeRowsPerPage}
+              ActionsComponent={() => null}
+              labelDisplayedRows={() => ''}
+              labelRowsPerPage='Số hàng mỗi trang:'
+              sx={{
+                borderTop: 'none',
+              }}
+            />
+
+            <Pagination
+              sx={{ px: 1 }}
+              count={10}
+            />
+          </Box>
         </Card>
       </Container>
     </Page>
@@ -382,6 +438,3 @@ function applySortFilter({
 //   setTableFiltered(dataFiltered);
 // }, [debounceValue]);
 //
-// const handleFilterType = (event) => {
-//   setFilterType(event.target.value);
-// };

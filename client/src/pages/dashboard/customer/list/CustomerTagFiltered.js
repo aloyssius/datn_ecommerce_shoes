@@ -5,8 +5,8 @@ import { useTheme, styled } from '@mui/material/styles';
 import { Chip, Typography, Stack, Button } from '@mui/material';
 import { All } from '../../../../constants/enum';
 // utils
-import { convertOrderStatus } from '../../../../utils/ConvertEnum';
 import getColorName from '../../../../utils/getColorName';
+import {convertAccountStatus} from '../../../../utils/ConvertEnum';
 // components
 import Iconify from '../../../../components/Iconify';
 
@@ -50,45 +50,23 @@ function labelPriceRange(range) {
   return 'Above $75';
 }
 
-OrderTagFiltered.propTypes = {
+CustomerTagFiltered.propTypes = {
   status: PropTypes.string,
-  startDate: PropTypes.instanceOf(Date),
-  endDate: PropTypes.instanceOf(Date),
+  gender: PropTypes.string,
   isShowReset: PropTypes.bool,
   onRemoveStatus: PropTypes.func,
-  onRemoveDate: PropTypes.func,
+  onRemoveGender: PropTypes.func,
   onResetAll: PropTypes.func,
 };
 
-export default function OrderTagFiltered({
+export default function CustomerTagFiltered({
   status,
-  startDate,
-  endDate,
+  gender,
   onRemoveStatus,
-  onRemoveDate,
+  onRemoveGender,
   isShowReset,
   onResetAll,
 }) {
-  const dateCurrent = new Date();
-
-  const monthNames = [...Array(12).keys()].map(month =>
-    new Intl.DateTimeFormat('vi-VN', { month: 'long' }).format(new Date(2024, month))
-  );
-
-  const getDateLabel = (startDate, endDate) => {
-    const monthName = monthNames[dateCurrent.getMonth()];
-
-    if (startDate && !endDate) {
-      return `${startDate.getDate()} - ? ${monthName} 2024`;
-    }
-    if (endDate && !startDate) {
-      return `? - ${endDate.getDate()} ${monthName} 2024`;
-    }
-    if (startDate && endDate) {
-      return `${startDate.getDate()} - ${endDate.getDate()} ${monthName} 2024`;
-    }
-    return 'No Dates Available';
-  };
 
   return (
     <RootStyle>
@@ -96,19 +74,20 @@ export default function OrderTagFiltered({
         <WrapperStyle>
           <LabelStyle>Trạng thái:</LabelStyle>
           <Stack direction="row" flexWrap="wrap" sx={{ p: 0.75 }}>
-            <Chip size="small" color='primary' label={convertOrderStatus(status)} deleteIcon={'ic:round-clear-all'} onDelete={onRemoveStatus} sx={{ m: 0.5 }} />
+            <Chip size="small" color='primary' label={convertAccountStatus(status)} deleteIcon={'ic:round-clear-all'} onDelete={onRemoveStatus} sx={{ m: 0.5 }} />
           </Stack>
         </WrapperStyle>
       )}
 
-      {(startDate || endDate) && (
+      {gender !== All.VI && (
         <WrapperStyle>
-          <LabelStyle>Ngày tạo:</LabelStyle>
+          <LabelStyle>Giới tính:</LabelStyle>
           <Stack direction="row" flexWrap="wrap" sx={{ p: 0.75 }}>
-            <Chip size="small" color='primary' label={getDateLabel(startDate, endDate)} deleteIcon={'ic:round-clear-all'} onDelete={onRemoveDate} sx={{ m: 0.5 }} />
+            <Chip size="small" color='primary' label={gender} deleteIcon={'ic:round-clear-all'} onDelete={onRemoveGender} sx={{ m: 0.5 }} />
           </Stack>
         </WrapperStyle>
       )}
+
 
       {!isShowReset && (
         <Button color="error" size="small" onClick={onResetAll} startIcon={<Iconify icon={'ic:round-clear-all'} />}>

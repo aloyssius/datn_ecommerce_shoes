@@ -15,8 +15,11 @@ import {
   Container,
   IconButton,
   TableContainer,
+  TablePagination,
+  Pagination,
+  Typography,
 } from '@mui/material';
-import { All, CustomerTypeOptions, CustomerStatusTab } from '../../../../constants/enum';
+import { All, AccountStatusTab, AccountGenderOption } from '../../../../constants/enum';
 // routes
 import { PATH_DASHBOARD } from '../../../../routes/paths';
 // hooks
@@ -34,25 +37,22 @@ import HeaderBreadcrumbs from '../../../../components/HeaderBreadcrumbs';
 import { TableEmptyRows, TableHeadCustom, TableNoData, TableSelectedActions } from '../../../../components/table';
 import CustomerTableToolBar from './CustomerTableToolBar';
 import CustomerTableRow from './CustomerTableRow';
-
-// section
+import CustomerTagFiltered from './CustomerTagFiltered';
 
 // ----------------------------------------------------------------------
 
-const TYPE_OPTIONS = [
+const GENDER_OPTIONS = [
   All.VI,
-  CustomerTypeOptions.vi.MEN,
-  CustomerTypeOptions.vi.WOMEN,
+  AccountGenderOption.vi.MEN,
+  AccountGenderOption.vi.WOMEN,
 ];
 
 const TABLE_HEAD = [
+  { id: 'name', label: 'Khách hàng', align: 'left' },
   { id: 'code', label: 'Mã khách hàng', align: 'left' },
-  { id: 'name', label: 'Tên khách hàng', align: 'left' },
-  { id: 'birth', label: 'Ngày sinh', align: 'left' },
-  { id: 'phone', label: 'Số điện thoại', align: 'left' },
-  { id: 'email', label: 'Email', align: 'left' },
+  { id: 'phoneNumber', label: 'Số điện thoại', align: 'left' },
+  { id: 'birthDate', label: 'Ngày sinh', align: 'left' },
   { id: 'gender', label: 'Giới tính', align: 'left' },
-  { id: 'avatar', label: 'Ảnh', align: 'left' },
   { id: 'status', label: 'Trạng Thái', align: 'left' },
   { id: 'action', label: 'Thao tác', align: 'left' },
 ];
@@ -69,13 +69,15 @@ export default function CustomerList() {
     onSelectRow,
     onSelectAllRows,
     onSort,
-  } = useTable({ defaultOrderBy: 'value' });
+    rowsPerPage,
+    onChangeRowsPerPage,
+  } = useTable({});
 
   const [tabs, setTabs] = useState(
     [
       { value: All.EN, label: All.VI, color: 'info', count: 0 },
-      { value: CustomerStatusTab.en.ACTIVE, label: CustomerStatusTab.vi.ACTIVE, color: 'success', count: 0 },
-      { value: CustomerStatusTab.en.UNACTIVE, label: CustomerStatusTab.vi.UNACTIVE, color: 'warning', count: 0 },
+      { value: AccountStatusTab.en.IS_ACTIVE, label: AccountStatusTab.vi.IS_ACTIVE, color: 'success', count: 0 },
+      { value: AccountStatusTab.en.UN_ACTIVE, label: AccountStatusTab.vi.UN_ACTIVE, color: 'error', count: 0 },
     ]
   );
 
@@ -83,9 +85,9 @@ export default function CustomerList() {
     {
       id: 1,
       code: 'PH22590',
-      name: 'Hồ Khánh Đăng',
-      birth: '11/11/2003',
-      phone: '0978267385',
+      fullName: 'Hồ Khánh Đăng',
+      birthDate: '11/11/2003',
+      phoneNumber: '0978267385',
       email: 'danghkph22590@fpt.edu.vn',
       gender: 'Nam',
       avatar: 'none',
@@ -95,20 +97,26 @@ export default function CustomerList() {
 
   const [filterSearch, setFilterSearch] = useState('');
 
-  const [filterType, setFilterType] = useState(All.VI);
+  const [filterGender, setFilterGender] = useState(All.VI);
 
   const { currentTab: filterStatus, onChangeTab: onFilterStatus } = useTabs(All.EN);
+
+  const [foundLengthData, setFoundLengthData] = useState(0);
+
+  const isDefault =
+    filterGender === All.VI &&
+    filterStatus === All.EN;
 
   const handleFilterSearch = (filterSearch) => {
     setFilterSearch(filterSearch);
   };
 
-  const handleFilterType = (event) => {
-    setFilterType(event.target.value);
+  const handleFilterGender = (event) => {
+    setFilterGender(event.target.value);
   };
 
   const handleEditRow = (id) => {
-    navigate(PATH_DASHBOARD.account.customer.list.edit(id));
+    navigate(PATH_DASHBOARD.account.customer.edit(id));
   };
 
   const dataFiltered = applySortFilter({
@@ -120,7 +128,7 @@ export default function CustomerList() {
     <Page title="Quản lý khách hàng - Danh sách khách hàng">
       <Container maxWidth={themeStretch ? false : 'lg'}>
         <HeaderBreadcrumbs
-          heading="Danh sách tài khoản khách hàng"
+          heading="Danh sách khách hàng"
           links={[
             { name: 'Quản lý khách hàng', href: PATH_DASHBOARD.account.customer.list },
             { name: 'Danh sách khách hàng' },
@@ -152,7 +160,7 @@ export default function CustomerList() {
               bgcolor: 'background.neutral',
             }}
           >
-            {tabs.map((tab) => (
+            {tabs.map((tab, index) => (
               <Tab
                 disableRipple
                 key={tab.value}
@@ -161,7 +169,7 @@ export default function CustomerList() {
                   <Stack spacing={1} direction="row" alignItems="center">
                     <div>{tab.label}</div>
                     <Label
-                      variant={filterStatus === tab.value ? 'filled' : 'ghost'}
+                      variant={filterStatus === tab.value || index === 0 ? 'filled' : 'ghost'}
                       sx={{
                         transition: 'all 0.3s ease',
                         cursor: 'pointer',
@@ -180,11 +188,35 @@ export default function CustomerList() {
 
           <CustomerTableToolBar
             filterSearch={filterSearch}
-            filterType={filterType}
+            filterGender={filterGender}
             onFilterSearch={handleFilterSearch}
-            onFilterType={handleFilterType}
-            optionsType={TYPE_OPTIONS}
+            onFilterGender={handleFilterGender}
+            optionsGender={GENDER_OPTIONS}
           />
+
+          {!isDefault &&
+            <Stack sx={{ mb: 3, px: 2 }}>
+              <>
+                <Typography sx={{ px: 1 }} variant="body2" gutterBottom>
+                  <strong>{foundLengthData}</strong>
+                  &nbsp; Khách hàng được tìm thấy
+                </Typography>
+                <CustomerTagFiltered
+                  isShowReset={isDefault}
+                  status={filterStatus}
+                  gender={filterGender}
+                  onRemoveStatus={() => onFilterStatus(null, All.EN)}
+                  onRemoveGender={() => {
+                    setFilterGender(All.VI);
+                  }}
+                  onResetAll={() => {
+                    onFilterStatus(null, All.EN)
+                    setFilterGender(All.VI);
+                  }}
+                />
+              </>
+            </Stack>
+          }
 
           <Scrollbar>
             <TableContainer sx={{ minWidth: 800, position: 'relative' }}>
@@ -243,6 +275,28 @@ export default function CustomerList() {
               </Table>
             </TableContainer>
           </Scrollbar>
+
+          <Divider />
+
+          <Box sx={{ position: 'relative', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', alignItems: 'center' }}>
+            <TablePagination
+              rowsPerPageOptions={[5, 10, 25]}
+              component="div"
+              rowsPerPage={rowsPerPage}
+              onRowsPerPageChange={onChangeRowsPerPage}
+              ActionsComponent={() => null}
+              labelDisplayedRows={() => ''}
+              labelRowsPerPage='Số hàng mỗi trang:'
+              sx={{
+                borderTop: 'none',
+              }}
+            />
+
+            <Pagination
+              sx={{ px: 1 }}
+              count={10}
+            />
+          </Box>
         </Card>
 
       </Container>

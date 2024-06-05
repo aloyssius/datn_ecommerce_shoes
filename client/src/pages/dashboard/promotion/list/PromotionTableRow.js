@@ -3,7 +3,7 @@ import { useState } from 'react';
 // @mui
 import { useTheme } from '@mui/material/styles';
 import { Tooltip, Checkbox, IconButton, TableRow, TableCell, Typography, Stack, Link, MenuItem } from '@mui/material';
-import { VoucherStatusTabs } from '../../../../constants/enum';
+import { DiscountStatusTab } from '../../../../constants/enum';
 // utils
 import { fDate } from '../../../../utils/formatTime';
 import createAvatar from '../../../../utils/createAvatar';
@@ -22,13 +22,12 @@ PromotionTableRow.propTypes = {
   selected: PropTypes.bool,
   onSelectRow: PropTypes.func,
   onEditRow: PropTypes.func,
-  onDeleteRow: PropTypes.func,
 };
 
-export default function PromotionTableRow({ row, selected, onSelectRow, onEditRow, onDeleteRow }) {
+export default function PromotionTableRow({ row, selected, onSelectRow, onEditRow }) {
   const theme = useTheme();
 
-  const { code, name, value, dateTimeRange, status } = row;
+  const { name, value, dateTime, status } = row;
 
   return (
     <TableRow hover selected={selected}>
@@ -36,49 +35,21 @@ export default function PromotionTableRow({ row, selected, onSelectRow, onEditRo
         <Checkbox checked={selected} onClick={onSelectRow} />
       </TableCell>
 
-      <TableCell align="left">
-        <Stack>
-          <Typography variant="subtitle2" noWrap>
-            {code}
-          </Typography>
-        </Stack>
-      </TableCell>
-      {/* Product
-      <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
-        <Image disabledEffect alt={name} src={cover} sx={{ borderRadius: 1.5, width: 48, height: 48, mr: 2 }} />
-        <Typography variant="subtitle2" noWrap>
-          {name}
-        </Typography>
-      </TableCell>
-
-      // account
-      <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
-        <Avatar alt={name} src={avatarUrl} sx={{ mr: 2 }} />
-        <Typography variant="subtitle2" noWrap>
-          {name}
-        </Typography>
-      </TableCell>
-      */}
-
       <TableCell align="left">{name}</TableCell>
-
-      {/* <TableCell align="left">{type}</TableCell> */}
 
       <TableCell align="left" sx={{ textTransform: 'capitalize' }}>
         {value}
       </TableCell>
 
-      {/* <TableCell align="left">{quantity}</TableCell> */}
-
-      <TableCell align="left">{dateTimeRange}</TableCell>
+      <TableCell align="left">{dateTime}</TableCell>
 
       <TableCell align="left">
         <Label
           variant={theme.palette.mode === 'light' ? 'ghost' : 'filled'}
           color={
-            (status === VoucherStatusTabs.en.ACTIVE && 'success') ||
-            (status === VoucherStatusTabs.en.UNACTIVE && 'warning') ||
-            (status === VoucherStatusTabs.en.EXPIRED && 'error') ||
+            (status === DiscountStatusTab.en.ON_GOING && 'success') ||
+            (status === DiscountStatusTab.en.UP_COMMING && 'warning') ||
+            (status === DiscountStatusTab.en.FINISHED && 'error') ||
             'default'
           }
           sx={{ textTransform: 'capitalize' }}
@@ -87,8 +58,7 @@ export default function PromotionTableRow({ row, selected, onSelectRow, onEditRo
         </Label>
       </TableCell>
 
-      <TableCell align="center">
-
+      <TableCell align="left">
         <Tooltip title='Cập nhật'>
           <IconButton onClick={onEditRow}>
             <Iconify

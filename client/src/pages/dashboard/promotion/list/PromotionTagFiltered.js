@@ -5,7 +5,7 @@ import { useTheme, styled } from '@mui/material/styles';
 import { Chip, Typography, Stack, Button } from '@mui/material';
 import { All } from '../../../../constants/enum';
 // utils
-import { convertOrderStatus } from '../../../../utils/ConvertEnum';
+import { convertDiscountStatus } from '../../../../utils/ConvertEnum';
 import getColorName from '../../../../utils/getColorName';
 // components
 import Iconify from '../../../../components/Iconify';
@@ -50,7 +50,7 @@ function labelPriceRange(range) {
   return 'Above $75';
 }
 
-OrderTagFiltered.propTypes = {
+PromotionTagFiltered.propTypes = {
   status: PropTypes.string,
   startDate: PropTypes.instanceOf(Date),
   endDate: PropTypes.instanceOf(Date),
@@ -60,7 +60,7 @@ OrderTagFiltered.propTypes = {
   onResetAll: PropTypes.func,
 };
 
-export default function OrderTagFiltered({
+export default function PromotionTagFiltered({
   status,
   startDate,
   endDate,
@@ -96,14 +96,14 @@ export default function OrderTagFiltered({
         <WrapperStyle>
           <LabelStyle>Trạng thái:</LabelStyle>
           <Stack direction="row" flexWrap="wrap" sx={{ p: 0.75 }}>
-            <Chip size="small" color='primary' label={convertOrderStatus(status)} deleteIcon={'ic:round-clear-all'} onDelete={onRemoveStatus} sx={{ m: 0.5 }} />
+            <Chip size="small" color='primary' label={convertDiscountStatus(status)} deleteIcon={'ic:round-clear-all'} onDelete={onRemoveStatus} sx={{ m: 0.5 }} />
           </Stack>
         </WrapperStyle>
       )}
 
       {(startDate || endDate) && (
         <WrapperStyle>
-          <LabelStyle>Ngày tạo:</LabelStyle>
+          <LabelStyle>Thời gian:</LabelStyle>
           <Stack direction="row" flexWrap="wrap" sx={{ p: 0.75 }}>
             <Chip size="small" color='primary' label={getDateLabel(startDate, endDate)} deleteIcon={'ic:round-clear-all'} onDelete={onRemoveDate} sx={{ m: 0.5 }} />
           </Stack>

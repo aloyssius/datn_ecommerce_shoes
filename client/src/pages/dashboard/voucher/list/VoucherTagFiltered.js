@@ -5,7 +5,7 @@ import { useTheme, styled } from '@mui/material/styles';
 import { Chip, Typography, Stack, Button } from '@mui/material';
 import { All } from '../../../../constants/enum';
 // utils
-import { convertOrderStatus } from '../../../../utils/ConvertEnum';
+import { convertDiscountStatus, convertVoucherType } from '../../../../utils/ConvertEnum';
 import getColorName from '../../../../utils/getColorName';
 // components
 import Iconify from '../../../../components/Iconify';
@@ -50,21 +50,25 @@ function labelPriceRange(range) {
   return 'Above $75';
 }
 
-OrderTagFiltered.propTypes = {
+VoucherTagFiltered.propTypes = {
   status: PropTypes.string,
+  type: PropTypes.string,
   startDate: PropTypes.instanceOf(Date),
   endDate: PropTypes.instanceOf(Date),
   isShowReset: PropTypes.bool,
   onRemoveStatus: PropTypes.func,
+  onRemoveType: PropTypes.func,
   onRemoveDate: PropTypes.func,
   onResetAll: PropTypes.func,
 };
 
-export default function OrderTagFiltered({
+export default function VoucherTagFiltered({
   status,
+  type,
   startDate,
   endDate,
   onRemoveStatus,
+  onRemoveType,
   onRemoveDate,
   isShowReset,
   onResetAll,
@@ -96,14 +100,23 @@ export default function OrderTagFiltered({
         <WrapperStyle>
           <LabelStyle>Trạng thái:</LabelStyle>
           <Stack direction="row" flexWrap="wrap" sx={{ p: 0.75 }}>
-            <Chip size="small" color='primary' label={convertOrderStatus(status)} deleteIcon={'ic:round-clear-all'} onDelete={onRemoveStatus} sx={{ m: 0.5 }} />
+            <Chip size="small" color='primary' label={convertDiscountStatus(status)} deleteIcon={'ic:round-clear-all'} onDelete={onRemoveStatus} sx={{ m: 0.5 }} />
+          </Stack>
+        </WrapperStyle>
+      )}
+
+      {type !== All.EN && (
+        <WrapperStyle>
+          <LabelStyle>Loại:</LabelStyle>
+          <Stack direction="row" flexWrap="wrap" sx={{ p: 0.75 }}>
+            <Chip size="small" color='primary' label={convertVoucherType(type)} deleteIcon={'ic:round-clear-all'} onDelete={onRemoveType} sx={{ m: 0.5 }} />
           </Stack>
         </WrapperStyle>
       )}
 
       {(startDate || endDate) && (
         <WrapperStyle>
-          <LabelStyle>Ngày tạo:</LabelStyle>
+          <LabelStyle>Thời gian:</LabelStyle>
           <Stack direction="row" flexWrap="wrap" sx={{ p: 0.75 }}>
             <Chip size="small" color='primary' label={getDateLabel(startDate, endDate)} deleteIcon={'ic:round-clear-all'} onDelete={onRemoveDate} sx={{ m: 0.5 }} />
           </Stack>

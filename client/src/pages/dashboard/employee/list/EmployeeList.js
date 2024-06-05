@@ -2,21 +2,24 @@ import { useState } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 // @mui
 import {
-    Box,
-    Tab,
-    Tabs,
-    Card,
-    Table,
-    Stack,
-    Button,
-    Tooltip,
-    Divider,
-    TableBody,
-    Container,
-    IconButton,
-    TableContainer,
+  Box,
+  Tab,
+  Tabs,
+  Card,
+  Table,
+  Stack,
+  Button,
+  Tooltip,
+  Divider,
+  TableBody,
+  Container,
+  IconButton,
+  TableContainer,
+  Typography,
+  TablePagination,
+  Pagination,
 } from '@mui/material';
-import { All, EmployeeTypeOptions, EmployeeStatusTab } from '../../../../constants/enum';
+import { All, AccountGenderOption, AccountStatusTab } from '../../../../constants/enum';
 // routes
 import { PATH_DASHBOARD } from '../../../../routes/paths';
 // hooks
@@ -34,238 +37,291 @@ import HeaderBreadcrumbs from '../../../../components/HeaderBreadcrumbs';
 import { TableEmptyRows, TableHeadCustom, TableNoData, TableSelectedActions } from '../../../../components/table';
 import EmployeeTableToolBar from './EmployeeTableToolBar';
 import EmployeeTableRow from './EmployeeTableRow';
+import EmployeeTagFiltered from './EmployeeTagFiltered';
 
 // section
 
 // ----------------------------------------------------------------------
 
-const TYPE_OPTIONS = [
-    All.VI,
-    EmployeeTypeOptions.vi.MEN,
-    EmployeeTypeOptions.vi.WOMEN,
+const GENDER_OPTIONS = [
+  All.VI,
+  AccountGenderOption.vi.MEN,
+  AccountGenderOption.vi.WOMEN,
 ];
 
 const TABLE_HEAD = [
-    { id: 'code', label: 'Mã nhân viên', align: 'left' },
-    { id: 'name', label: 'Tên nhân viên', align: 'left' },
-    { id: 'birth', label: 'Ngày sinh', align: 'left' },
-    { id: 'phone', label: 'Số điện thoại', align: 'left' },
-    { id: 'email', label: 'Email', align: 'left' },
-    { id: 'gender', label: 'Giới tính', align: 'left' },
-    { id: 'avatar', label: 'Ảnh', align: 'left' },
-    { id: 'status', label: 'Trạng Thái', align: 'left' },
-    { id: 'action', label: 'Thao tác', align: 'left' },
+  { id: 'name', label: 'Nhân viên', align: 'left' },
+  { id: 'code', label: 'Mã nhân viên', align: 'left' },
+  { id: 'phone', label: 'Số điện thoại', align: 'left' },
+  { id: 'birth', label: 'Ngày sinh', align: 'left' },
+  { id: 'gender', label: 'Giới tính', align: 'left' },
+  { id: 'status', label: 'Trạng Thái', align: 'left' },
+  { id: 'action', label: 'Thao tác', align: 'left' },
 ];
 
 export default function EmployeeList() {
-    const { themeStretch } = useSettings();
+  const { themeStretch } = useSettings();
 
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    const {
-        order,
-        orderBy,
-        selected,
-        onSelectRow,
-        onSelectAllRows,
-        onSort,
-    } = useTable({ defaultOrderBy: 'value' });
+  const {
+    order,
+    orderBy,
+    selected,
+    onSelectRow,
+    onSelectAllRows,
+    onSort,
+    rowsPerPage,
+    onChangeRowsPerPage,
+  } = useTable({});
 
-    const [tabs, setTabs] = useState(
-        [
-            { value: All.EN, label: All.VI, color: 'info', count: 0 },
-            { value: EmployeeStatusTab.en.ACTIVE, label: EmployeeStatusTab.vi.ACTIVE, color: 'success', count: 0 },
-            { value: EmployeeStatusTab.en.UNACTIVE, label: EmployeeStatusTab.vi.UNACTIVE, color: 'warning', count: 0 },
-        ]
-    );
+  const [tabs, setTabs] = useState(
+    [
+      { value: All.EN, label: All.VI, color: 'info', count: 0 },
+      { value: AccountStatusTab.en.IS_ACTIVE, label: AccountStatusTab.vi.IS_ACTIVE, color: 'success', count: 0 },
+      { value: AccountStatusTab.en.UN_ACTIVE, label: AccountStatusTab.vi.UN_ACTIVE, color: 'error', count: 0 },
+    ]
+  );
 
-    const [tableData, setTableData] = useState([
-        {
-            id: 1,
-            code: 'PH22590',
-            name: 'Hồ Khánh Đăng',
-            birth: '11/11/2003',
-            phone: '0978267385',
-            email: 'danghkph22590@fpt.edu.vn',
-            gender: 'Nam',
-            avatar: 'none',
-            status: 'ACTIVE',
-        },
-    ]);
+  const [tableData, setTableData] = useState([
+    {
+      id: 1,
+      code: 'PH22590',
+      fullName: 'Hồ Khánh Đăng',
+      birthDate: '11/11/2003',
+      phoneNumber: '0978267385',
+      email: 'danghkph22590@fpt.edu.vn',
+      gender: 'Nam',
+      avatar: 'none',
+      status: 'ACTIVE',
+    },
+  ]);
 
-    const [filterSearch, setFilterSearch] = useState('');
+  const [filterSearch, setFilterSearch] = useState('');
 
-    const [filterType, setFilterType] = useState(All.VI);
+  const [filterGender, setFilterGender] = useState(All.VI);
 
-    const { currentTab: filterStatus, onChangeTab: onFilterStatus } = useTabs(All.EN);
+  const { currentTab: filterStatus, onChangeTab: onFilterStatus } = useTabs(All.EN);
 
-    const handleFilterSearch = (filterSearch) => {
-        setFilterSearch(filterSearch);
-    };
+  const [foundLengthData, setFoundLengthData] = useState(0);
 
-    const handleFilterType = (event) => {
-        setFilterType(event.target.value);
-    };
+  const isDefault =
+    filterGender === All.VI &&
+    filterStatus === All.EN;
 
-    const handleEditRow = (id) => {
-        navigate(PATH_DASHBOARD.employee.list.edit(id));
-    };
+  const handleFilterSearch = (filterSearch) => {
+    setFilterSearch(filterSearch);
+  };
 
-    const dataFiltered = applySortFilter({
-        tableData,
-        comparator: getComparator(order, orderBy),
-    });
+  const handleFilterGender = (event) => {
+    setFilterGender(event.target.value);
+  };
 
-    return (
-        <Page title="Quản lý nhân viên - danh sách nhân viên">
-            <Container maxWidth={themeStretch ? false : 'lg'}>
-                <HeaderBreadcrumbs
-                    heading="Danh sách tài khoản nhân viên"
-                    links={[
-                        { name: 'Quản lý nhân viên', href: PATH_DASHBOARD.account.customer.list },
-                        { name: 'Danh sách nhân viên' },
-                    ]}
-                    action={
-                        <Button
-                            variant="contained"
-                            component={RouterLink}
-                            to={PATH_DASHBOARD.invoice.new}
-                            startIcon={<Iconify icon={'eva:plus-fill'} />}
-                        >
-                            Tạo tài khoản
-                        </Button>
-                    }
+  const handleEditRow = (id) => {
+    navigate(PATH_DASHBOARD.account.employee.edit(id));
+  };
+
+  const dataFiltered = applySortFilter({
+    tableData,
+    comparator: getComparator(order, orderBy),
+  });
+
+  return (
+    <Page title="Quản lý nhân viên - danh sách nhân viên">
+      <Container maxWidth={themeStretch ? false : 'lg'}>
+        <HeaderBreadcrumbs
+          heading="Danh sách nhân viên"
+          links={[
+            { name: 'Quản lý nhân viên', href: PATH_DASHBOARD.account.customer.list },
+            { name: 'Danh sách nhân viên' },
+          ]}
+          action={
+            <Button
+              variant="contained"
+              component={RouterLink}
+              to={PATH_DASHBOARD.invoice.new}
+              startIcon={<Iconify icon={'eva:plus-fill'} />}
+            >
+              Tạo tài khoản
+            </Button>
+          }
+        />
+
+        <Card>
+          <Tabs
+            allowScrollButtonsMobile
+            variant="scrollable"
+            scrollButtons="auto"
+            value={filterStatus}
+            onChange={onFilterStatus}
+            TabIndicatorProps={{
+              sx: { height: 2.5 },
+            }}
+            sx={{
+              px: 2,
+              bgcolor: 'background.neutral',
+            }}
+          >
+            {tabs.map((tab, index) => (
+              <Tab
+                disableRipple
+                key={tab.value}
+                value={tab.value}
+                label={
+                  <Stack spacing={1} direction="row" alignItems="center">
+                    <div>{tab.label}</div>
+                    <Label
+                      variant={filterStatus === tab.value || index === 0 ? 'filled' : 'ghost'}
+                      sx={{
+                        transition: 'all 0.3s ease',
+                        cursor: 'pointer',
+                      }}
+                      color={tab.color}
+                    >
+                      {tab.count}
+                    </Label>
+                  </Stack>
+                }
+              />
+            ))}
+          </Tabs>
+
+          <Divider />
+
+          <EmployeeTableToolBar
+            filterSearch={filterSearch}
+            filterGender={filterGender}
+            onFilterSearch={handleFilterSearch}
+            onFilterGender={handleFilterGender}
+            optionsGender={GENDER_OPTIONS}
+          />
+
+          {!isDefault &&
+            <Stack sx={{ mb: 3, px: 2 }}>
+              <>
+                <Typography sx={{ px: 1 }} variant="body2" gutterBottom>
+                  <strong>{foundLengthData}</strong>
+                  &nbsp; Nhân viên được tìm thấy
+                </Typography>
+                <EmployeeTagFiltered
+                  isShowReset={isDefault}
+                  status={filterStatus}
+                  gender={filterGender}
+                  onRemoveStatus={() => onFilterStatus(null, All.EN)}
+                  onRemoveGender={() => {
+                    setFilterGender(All.VI);
+                  }}
+                  onResetAll={() => {
+                    onFilterStatus(null, All.EN)
+                    setFilterGender(All.VI);
+                  }}
+                />
+              </>
+            </Stack>
+          }
+
+          <Scrollbar>
+            <TableContainer sx={{ minWidth: 800, position: 'relative' }}>
+              {selected.length > 0 && (
+                <TableSelectedActions
+                  numSelected={selected.length}
+                  rowCount={tableData.length}
+                  onSelectAllRows={(checked) =>
+                    onSelectAllRows(
+                      checked,
+                      tableData.map((row) => row.id)
+                    )
+                  }
+                  actions={
+                    <Stack spacing={1} direction="row">
+                      <Tooltip title="Delete">
+                        <IconButton color="primary">
+                          <Iconify icon={'eva:trash-2-outline'} />
+                        </IconButton>
+                      </Tooltip>
+                    </Stack>
+                  }
+                />
+              )}
+
+              <Table>
+                <TableHeadCustom
+                  order={order}
+                  orderBy={orderBy}
+                  headLabel={TABLE_HEAD}
+                  rowCount={tableData.length}
+                  numSelected={selected.length}
+                  onSort={onSort}
+                  onSelectAllRows={(checked) =>
+                    onSelectAllRows(
+                      checked,
+                      tableData.map((row) => row.id)
+                    )
+                  }
                 />
 
-                <Card>
-                    <Tabs
-                        allowScrollButtonsMobile
-                        variant="scrollable"
-                        scrollButtons="auto"
-                        value={filterStatus}
-                        onChange={onFilterStatus}
-                        TabIndicatorProps={{
-                            sx: { height: 2.5 },
-                        }}
-                        sx={{
-                            px: 2,
-                            bgcolor: 'background.neutral',
-                        }}
-                    >
-                        {tabs.map((tab) => (
-                            <Tab
-                                disableRipple
-                                key={tab.value}
-                                value={tab.value}
-                                label={
-                                    <Stack spacing={1} direction="row" alignItems="center">
-                                        <div>{tab.label}</div>
-                                        <Label
-                                            variant={filterStatus === tab.value ? 'filled' : 'ghost'}
-                                            sx={{
-                                                transition: 'all 0.3s ease',
-                                                cursor: 'pointer',
-                                            }}
-                                            color={tab.color}
-                                        >
-                                            {tab.count}
-                                        </Label>
-                                    </Stack>
-                                }
-                            />
-                        ))}
-                    </Tabs>
-
-                    <Divider />
-
-                    <EmployeeTableToolBar
-                        filterSearch={filterSearch}
-                        filterType={filterType}
-                        onFilterSearch={handleFilterSearch}
-                        onFilterType={handleFilterType}
-                        optionsType={TYPE_OPTIONS}
+                <TableBody>
+                  {dataFiltered.map((row) => (
+                    <EmployeeTableRow
+                      key={row.id}
+                      row={row}
+                      selected={selected.includes(row.id)}
+                      onSelectRow={() => onSelectRow(row.id)}
+                      onEditRow={() => handleEditRow(row.id)}
                     />
-
-                    <Scrollbar>
-                        <TableContainer sx={{ minWidth: 800, position: 'relative' }}>
-                            {selected.length > 0 && (
-                                <TableSelectedActions
-                                    numSelected={selected.length}
-                                    rowCount={tableData.length}
-                                    onSelectAllRows={(checked) =>
-                                        onSelectAllRows(
-                                            checked,
-                                            tableData.map((row) => row.id)
-                                        )
-                                    }
-                                    actions={
-                                        <Stack spacing={1} direction="row">
-                                            <Tooltip title="Delete">
-                                                <IconButton color="primary">
-                                                    <Iconify icon={'eva:trash-2-outline'} />
-                                                </IconButton>
-                                            </Tooltip>
-                                        </Stack>
-                                    }
-                                />
-                            )}
-
-                            <Table>
-                                <TableHeadCustom
-                                    order={order}
-                                    orderBy={orderBy}
-                                    headLabel={TABLE_HEAD}
-                                    rowCount={tableData.length}
-                                    numSelected={selected.length}
-                                    onSort={onSort}
-                                    onSelectAllRows={(checked) =>
-                                        onSelectAllRows(
-                                            checked,
-                                            tableData.map((row) => row.id)
-                                        )
-                                    }
-                                />
-
-                                <TableBody>
-                                    {dataFiltered.map((row) => (
-                                        <EmployeeTableRow
-                                            key={row.id}
-                                            row={row}
-                                            selected={selected.includes(row.id)}
-                                            onSelectRow={() => onSelectRow(row.id)}
-                                            onEditRow={() => handleEditRow(row.id)}
-                                        />
-                                    ))}
-                                    {/*
+                  ))}
+                  {/*
                   <TableNoData isNotFound={isNotFound} />
                   */}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-                    </Scrollbar>
-                </Card>
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Scrollbar>
 
-            </Container>
-        </Page>
-    );
+          <Divider />
+
+          <Box sx={{ position: 'relative', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', alignItems: 'center' }}>
+            <TablePagination
+              rowsPerPageOptions={[5, 10, 25]}
+              component="div"
+              rowsPerPage={rowsPerPage}
+              onRowsPerPageChange={onChangeRowsPerPage}
+              ActionsComponent={() => null}
+              labelDisplayedRows={() => ''}
+              labelRowsPerPage='Số hàng mỗi trang:'
+              sx={{
+                borderTop: 'none',
+              }}
+            />
+
+            <Pagination
+              sx={{ px: 1 }}
+              count={10}
+            />
+          </Box>
+        </Card>
+
+      </Container>
+    </Page>
+  );
 }
 
 // ----------------------------------------------------------------------
 
 function applySortFilter({
-    tableData,
-    comparator,
+  tableData,
+  comparator,
 }) {
-    const stabilizedThis = tableData.map((el, index) => [el, index]);
+  const stabilizedThis = tableData.map((el, index) => [el, index]);
 
-    stabilizedThis.sort((a, b) => {
-        const order = comparator(a[0], b[0]);
-        if (order !== 0) return order;
-        return a[1] - b[1];
-    });
+  stabilizedThis.sort((a, b) => {
+    const order = comparator(a[0], b[0]);
+    if (order !== 0) return order;
+    return a[1] - b[1];
+  });
 
-    tableData = stabilizedThis.map((el) => el[0]);
+  tableData = stabilizedThis.map((el) => el[0]);
 
-    return tableData;
+  return tableData;
 }
 

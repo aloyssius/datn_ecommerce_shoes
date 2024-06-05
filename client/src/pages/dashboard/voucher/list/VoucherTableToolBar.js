@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import { Stack, InputAdornment, TextField, MenuItem, Button } from '@mui/material';
 import DatePicker from '@mui/lab/DatePicker';
+import { convertVoucherType } from '../../../../utils/ConvertEnum';
 // components
 import Iconify from '../../../../components/Iconify';
 // ----------------------------------------------------------------------
@@ -8,9 +9,6 @@ import Iconify from '../../../../components/Iconify';
 const INPUT_WIDTH = 160;
 
 VoucherTableToolbar.propTypes = {
-  filterDiscountValue: PropTypes.string,
-  filterQuantity: PropTypes.string,
-  filterTypeDiscount: PropTypes.string,
   filterSearch: PropTypes.string,
   filterType: PropTypes.string,
   filterStartDate: PropTypes.instanceOf(Date),
@@ -23,9 +21,6 @@ VoucherTableToolbar.propTypes = {
 };
 
 export default function VoucherTableToolbar({
-  filterDiscountValue,
-  filterQuantity,
-  filterTypeDiscount,
   filterSearch,
   filterType,
   filterStartDate,
@@ -66,7 +61,7 @@ export default function VoucherTableToolbar({
               textTransform: 'capitalize',
             }}
           >
-            {option}
+            {convertVoucherType(option)}
           </MenuItem>
         ))}
       </TextField>
@@ -116,18 +111,6 @@ export default function VoucherTableToolbar({
           ),
         }}
       />
-
-      <Stack
-        direction="row"
-        spacing={1}
-        flexShrink={0}
-        alignItems={{ sm: 'center' }}
-        justifyContent="space-between"
-      >
-        <Button disableRipple color="inherit" endIcon={<Iconify icon={'ic:round-filter-list'} />} /* onClick={onOpen} */>
-          Bộ lọc
-        </Button>
-      </Stack>
     </Stack>
   );
 }

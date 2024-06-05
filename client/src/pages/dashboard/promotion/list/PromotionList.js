@@ -15,8 +15,11 @@ import {
   Container,
   IconButton,
   TableContainer,
+  TablePagination,
+  Pagination,
+  Typography,
 } from '@mui/material';
-import { All, VoucherTypeOptions, VoucherStatusTabs } from '../../../../constants/enum';
+import { All, VoucherTypeOption, DiscountStatusTab } from '../../../../constants/enum';
 // routes
 import { PATH_DASHBOARD } from '../../../../routes/paths';
 // hooks
@@ -35,22 +38,16 @@ import { TableEmptyRows, TableHeadCustom, TableNoData, TableSelectedActions } fr
 // sections
 import PromotionTableToolbar from './PromotionTableToolBar';
 import PromotionTableRow from './PromotionTableRow';
+import PromotionTagFiltered from './PromotionTagFiltered';
 
 // ----------------------------------------------------------------------
 
-const TYPE_OPTIONS = [
-  All.VI,
-  VoucherTypeOptions.vi.PUBLIC,
-  VoucherTypeOptions.vi.PRIVATE,
-];
-
 const TABLE_HEAD = [
-  { id: 'code', label: 'Mã', align: 'left' },
   { id: 'name', label: 'Tên', align: 'left' },
   { id: 'value', label: 'Giá trị', align: 'left' },
-  { id: 'dateTimeRange', label: 'Thời gian', align: 'left' },
+  { id: 'dateTime', label: 'Thời gian', align: 'left' },
   { id: 'status', label: 'Trạng Thái', align: 'left' },
-  { id: 'action', label: 'Thao tác', align: 'center' },
+  { id: 'action', label: 'Thao tác', align: 'left' },
 ];
 
 // ----------------------------------------------------------------------
@@ -67,15 +64,16 @@ export default function VoucherList() {
     onSelectRow,
     onSelectAllRows,
     onSort,
-  } = useTable({ defaultOrderBy: 'value' });
+    rowsPerPage,
+    onChangeRowsPerPage,
+  } = useTable({});
 
   const [tabs, setTabs] = useState(
     [
       { value: All.EN, label: All.VI, color: 'info', count: 0 },
-      { value: VoucherStatusTabs.en.ACTIVE, label: VoucherStatusTabs.vi.ACTIVE, color: 'success', count: 0 },
-      { value: VoucherStatusTabs.en.UNACTIVE, label: VoucherStatusTabs.vi.UNACTIVE, color: 'warning', count: 0 },
-      { value: VoucherStatusTabs.en.EXPIRED, label: VoucherStatusTabs.vi.EXPIRED, color: 'error', count: 0 },
-      { value: VoucherStatusTabs.en.DRAFT, label: VoucherStatusTabs.vi.DRAFT, color: 'default', count: 0 },
+      { value: DiscountStatusTab.en.UP_COMMING, label: DiscountStatusTab.vi.UP_COMMING, color: 'warning', count: 0 },
+      { value: DiscountStatusTab.en.ON_GOING, label: DiscountStatusTab.vi.ON_GOING, color: 'success', count: 0 },
+      { value: DiscountStatusTab.en.FINISHED, label: DiscountStatusTab.vi.FINISHED, color: 'error', count: 0 },
     ]
   );
 
@@ -85,7 +83,7 @@ export default function VoucherList() {
       code: '123123',
       name: 'ABC',
       value: 500000,
-      dateTimeRange: '17/05/2023 - 18/05/2024',
+      dateTime: '17/05/2023 - 18/05/2024',
       status: 'ACTIVE',
     },
     {
@@ -93,7 +91,7 @@ export default function VoucherList() {
       code: '113123',
       name: 'ABCD',
       value: 100000,
-      dateTimeRange: '17/05/2023 - 18/05/2024',
+      dateTime: '17/05/2023 - 18/05/2024',
       status: 'ACTIVE',
     },
     {
@@ -101,7 +99,7 @@ export default function VoucherList() {
       code: '1231234',
       name: 'ABCC',
       value: 400000,
-      dateTimeRange: '17/05/2023 - 18/05/2024',
+      dateTime: '17/05/2023 - 18/05/2024',
       status: 'ACTIVE',
     },
     {
@@ -109,36 +107,28 @@ export default function VoucherList() {
       code: '1231235',
       name: 'ABCK',
       value: 300000,
-      dateTimeRange: '17/05/2023 - 18/05/2024',
-      status: 'UNACTIVE',
+      dateTime: '17/05/2023 - 18/05/2024',
+      status: 'up_comming',
     },
     {
       id: 5,
       code: '1231239',
       name: 'ABCL',
       value: 200000,
-      dateTimeRange: '17/05/2023 - 18/05/2024',
-      status: 'EXPIRED',
+      dateTime: '17/05/2023 - 18/05/2024',
+      status: 'finished',
     },
     {
       id: 6,
       code: '1231231',
       name: 'ABCQ',
       value: 600000,
-      dateTimeRange: '17/05/2023 - 18/05/2024',
-      status: 'ACTIVE',
+      dateTime: '17/05/2023 - 18/05/2024',
+      status: 'on_going',
     },
   ]);
 
   const [filterSearch, setFilterSearch] = useState('');
-
-  const [filterDiscountValue, setFilterDiscountValue] = useState('');
-
-  const [filterQuantity, setFilterQuantity] = useState('');
-
-  const [filterTypeDiscount, setFilterTypeDiscount] = useState('');
-
-  const [filterType, setFilterType] = useState(All.VI);
 
   const [filterStartDate, setFilterStartDate] = useState(null);
 
@@ -146,12 +136,15 @@ export default function VoucherList() {
 
   const { currentTab: filterStatus, onChangeTab: onFilterStatus } = useTabs(All.EN);
 
+  const [foundLengthData, setFoundLengthData] = useState(0);
+
+  const isDefault =
+    filterStartDate === null &&
+    filterEndDate === null &&
+    filterStatus === All.EN;
+
   const handleFilterSearch = (filterSearch) => {
     setFilterSearch(filterSearch);
-  };
-
-  const handleFilterType = (event) => {
-    setFilterType(event.target.value);
   };
 
   const handleEditRow = (id) => {
@@ -169,7 +162,7 @@ export default function VoucherList() {
         <HeaderBreadcrumbs
           heading="Danh sách đợt giảm giá"
           links={[
-            { name: 'Quản lý đợt giảm giá', href: PATH_DASHBOARD.discount.voucher.list },
+            { name: 'Quản lý đợt giảm giá', href: PATH_DASHBOARD.discount.promotion.list },
             { name: 'Danh sách đợt giảm giá' },
           ]}
           action={
@@ -199,7 +192,7 @@ export default function VoucherList() {
               bgcolor: 'background.neutral',
             }}
           >
-            {tabs.map((tab) => (
+            {tabs.map((tab, index) => (
               <Tab
                 disableRipple
                 key={tab.value}
@@ -208,7 +201,7 @@ export default function VoucherList() {
                   <Stack spacing={1} direction="row" alignItems="center">
                     <div>{tab.label}</div>
                     <Label
-                      variant={filterStatus === tab.value ? 'filled' : 'ghost'}
+                      variant={filterStatus === tab.value || index === 0 ? 'filled' : 'ghost'}
                       sx={{
                         transition: 'all 0.3s ease',
                         cursor: 'pointer',
@@ -226,23 +219,44 @@ export default function VoucherList() {
           <Divider />
 
           <PromotionTableToolbar
-            filterDiscountValue={filterDiscountValue}
-            filterQuantity={filterQuantity}
-            filterTypeDiscount={filterTypeDiscount}
             filterSearch={filterSearch}
-            filterType={filterType}
             filterStartDate={filterStartDate}
             filterEndDate={filterEndDate}
             onFilterSearch={handleFilterSearch}
-            onFilterType={handleFilterType}
             onFilterStartDate={(newValue) => {
               setFilterStartDate(newValue);
             }}
             onFilterEndDate={(newValue) => {
               setFilterEndDate(newValue);
             }}
-            optionsType={TYPE_OPTIONS}
           />
+
+          {!isDefault &&
+            <Stack sx={{ mb: 3, px: 2 }}>
+              <>
+                <Typography sx={{ px: 1 }} variant="body2" gutterBottom>
+                  <strong>{foundLengthData}</strong>
+                  &nbsp; Đợt giảm giá được tìm thấy
+                </Typography>
+                <PromotionTagFiltered
+                  isShowReset={isDefault}
+                  status={filterStatus}
+                  startDate={filterStartDate}
+                  endDate={filterEndDate}
+                  onRemoveStatus={() => onFilterStatus(null, All.EN)}
+                  onRemoveDate={() => {
+                    setFilterEndDate(null);
+                    setFilterStartDate(null);
+                  }}
+                  onResetAll={() => {
+                    onFilterStatus(null, All.EN)
+                    setFilterEndDate(null);
+                    setFilterStartDate(null);
+                  }}
+                />
+              </>
+            </Stack>
+          }
 
           <Scrollbar>
             <TableContainer sx={{ minWidth: 800, position: 'relative' }}>
@@ -301,6 +315,27 @@ export default function VoucherList() {
               </Table>
             </TableContainer>
           </Scrollbar>
+          <Divider />
+
+          <Box sx={{ position: 'relative', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', alignItems: 'center' }}>
+            <TablePagination
+              rowsPerPageOptions={[5, 10, 25]}
+              component="div"
+              rowsPerPage={rowsPerPage}
+              onRowsPerPageChange={onChangeRowsPerPage}
+              ActionsComponent={() => null}
+              labelDisplayedRows={() => ''}
+              labelRowsPerPage='Số hàng mỗi trang:'
+              sx={{
+                borderTop: 'none',
+              }}
+            />
+
+            <Pagination
+              sx={{ px: 1 }}
+              count={10}
+            />
+          </Box>
         </Card>
       </Container>
     </Page>
@@ -368,6 +403,3 @@ function applySortFilter({
 //   setTableFiltered(dataFiltered);
 // }, [debounceValue]);
 //
-// const handleFilterType = (event) => {
-//   setFilterType(event.target.value);
-// };

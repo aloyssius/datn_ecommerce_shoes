@@ -8,19 +8,19 @@ import Iconify from '../../../../components/Iconify';
 const INPUT_WIDTH = 160;
 
 EmployeeTableToolBar.propTypes = {
-    filterSearch: PropTypes.string,
-    filterType: PropTypes.string,
-    onFilterSearch: PropTypes.func,
-    onFilterType: PropTypes.func,
-    optionsType: PropTypes.arrayOf(PropTypes.string),
+  filterSearch: PropTypes.string,
+  filterGender: PropTypes.string,
+  onFilterSearch: PropTypes.func,
+  onFilterGender: PropTypes.func,
+  optionsGender: PropTypes.arrayOf(PropTypes.string),
 };
 
 export default function EmployeeTableToolBar({
-    filterSearch,
-    filterType,
-    onFilterSearch,
-    onFilterType,
-    optionsType,
+  filterSearch,
+  filterGender,
+  onFilterSearch,
+  onFilterGender,
+  optionsGender,
 }) {
     return (
         <Stack spacing={2} direction={{ xs: 'column', md: 'row' }} sx={{ py: 2.5, px: 3 }}>
@@ -28,8 +28,8 @@ export default function EmployeeTableToolBar({
                 fullWidth
                 select
                 label="Giới tính"
-                value={filterType}
-                onChange={onFilterType}
+                value={filterGender}
+                onChange={onFilterGender}
                 SelectProps={{
                     MenuProps: {
                         sx: { '& .MuiPaper-root': { maxHeight: 260 } },
@@ -40,7 +40,7 @@ export default function EmployeeTableToolBar({
                     textTransform: 'capitalize',
                 }}
             >
-                {optionsType.map((option) => (
+                {optionsGender.map((option) => (
                     <MenuItem
                         key={option}
                         value={option}
@@ -62,7 +62,7 @@ export default function EmployeeTableToolBar({
                 fullWidth
                 value={filterSearch}
                 onChange={(event) => onFilterSearch(event.target.value)}
-                placeholder="Tìm kiếm mã nhân viên..."
+                placeholder="Tìm kiếm nhân viên..."
                 InputProps={{
                     startAdornment: (
                         <InputAdornment position="start">
@@ -71,18 +71,6 @@ export default function EmployeeTableToolBar({
                     ),
                 }}
             />
-
-            <Stack
-                direction="row"
-                spacing={1}
-                flexShrink={0}
-                alignItems={{ sm: 'center' }}
-                justifyContent="space-between"
-            >
-                <Button disableRipple color="inherit" endIcon={<Iconify icon={'ic:round-filter-list'} />} /* onClick={onOpen} */>
-                    Bộ lọc
-                </Button>
-            </Stack>
         </Stack>
     );
 }

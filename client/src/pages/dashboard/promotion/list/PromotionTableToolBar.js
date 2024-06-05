@@ -23,54 +23,15 @@ PromotionTableToolbar.propTypes = {
 };
 
 export default function PromotionTableToolbar({
-  filterDiscountValue,
-  filterQuantity,
-  filterTypeDiscount,
   filterSearch,
-  filterType,
   filterStartDate,
   filterEndDate,
   onFilterSearch,
-  onFilterType,
   onFilterStartDate,
   onFilterEndDate,
-  optionsType,
 }) {
   return (
     <Stack spacing={2} direction={{ xs: 'column', md: 'row' }} sx={{ py: 2.5, px: 3 }}>
-      {/* <TextField
-        fullWidth
-        select
-        label="Loại"
-        value={filterType}
-        onChange={onFilterType}
-        SelectProps={{
-          MenuProps: {
-            sx: { '& .MuiPaper-root': { maxHeight: 260 } },
-          },
-        }}
-        sx={{
-          maxWidth: { md: INPUT_WIDTH },
-          textTransform: 'capitalize',
-        }}
-      >
-        {optionsType.map((option) => (
-          <MenuItem
-            key={option}
-            value={option}
-            sx={{
-              mx: 1,
-              my: 0.5,
-              borderRadius: 0.75,
-              typography: 'body2',
-              textTransform: 'capitalize',
-            }}
-          >
-            {option}
-          </MenuItem>
-        ))}
-      </TextField> */}
-
       <DatePicker
         label="Ngày bắt đầu"
         inputFormat='dd/MM/yyyy'
@@ -107,7 +68,7 @@ export default function PromotionTableToolbar({
         fullWidth
         value={filterSearch}
         onChange={(event) => onFilterSearch(event.target.value)}
-        placeholder="Tìm kiếm mã giảm giá..."
+        placeholder="Tìm kiếm đợt giảm giá..."
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
@@ -116,18 +77,6 @@ export default function PromotionTableToolbar({
           ),
         }}
       />
-
-      <Stack
-        direction="row"
-        spacing={1}
-        flexShrink={0}
-        alignItems={{ sm: 'center' }}
-        justifyContent="space-between"
-      >
-        <Button disableRipple color="inherit" endIcon={<Iconify icon={'ic:round-filter-list'} />} /* onClick={onOpen} */>
-          Bộ lọc
-        </Button>
-      </Stack>
     </Stack>
   );
 }
