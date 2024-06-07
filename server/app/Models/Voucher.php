@@ -2,18 +2,51 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Voucher extends Model
+class Voucher extends BaseModel
 {
-    protected $primaryKey = 'id';
+    use SoftDeletes;
 
-    use HasUuids;
+    protected $fillable = [
+        'code',
+        'name',
+        'value',
+        'type',
+        'type_discount',
+        'max_discount_value',
+        'min_order_value',
+        'quantity',
+        'status',
+        'start_time',
+        'end_time',
+    ];
+    protected $casts = [
+        'value' => 'float',
+        'max_discount_value' => 'float',
+        'min_order_value' => 'float',
+    ];
 
+    public function __construct(array $attributes = [])
+    {
+        $this->fillable = array_merge(parent::getBaseFillable(), $this->fillable);
+        parent::__construct($attributes);
+    }
 
-    public $incrementing = false;
-    protected $keyType = 'string';
-    protected $dateFormat = 'd-m-Y';
+    public function getStartTimeAttribute($value)
+    {
+        if ($value !== null) {
+            return Carbon::parse($value)->format('H:i:s d-m-Y');
+        }
+        return null;
+    }
+
+    public function getEndTimeAttribute($value)
+    {
+        if ($value !== null) {
+            return Carbon::parse($value)->format('H:i:s d-m-Y');
+        }
+        return null;
+    }
 }
