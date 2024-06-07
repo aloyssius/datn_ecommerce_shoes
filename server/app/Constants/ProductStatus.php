@@ -2,7 +2,7 @@
 
 namespace App\Constants;
 
-class ProductDetailStatus
+class ProductStatus
 {
     const IS_ACTIVE = 'is_active';
     const UN_ACTIVE = 'un_active';
