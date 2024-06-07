@@ -2,11 +2,13 @@
 
 use App\Common\BaseBlueprint;
 use App\Constants\BillHistoryStatusTimeline;
+use App\Constants\CommonStatus;
 use App\Constants\ConstantSystem;
 use App\Constants\DiscountStatus;
 use App\Constants\OrderStatus;
 use App\Constants\OrderType;
-use App\Constants\ProductDetailStatus;
+use App\Constants\ProductStatus;
+use App\Constants\Role;
 use App\Constants\TransactionType;
 use App\Constants\VoucherTypeDiscount;
 use App\Constants\VoucherType;
@@ -29,7 +31,8 @@ return new class extends Migration
 
         // Role
         $schema->create('roles', function (BaseBlueprint $table) {
-            $table->baseColumn()->addColumnName()->addColumnCode();
+            $table->baseColumn()->addColumnName();
+            $table->enum('code', Role::toArray())->unique();
         });
 
         // Account
@@ -42,13 +45,14 @@ return new class extends Migration
             $table->string('email', ConstantSystem::EMAIL_MAX_LENGTH)->unique();
             $table->string('identity_card', ConstantSystem::IDENTITY_CARD_MAX_LENGTH)->nullable()->unique();
             $table->boolean('gender')->nullable();
+            $table->enum('status', CommonStatus::toArray());
             $table->string('avatar_url', ConstantSystem::URL_MAX_LENGTH)->nullable();
             $table->foreignUuid('role_id')->references('id')->on('roles');
         });
 
         // Address
         $schema->create('addresses', function (BaseBlueprint $table) {
-            $table->baseColumn()->addColumnCode();
+            $table->baseColumn();
             $table->string('full_name', ConstantSystem::FULL_NAME_MAX_LENGTH);
             $table->string('address', ConstantSystem::ADDRESS_MAX_LENGTH);
             $table->string('phone_number', ConstantSystem::PHONE_NUMBER_MAX_LENGTH)->unique();
@@ -61,7 +65,7 @@ return new class extends Migration
 
         // Notification
         $schema->create('notifications', function (BaseBlueprint $table) {
-            $table->baseColumn();
+            $table->baseColumn()->addSoftDeletes();
             $table->string('content', ConstantSystem::DEFAULT_MAX_LENGTH);
             $table->boolean('is_seen')->default(false);
             $table->string('url', ConstantSystem::URL_MAX_LENGTH);
@@ -84,7 +88,7 @@ return new class extends Migration
 
         // Customer_vouchers
         $schema->create('customer_vouchers', function (BaseBlueprint $table) {
-            $table->baseColumn();
+            $table->baseColumn()->addSoftDeletes();
             $table->boolean('is_used')->default(false);
             $table->foreignUuid('voucher_id')->references('id')->on('vouchers');
             $table->foreignUuid('account_id')->references('id')->on('accounts');
@@ -92,47 +96,48 @@ return new class extends Migration
 
         // Carts
         $schema->create('carts', function (BaseBlueprint $table) {
-            $table->baseColumn();
-            $table->foreignUuid('account_id')->references('id')->on('accounts');
+            $table->baseColumn()->addSoftDeletes();
+            $table->uuid('account_id')->unique();
         });
 
         // Categorys
-        $schema->create('categorys', function (BaseBlueprint $table) {
-            $table->baseColumn()->addColumnCode();
+        $schema->create('categories', function (BaseBlueprint $table) {
+            $table->baseColumn()->addColumnCode()->addSoftDeletes()->addColumnName();
         });
 
         // Sizes
         $schema->create('sizes', function (BaseBlueprint $table) {
-            $table->baseColumn()->addColumnCode();
+            $table->baseColumn()->addColumnCode()->addSoftDeletes()->addColumnName();
         });
 
         // Colors
         $schema->create('colors', function (BaseBlueprint $table) {
-            $table->baseColumn()->addColumnCode();
+            $table->baseColumn()->addColumnCode()->addSoftDeletes()->addColumnName();
         });
 
         // Brands
         $schema->create('brands', function (BaseBlueprint $table) {
-            $table->baseColumn()->addColumnCode();
+            $table->baseColumn()->addColumnCode()->addSoftDeletes()->addColumnName();
         });
 
         // Products
         $schema->create('products', function (BaseBlueprint $table) {
-            $table->baseColumn();
+            $table->baseColumn()->addSoftDeletes()->addColumnName();
             $table->string('sku', ConstantSystem::CODE_MAX_LENGTH)->unique();
+            $table->enum('status', ProductStatus::toArray())->default(ProductStatus::IS_ACTIVE);
             $table->text('description')->nullable();
         });
 
         // Product_details
         $schema->create('product_details', function (BaseBlueprint $table) {
-            $table->baseColumn();
+            $table->baseColumn()->addSoftDeletes();
             $table->string('sub-sku', ConstantSystem::CODE_MAX_LENGTH)->unique();
             $table->string('quantity')->default(0);
             $table->bigDecimal('price');
-            $table->enum('status', ProductDetailStatus::toArray())->default(ProductDetailStatus::IS_ACTIVE);
+            $table->enum('status', ProductStatus::toArray())->default(ProductStatus::IS_ACTIVE);
             $table->bigDecimalNullable('promotion_price');
             $table->foreignUuid('product_id')->references('id')->on('products');
-            $table->foreignUuid('category_id')->references('id')->on('categorys');
+            $table->foreignUuid('category_id')->references('id')->on('categories');
             $table->foreignUuid('brand_id')->references('id')->on('brands');
             $table->foreignUuid('color_id')->references('id')->on('colors');
             $table->foreignUuid('size_id')->references('id')->on('sizes');
@@ -148,7 +153,7 @@ return new class extends Migration
 
         // Promotions
         $schema->create('promotions', function (BaseBlueprint $table) {
-            $table->baseColumn()->addColumnName()->addColumnCode();
+            $table->baseColumn()->addColumnName()->addSoftDeletes();
             $table->bigDecimal('value');
             $table->enum('status', DiscountStatus::toArray());
             $table->timestamp('start_time');
@@ -166,17 +171,16 @@ return new class extends Migration
 
         // Bills
         $schema->create('bills', function (BaseBlueprint $table) {
-            $table->baseColumn()->addColumnCode();
+            $table->baseColumn()->addColumnCode()->addSoftDeletes();
             $table->timestamp('confirmation_date')->nullable();
             $table->timestamp('delivery_date')->nullable();
             $table->timestamp('completion_date')->nullable();
             $table->string('note', ConstantSystem::DEFAULT_MAX_LENGTH)->nullable();
             $table->enum('status', OrderStatus::toArray())->default(OrderStatus::PENDING_COMFIRN);
-            $table->enum('type', OrderType::toArray());
-            $table->string('full_name', ConstantSystem::FULL_NAME_MAX_LENGTH)->nullable();
-            $table->string('email', ConstantSystem::EMAIL_MAX_LENGTH)->nullable();
-            $table->string('address', ConstantSystem::ADDRESS_MAX_LENGTH)->nullable();
-            $table->string('phone_number', ConstantSystem::PHONE_NUMBER_MAX_LENGTH)->nullable();
+            $table->string('full_name', ConstantSystem::FULL_NAME_MAX_LENGTH);
+            $table->string('email', ConstantSystem::EMAIL_MAX_LENGTH);
+            $table->string('address', ConstantSystem::ADDRESS_MAX_LENGTH);
+            $table->string('phone_number', ConstantSystem::PHONE_NUMBER_MAX_LENGTH);
             $table->bigDecimalNullable('money_ship');
             $table->bigDecimal('total_money');
             $table->bigDecimalNullable('discount_amount');
@@ -189,7 +193,6 @@ return new class extends Migration
             $table->baseColumn();
             $table->bigDecimal('price');
             $table->bigDecimalNullable('price_after_promotion');
-            // $table->enum('status');
             $table->integer('quantity');
             $table->foreignUuid('bill_id')->references('id')->on('bills');
             $table->foreignUuid('product_details_id')->references('id')->on('product_details');
@@ -197,8 +200,7 @@ return new class extends Migration
 
         // Bill_histories
         $schema->create('bill_histories', function (BaseBlueprint $table) {
-            $table->baseColumn();
-            $table->string('action_description', ConstantSystem::DEFAULT_MAX_LENGTH);
+            $table->baseColumn()->addSoftDeletes();
             $table->enum('status_timeline', BillHistoryStatusTimeline::toArray());
             $table->string('note', ConstantSystem::DEFAULT_MAX_LENGTH);
             $table->foreignUuid('bill_id')->references('id')->on('bills');
@@ -206,7 +208,7 @@ return new class extends Migration
 
         // Transactions
         $schema->create('transactions', function (BaseBlueprint $table) {
-            $table->baseColumn();
+            $table->baseColumn()->addSoftDeletes();
             $table->bigDecimal('total_money');
             $table->enum('type', TransactionType::toArray());
             $table->string('trading_code', ConstantSystem::CODE_MAX_LENGTH)->unique()->nullable();
@@ -217,7 +219,6 @@ return new class extends Migration
         // Images
         $schema->create('images', function (BaseBlueprint $table) {
             $table->baseColumn();
-            $table->boolean('is_default');
             $table->string('path_url', ConstantSystem::URL_MAX_LENGTH);
             $table->foreignUuid('product_details_id')->references('id')->on('product_details');
         });
@@ -229,9 +230,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('roles');
-        Schema::dropIfExists('accounts');
-        Schema::dropIfExists('vouchers');
-        Schema::dropIfExists('categorys');
+        Schema::dropIfExists('categories');
         Schema::dropIfExists('brands');
         Schema::dropIfExists('sizes');
         Schema::dropIfExists('colors');
@@ -241,17 +240,15 @@ return new class extends Migration
         Schema::dropIfExists('transactions');
         Schema::dropIfExists('notifications');
         Schema::dropIfExists('addresses');
+        Schema::dropIfExists('customer_vouchers');
+        Schema::dropIfExists('accounts');
+        Schema::dropIfExists('vouchers');
         Schema::dropIfExists('carts');
         Schema::dropIfExists('cart_details');
         Schema::dropIfExists('products');
         Schema::dropIfExists('product_details');
         Schema::dropIfExists('promotions');
         Schema::dropIfExists('promotion_product_details');
-        Schema::dropIfExists('customer_vouchers');
-        Schema::dropIfExists('promotion_product_details');
-        Schema::dropIfExists('promotion_product_details');
-        Schema::dropIfExists('promotion_product_details');
-        Schema::dropIfExists('promotion_product_details');
-        Schema::dropIfExists('promotion_product_details');
+        Schema::dropIfExists('images');
     }
 };
