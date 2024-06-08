@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\Bills\BillController;
 use App\Http\Controllers\Api\Vouchers\VoucherController;
+use App\Http\Controllers\Api\Accounts\AccountController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -22,3 +23,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::apiResource('/vouchers', VoucherController::class);
 Route::apiResource('/bills', BillController::class);
+Route::apiResource('/accounts', AccountController::class);
+
