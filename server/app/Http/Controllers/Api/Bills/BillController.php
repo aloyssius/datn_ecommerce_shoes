@@ -43,10 +43,14 @@ class BillController extends Controller
                 $query->where('created_at', '<=', $endDate);
             });
 
+        $statusCounts = Bill::select(DB::raw('count(status) as count, status'))
+            ->groupBy('status')
+            ->get();
+
         QueryHelper::buildOrderBy($bills, 'created_at', 'desc');
         $bills = QueryHelper::buildPagination($bills, $req);
 
-        return ApiResponse::responsePage(BillResource::collection($bills));
+        return ApiResponse::responsePage(BillResource::collection($bills), $statusCounts);
     }
 
     public function show($id)

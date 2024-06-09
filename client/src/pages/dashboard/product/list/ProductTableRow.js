@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import { useState } from 'react';
 // @mui
+import { format, parse } from 'date-fns';
 import { useTheme } from '@mui/material/styles';
 import { Tooltip, Checkbox, IconButton, TableRow, TableCell, Typography, Stack, Link, MenuItem } from '@mui/material';
 import LinearProgress, { linearProgressClasses } from '@mui/material/LinearProgress';
@@ -16,6 +17,7 @@ import Avatar from '../../../../components/Avatar';
 import Iconify from '../../../../components/Iconify';
 import { TableMoreMenu } from '../../../../components/table';
 import { PATH_DASHBOARD } from '../../../../routes/paths';
+import { convertProductStatus } from '../../../../utils/ConvertEnum';
 
 // ----------------------------------------------------------------------
 
@@ -54,7 +56,11 @@ const BorderLinearProgress = ({ value }) => {
 export default function ProductTableRow({ row, selected, onSelectRow, onEditRow }) {
   const theme = useTheme();
 
-  const { sku, name, brand, image, createdAt, quantity, status } = row;
+  const { sku, name, brand, image, createdAt, totalQuantity, status, stockStatus } = row;
+
+  const parsedDateTime = parse(createdAt, 'HH:mm:ss dd-MM-yyyy', new Date());
+  const formattedDate = format(parsedDateTime, 'dd/MM/yyyy');
+  const formattedTime = format(parsedDateTime, 'HH:mm');
 
   return (
     <TableRow hover selected={selected}>
@@ -78,11 +84,11 @@ export default function ProductTableRow({ row, selected, onSelectRow, onEditRow 
       <TableCell >
         <Stack>
           <Typography variant="body2" noWrap>
-            {'01 Jun 2024'}
+            {formattedDate}
           </Typography>
 
           <Typography noWrap variant="body2" sx={{ color: '#696969	', fontSize: '12px' }}>
-            {'9:59 PM'}
+            {formattedTime}
           </Typography>
         </Stack>
       </TableCell>
@@ -90,10 +96,10 @@ export default function ProductTableRow({ row, selected, onSelectRow, onEditRow 
       <TableCell align="left">
         <Stack>
           <Typography variant="body2" noWrap>
-            <BorderLinearProgress variant="determinate" value={quantity} />
+            <BorderLinearProgress variant="determinate" value={totalQuantity} />
           </Typography>
           <Typography noWrap variant="body2" sx={{ color: '#696969	', fontSize: '12px', marginTop: 1 }}>
-            {`${quantity} ${quantity === 0 ? '(Hết hàng)' : '(Còn hàng)'}`}
+            {`${totalQuantity} (${stockStatus})`}
 
           </Typography>
         </Stack>
@@ -118,7 +124,7 @@ export default function ProductTableRow({ row, selected, onSelectRow, onEditRow 
           }
           sx={{ textTransform: 'capitalize' }}
         >
-          {status}
+          {convertProductStatus(status)}
         </Label>
       </TableCell>
 

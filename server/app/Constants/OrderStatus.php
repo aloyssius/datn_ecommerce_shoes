@@ -5,7 +5,7 @@ namespace App\Constants;
 class OrderStatus
 {
     const PENDING_COMFIRN = 'pending_confirm';
-    const WAITTING_DELEVERY = 'watting_delevery';
+    const WAITTING_DELIVERY = 'waitting_delivery';
     const DELIVERING = 'delivering';
     const COMPLETED = 'completed';
     const CANCELED = 'canceled';
@@ -14,7 +14,7 @@ class OrderStatus
     {
         return [
             self::PENDING_COMFIRN,
-            self::WAITTING_DELEVERY,
+            self::WAITTING_DELIVERY,
             self::DELIVERING,
             self::COMPLETED,
             self::CANCELED,

@@ -186,6 +186,7 @@ return new class extends Migration
             $table->bigDecimalNullable('discount_amount');
             $table->foreignUuid('customer_id')->references('id')->on('accounts');
             $table->foreignUuid('employee_id')->references('id')->on('accounts');
+            $table->index(['full_name', 'created_at', 'phone_number', 'code', 'status']);
         });
 
         // Bill_details

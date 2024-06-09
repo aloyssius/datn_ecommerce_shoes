@@ -38,6 +38,7 @@ import { store, persistor } from './redux/store';
 // contexts
 import { SettingsProvider } from './contexts/SettingsContext';
 import { CollapseDrawerProvider } from './contexts/CollapseDrawerContext';
+import { LoadingProvider } from './contexts/LoadingContext';
 
 // Check our docs
 // https://docs-minimals.vercel.app/authentication/ts-version
@@ -61,11 +62,13 @@ ReactDOM.render(
         <PersistGate loading={null} persistor={persistor}>
           <LocalizationProvider dateAdapter={AdapterDateFns}>
             <SettingsProvider>
-              <CollapseDrawerProvider>
-                <BrowserRouter>
-                  <App />
-                </BrowserRouter>
-              </CollapseDrawerProvider>
+              <LoadingProvider>
+                <CollapseDrawerProvider>
+                  <BrowserRouter>
+                    <App />
+                  </BrowserRouter>
+                </CollapseDrawerProvider>
+              </LoadingProvider>
             </SettingsProvider>
           </LocalizationProvider>
         </PersistGate>

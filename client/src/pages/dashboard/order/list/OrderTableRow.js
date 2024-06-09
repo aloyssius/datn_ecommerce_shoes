@@ -1,9 +1,10 @@
 import PropTypes from 'prop-types';
 import { useState } from 'react';
 // @mui
+import { format, parse } from 'date-fns';
 import { useTheme } from '@mui/material/styles';
 import { Tooltip, Checkbox, IconButton, TableRow, TableCell, Typography, Stack, Link, MenuItem } from '@mui/material';
-import { OrderStatusTab } from '../../../../constants/enum';
+import { BillStatusTab } from '../../../../constants/enum';
 // utils
 import { fDate } from '../../../../utils/formatTime';
 import createAvatar from '../../../../utils/createAvatar';
@@ -14,6 +15,8 @@ import Avatar from '../../../../components/Avatar';
 import Iconify from '../../../../components/Iconify';
 import { TableMoreMenu } from '../../../../components/table';
 import { PATH_DASHBOARD } from '../../../../routes/paths';
+import { convertOrderStatus } from '../../../../utils/ConvertEnum';
+import { displayCurrencyVnd } from '../../../../utils/formatCurrency';
 
 // ----------------------------------------------------------------------
 
@@ -28,6 +31,10 @@ export default function OrderTableRow({ row, selected, onSelectRow, onEditRow })
   const theme = useTheme();
 
   const { code, fullName, phoneNumber, createdAt, totalMoney, status } = row;
+
+  const parsedDateTime = parse(createdAt, 'HH:mm:ss dd-MM-yyyy', new Date());
+  const formattedDate = format(parsedDateTime, 'dd/MM/yyyy');
+  const formattedTime = format(parsedDateTime, 'HH:mm');
 
   return (
     <TableRow hover selected={selected}>
@@ -62,31 +69,31 @@ export default function OrderTableRow({ row, selected, onSelectRow, onEditRow })
       <TableCell >
         <Stack>
           <Typography variant="body2" noWrap>
-            {'01 Jun 2024'}
+            {formattedDate}
           </Typography>
 
           <Typography noWrap variant="body2" sx={{ color: '#696969	', fontSize: '12px' }}>
-            {'9:59 PM'}
+            {formattedTime}
           </Typography>
         </Stack>
       </TableCell>
 
-      <TableCell align="left" sx={{ textTransform: 'capitalize' }}>
-        {totalMoney}
+      <TableCell align="left" sx={{ textTransform: 'capitalize', color: '#CF000F' }}>
+        {displayCurrencyVnd(totalMoney)}
       </TableCell>
 
       <TableCell align="left">
         <Label
           variant={theme.palette.mode === 'light' ? 'ghost' : 'filled'}
           color={
-            (status === OrderStatusTab.en.COMPLETED && 'success') ||
-            (status === OrderStatusTab.en.PENDING_CONFIRM && 'warning') ||
-            (status === OrderStatusTab.en.CANCELED && 'error') ||
+            (status === BillStatusTab.en.COMPLETED && 'success') ||
+            (status === BillStatusTab.en.PENDING_CONFIRM && 'warning') ||
+            (status === BillStatusTab.en.CANCELED && 'error') ||
             'default'
           }
           sx={{ textTransform: 'capitalize' }}
         >
-          {status}
+          {convertOrderStatus(status)}
         </Label>
       </TableCell>
 
