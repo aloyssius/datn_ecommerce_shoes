@@ -2,9 +2,8 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Contracts\Validation\Validator;
+use App\Constants\CommonStatus;
+use Illuminate\Validation\Rule;
 
 class AccountRequest extends BaseRequest
 {
@@ -23,12 +22,20 @@ class AccountRequest extends BaseRequest
      */
     public function rules(): array
     {
-        return array_merge(parent::rules(), []);
+        return array_merge(parent::rules(), [
+            'search' => 'string|nullable',
+            'status' => [
+                Rule::in(CommonStatus::toArray()), 'nullable'
+            ],
+            'gender' => 'boolean|nullable',
+        ]);
     }
 
     public function messages()
     {
 
-        return array_merge(parent::messages(), []);
+        return array_merge(parent::messages(), [
+            'status.in' => 'Trạng thái tài khoản không hợp lệ.',
+        ]);
     }
 }
