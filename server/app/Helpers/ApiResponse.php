@@ -35,7 +35,7 @@ class ApiResponse
         return response()->json($response, $code);
     }
 
-    public static function responsePage($page, $statusCounts = [], $otherData, $message = '', $code = 200)
+    public static function responsePage($page, $statusCounts = [], $otherData , $message = '', $code = 200)
     {
         $showSql = DB::getQueryLog();
 
@@ -58,6 +58,10 @@ class ApiResponse
 
         if ($statusCounts) {
             $response['statusCounts'] = $statusCounts;
+        }
+
+        if ($otherData) {
+            $response['otherData'] = $statusCounts;
         }
 
         return response()->json($response, $code);

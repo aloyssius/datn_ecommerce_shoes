@@ -50,7 +50,7 @@ class BillController extends Controller
         QueryHelper::buildOrderBy($bills, 'created_at', 'desc');
         $bills = QueryHelper::buildPagination($bills, $req);
 
-        return ApiResponse::responsePage(BillResource::collection($bills), $statusCounts);
+        return ApiResponse::responsePage(BillResource::collection($bills), $statusCounts, null);
     }
 
     public function show($id)

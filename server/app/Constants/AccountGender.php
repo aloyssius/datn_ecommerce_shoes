@@ -4,8 +4,8 @@ namespace App\Constants;
 
 class AccountGender
 {
-    const MEN = 1;
-    const WOMEN = 0;
+    const MEN = 0;
+    const WOMEN = 1;
 
     public static function toArray(): array
     {

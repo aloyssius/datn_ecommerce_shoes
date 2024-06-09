@@ -34,10 +34,14 @@ class AccountController extends Controller {
             QueryHelper::buildQueryEquals($accounts, 'gender', $req->gender);
         }
 
+        $statusCounts = Account::select(DB::raw('count(status) as count, status'))
+            ->groupBy('status')
+            ->get();
+
         QueryHelper::buildOrderBy($accounts, 'created_at', 'desc');
         $accounts = QueryHelper::buildPagination($accounts, $req);
 
-        return ApiResponse::responsePage(AccountResource::collection($accounts));
+        return ApiResponse::responsePage(AccountResource::collection($accounts), $statusCounts, null);
     }
 
 }
