@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\Api\Vouchers\VoucherController;
+use App\Http\Controllers\Api\Products\ProductController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -15,10 +15,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::middleware('api')->group(function () {
+    Route::get('/products', [ProductController::class, 'index']);
 });
-
-Route::apiResource('/vouchers', VoucherController::class);
-require __DIR__ . '/api/bills/api.php';
-require __DIR__ . '/api/products/api.php';

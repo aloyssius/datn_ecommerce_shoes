@@ -21,6 +21,12 @@ class QueryHelper
         $model->where($filterField, $value);
     }
 
+    public static function buildQueryIn(Builder $model, $filterField, $value)
+    {
+        $arrayValue = explode(',', $value);
+        $model->whereIn($filterField, $arrayValue);
+    }
+
     public static function buildOrderBy(Builder $model, $sortField, $by)
     {
         $model->orderBy($sortField, $by);
