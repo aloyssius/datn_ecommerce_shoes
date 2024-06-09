@@ -1,4 +1,4 @@
-import { All, AccountStatusTab, DiscountStatusTab, OrderStatusTab, VoucherTypeOption, ProductStockOption, ProductStatusTab } from '../constants/enum'
+import { All, AccountStatusTab, DiscountStatusTab, BillStatusTab, VoucherTypeOption, ProductStockOption, ProductStatusTab } from '../constants/enum'
 
 export const convertProductStatus = (status) => {
   let statusConverted = "";
@@ -81,20 +81,20 @@ export const convertDiscountStatus = (status) => {
 export const convertOrderStatus = (status) => {
   let statusConverted = "";
   switch (status) {
-    case OrderStatusTab.en.PENDING_CONFIRM:
-      statusConverted = OrderStatusTab.vi.PENDING_CONFIRM;
+    case BillStatusTab.en.PENDING_CONFIRM:
+      statusConverted = BillStatusTab.vi.PENDING_CONFIRM;
       break;
-    case OrderStatusTab.en.WAITTING_DELIVERY:
-      statusConverted = OrderStatusTab.vi.WAITTING_DELIVERY;
+    case BillStatusTab.en.WAITTING_DELIVERY:
+      statusConverted = BillStatusTab.vi.WAITTING_DELIVERY;
       break;
-    case OrderStatusTab.en.DELIVERING:
-      statusConverted = OrderStatusTab.vi.DELIVERING;
+    case BillStatusTab.en.DELIVERING:
+      statusConverted = BillStatusTab.vi.DELIVERING;
       break;
-    case OrderStatusTab.en.COMPLETED:
-      statusConverted = OrderStatusTab.vi.COMPLETED;
+    case BillStatusTab.en.COMPLETED:
+      statusConverted = BillStatusTab.vi.COMPLETED;
       break;
     default:
-      statusConverted = OrderStatusTab.vi.CANCELED;
+      statusConverted = BillStatusTab.vi.CANCELED;
       break;
   }
 

@@ -41,16 +41,12 @@ export function ProgressBarStyle() {
 }
 
 export default function ProgressBar() {
-  NProgress.configure({
-    showSpinner: false,
-  });
-
-  useMemo(() => {
-    NProgress.start();
-  }, []);
-
   useEffect(() => {
-    NProgress.done();
+    NProgress.start();
+
+    return () => {
+      NProgress.done();
+    };
   }, []);
 
   return null;

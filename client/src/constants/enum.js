@@ -11,7 +11,7 @@ export const Color = {
   DEFAULT: 'default',
 }
 
-export const OrderTypeOption = {
+export const BillTypeOption = {
   en: {
     AT_THE_COUNTER: 'at_the_counter',
     DELIVERY: 'delivery',
@@ -22,10 +22,10 @@ export const OrderTypeOption = {
   }
 };
 
-export const OrderStatusTab = {
+export const BillStatusTab = {
   en: {
     PENDING_CONFIRM: 'pending_confirm',
-    WAITTING_DELIVERY: 'watting_delivery',
+    WAITTING_DELIVERY: 'waitting_delivery',
     DELIVERING: 'delivering',
     COMPLETED: 'completed',
     CANCELED: 'canceled',
