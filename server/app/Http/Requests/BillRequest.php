@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Contracts\Validation\Validator;
+use App\Constants\OrderStatus;
+use Illuminate\Validation\Rule;
 
 class BillRequest extends BaseRequest
 {
@@ -22,12 +22,27 @@ class BillRequest extends BaseRequest
      */
     public function rules(): array
     {
-        return array_merge(parent::rules(), []);
+        return array_merge(parent::rules(), [
+            'search' => 'string|nullable',
+            'status' => [
+                Rule::in(OrderStatus::toArray()), 'nullable'
+            ],
+            'startDate' => 'date|date_format:d-m-Y|nullable',
+            'endDate' => 'date|date_format:d-m-Y|after_or_equal:startDate|nullable',
+        ]);
     }
+
+
 
     public function messages()
     {
-
-        return array_merge(parent::messages(), []);
+        return array_merge(parent::messages(), [
+            'status.in' => 'Trạng thái đơn hàng không hợp lệ.',
+            'startDate.date' => 'Ngày bắt đầu không hợp lệ.',
+            'startDate.date_format' => 'Định dạng ngày bắt đầu không hợp lệ.',
+            'endDate.date_format' => 'Định dạng ngày kết thúc không hợp lệ.',
+            'endDate.date' => 'Ngày kết thúc không hợp lệ.',
+            'endDate.after_or_equal' => 'Ngày kết thúc phải là ngày đằng sau hoặc bằng ngày bắt đầu.',
+        ]);
     }
 }

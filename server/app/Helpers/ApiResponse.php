@@ -22,9 +22,12 @@ class ApiResponse
 
     public static function responseObject($data, $message = '', $code = 200)
     {
+        $showsql = DB::getQueryLog();
+
         $response = [
             'success' => true,
-            'data'    => $data
+            'data'    => $data,
+            'sql' => $showsql,
         ];
         if (!empty($message)) {
             $response['message'] = $message;
@@ -32,17 +35,20 @@ class ApiResponse
         return response()->json($response, $code);
     }
 
-    public static function responsePage($page, $message = '', $code = 200)
+    public static function responsepage($page, $message = '', $code = 200)
     {
+        $showsql = DB::getQueryLog();
+
         $response = [
             'success' => true,
             'data'    => $page->items(),
             'page' => [
-                'currentPage' => $page->currentPage(),
-                'totalPages' => $page->lastPage(),
-                'pageSize' => $page->perPage(),
+                'currentpage' => $page->currentpage(),
+                'totalpages' => $page->lastpage(),
+                'pagesize' => $page->perpage(),
                 'totalElements' => $page->total(),
-            ]
+            ],
+            'sql' => $showsql,
 
         ];
         if (!empty($message)) {
