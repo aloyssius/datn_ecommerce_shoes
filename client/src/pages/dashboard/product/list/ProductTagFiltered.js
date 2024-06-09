@@ -51,6 +51,7 @@ function labelPriceRange(range) {
 }
 
 ProductTagFiltered.propTypes = {
+  otherData: PropTypes.object,
   status: PropTypes.string,
   brands: PropTypes.arrayOf(PropTypes.string),
   categories: PropTypes.arrayOf(PropTypes.string),
@@ -64,6 +65,7 @@ ProductTagFiltered.propTypes = {
 };
 
 export default function ProductTagFiltered({
+  otherData,
   status,
   stocks,
   brands,
@@ -75,6 +77,14 @@ export default function ProductTagFiltered({
   isShowReset,
   onResetAll,
 }) {
+
+  const findBrandName = (id) => {
+    return otherData?.brands?.find((item) => item.id === id)?.name;
+  }
+
+  const findCategoryName = (id) => {
+    return otherData?.categories?.find((item) => item.id === id)?.name;
+  }
 
   return (
     <RootStyle>
@@ -112,9 +122,9 @@ export default function ProductTagFiltered({
           <Stack direction="row" flexWrap="wrap" sx={{ p: 0.75 }}>
             {categories.map((s) => (
               <Chip
-                key={s}
+                key={s.id}
                 deleteIcon={'ic:round-clear-all'}
-                label={s}
+                label={findCategoryName(s)}
                 color='primary'
                 size="small"
                 onDelete={() => onRemoveCategory(s)}
@@ -131,7 +141,7 @@ export default function ProductTagFiltered({
             {brands.map((s) => (
               <Chip
                 key={s}
-                label={s}
+                label={findBrandName(s)}
                 color='primary'
                 deleteIcon={'ic:round-clear-all'}
                 size="small"

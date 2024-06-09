@@ -19,7 +19,11 @@ import {
   Pagination,
   Typography,
 } from '@mui/material';
-import { All, VoucherTypeOption, OrderStatusTab, OrderTypeOption, ProductStatusTab, ProductStockOption } from '../../../../constants/enum';
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
+import { ADMIN_API } from '../../../../api/apiConfig';
+import useFetch from '../../../../hooks/useFetch';
+import { All, ProductStatusTab, ProductStockOption } from '../../../../constants/enum';
 // routes
 import { PATH_DASHBOARD } from '../../../../routes/paths';
 // hooks
@@ -49,12 +53,12 @@ const STOCK_OPTIONS = [
 ]
 
 const TABLE_HEAD = [
-  { id: 'product', label: 'Sản phẩm', align: 'left' },
+  { id: 'name', label: 'Sản phẩm', align: 'left' },
   { id: 'createdAt', label: 'Ngày tạo', align: 'left' },
-  { id: 'quantity', label: 'Số lượng tồn', align: 'left' },
+  { id: 'totalQuantity', label: 'Số lượng tồn', align: 'left' },
   { id: 'sku', label: 'SKU', align: 'left' },
   { id: 'status', label: 'Trạng thái', align: 'left' },
-  { id: 'action', label: 'Thao tác', align: 'left' },
+  { id: 'action', label: '', align: 'left' },
 ];
 
 // ----------------------------------------------------------------------
@@ -72,6 +76,8 @@ export default function ProductList() {
     onSelectRow,
     onSelectAllRows,
     onSort,
+    page,
+    onChangePage,
     onChangeRowsPerPage,
   } = useTable({});
 
@@ -83,18 +89,6 @@ export default function ProductList() {
     ]
   );
 
-  const [tableData, setTableData] = useState([
-    {
-      id: 1,
-      sku: '123123',
-      name: 'Nike Air Force 1 NDESTRUKT',
-      brand: 'Nike',
-      quantity: 50,
-      createdAt: '2023-10-20',
-      status: 'is_active',
-    },
-  ]);
-
   const [filterSearch, setFilterSearch] = useState('');
 
   const { currentTab: filterStatus, onChangeTab: onFilterStatus } = useTabs(All.EN);
@@ -104,8 +98,6 @@ export default function ProductList() {
   const [brandSelecteds, setBrandSelecteds] = useState([]);
 
   const [categorySelecteds, setCategorySelecteds] = useState([]);
-
-  const [foundLengthData, setFoundLengthData] = useState(0);
 
   const handleFilterSearch = (filterSearch) => {
     setFilterSearch(filterSearch);
@@ -148,8 +140,69 @@ export default function ProductList() {
     brandSelecteds.length === 0 &&
     filterStatus === All.EN;
 
+  const { data, totalElements, totalPages, setParams, fetchCount, statusCounts, otherData } = useFetch(ADMIN_API.product.all);
+
+  const convertedStockSelected = (stocks) => {
+    const converted = stocks.map(item => {
+      if (item === ProductStockOption.OUT_OF_STOCK) {
+        return '<=0';
+      } if (item === ProductStockOption.LOW_STOCK) {
+        return '<=10';
+      } if (item === ProductStockOption.IN_STOCK) {
+        return '>10';
+      }
+      return "";
+    });
+
+    const convertedStocks = converted.join(",");
+    return convertedStocks;
+  };
+
+  const handleFilter = () => {
+    const convertedBrandIds = brandSelecteds.join(",");
+    const convertedCategoryIds = categorySelecteds.join(",");
+    const params = {
+      currentPage: page,
+      pageSize: rowsPerPage,
+      search: filterSearch || null,
+      status: filterStatus !== All.EN ? filterStatus : null,
+      brandIds: brandSelecteds.length === 0 ? null : convertedBrandIds,
+      categoryIds: categorySelecteds.length === 0 ? null : convertedCategoryIds,
+      quantityConditions: stockSelecteds.length === 0 ? null : convertedStockSelected(stockSelecteds),
+    };
+    setParams(params);
+  }
+
+  useEffect(() => {
+    if (fetchCount > 0) {
+      handleFilter();
+    }
+  }, [page, rowsPerPage, filterSearch, filterStatus, categorySelecteds, brandSelecteds, stockSelecteds]);
+
+  useEffect(() => {
+    if (statusCounts) {
+
+      const updatedTabs = tabs.map(tab => {
+        let count = 0;
+        if (tab.value === All.EN) {
+          count = statusCounts.reduce((acc, curr) => acc + curr.count, 0);
+        } else {
+          const statusCount = statusCounts.find(item => item.status === tab.value);
+          count = statusCount ? statusCount.count : tab.count;
+        }
+
+        return {
+          ...tab,
+          count,
+        };
+      });
+
+      setTabs(updatedTabs);
+    }
+  }, [statusCounts]);
+
   const dataFiltered = applySortFilter({
-    tableData,
+    data,
     comparator: getComparator(order, orderBy),
   });
 
@@ -207,8 +260,8 @@ export default function ProductList() {
 
           <ProductTableToolbar
             optionsStock={STOCK_OPTIONS}
-            optionsCategory={STOCK_OPTIONS}
-            optionsBrand={STOCK_OPTIONS}
+            optionsCategory={otherData?.categories}
+            optionsBrand={otherData?.brands}
             filterSearch={filterSearch}
             filterCategory={categorySelecteds}
             filterBrand={brandSelecteds}
@@ -222,11 +275,8 @@ export default function ProductList() {
           {!isDefault &&
             <Stack sx={{ mb: 3, px: 2 }}>
               <>
-                <Typography sx={{ px: 1 }} variant="body2" gutterBottom>
-                  <strong>{foundLengthData}</strong>
-                  &nbsp; Sản phẩm được tìm thấy
-                </Typography>
                 <ProductTagFiltered
+                  otherData={otherData}
                   isShowReset={isDefault}
                   status={filterStatus}
                   stocks={stockSelecteds}
@@ -253,11 +303,11 @@ export default function ProductList() {
               {selected.length > 0 && (
                 <TableSelectedActions
                   numSelected={selected.length}
-                  rowCount={tableData.length}
+                  rowCount={totalElements}
                   onSelectAllRows={(checked) =>
                     onSelectAllRows(
                       checked,
-                      tableData.map((row) => row.id)
+                      data.map((row) => row.id)
                     )
                   }
                   actions={
@@ -277,13 +327,13 @@ export default function ProductList() {
                   order={order}
                   orderBy={orderBy}
                   headLabel={TABLE_HEAD}
-                  rowCount={tableData.length}
+                  rowCount={totalElements}
                   numSelected={selected.length}
                   onSort={onSort}
                   onSelectAllRows={(checked) =>
                     onSelectAllRows(
                       checked,
-                      tableData.map((row) => row.id)
+                      data.map((row) => row.id)
                     )
                   }
                 />
@@ -310,7 +360,7 @@ export default function ProductList() {
 
           <Box sx={{ position: 'relative', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', alignItems: 'center' }}>
             <TablePagination
-              rowsPerPageOptions={[5, 10, 25]}
+              rowsPerPageOptions={[10, 15, 25]}
               component="div"
               rowsPerPage={rowsPerPage}
               onRowsPerPageChange={onChangeRowsPerPage}
@@ -324,7 +374,9 @@ export default function ProductList() {
 
             <Pagination
               sx={{ px: 1 }}
-              count={10}
+              page={page}
+              count={totalPages}
+              onChange={onChangePage}
             />
           </Box>
         </Card>
@@ -336,10 +388,10 @@ export default function ProductList() {
 // ----------------------------------------------------------------------
 
 function applySortFilter({
-  tableData,
+  data,
   comparator,
 }) {
-  const stabilizedThis = tableData.map((el, index) => [el, index]);
+  const stabilizedThis = data.map((el, index) => [el, index]);
 
   stabilizedThis.sort((a, b) => {
     const order = comparator(a[0], b[0]);
@@ -347,9 +399,9 @@ function applySortFilter({
     return a[1] - b[1];
   });
 
-  tableData = stabilizedThis.map((el) => el[0]);
+  data = stabilizedThis.map((el) => el[0]);
 
-  return tableData;
+  return data;
 }
 
 // ----------------------------------------------------------------------

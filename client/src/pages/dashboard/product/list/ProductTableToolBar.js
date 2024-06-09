@@ -10,9 +10,9 @@ const FORM_CONTROL_WIDTH = 500;
 const MIN_FORM_CONTROL_WIDTH = 1;
 
 ProductTableToolbar.propTypes = {
-  optionsStock: PropTypes.arrayOf(PropTypes.string),
-  optionsBrand: PropTypes.arrayOf(PropTypes.string),
-  optionsCategory: PropTypes.arrayOf(PropTypes.string),
+  optionsStock: PropTypes.array,
+  optionsBrand: PropTypes.array,
+  optionsCategory: PropTypes.array,
   filterSearch: PropTypes.string,
   filterStock: PropTypes.arrayOf(PropTypes.string),
   onFilterSearch: PropTypes.func,
@@ -77,16 +77,19 @@ export default function ProductTableToolbar({
           value={filterCategory}
           onChange={onFilterCategory}
           input={<OutlinedInput label="Danh mục" />}
-          renderValue={(selected) => selected.join(', ')}
+          renderValue={(selected) => {
+            const selectedCategory = optionsCategory.filter(c => selected.includes(c.id));
+            return selectedCategory.map(c => c.name).join(', ');
+          }}
           sx={{
             maxWidth: { md: INPUT_WIDTH },
             textTransform: 'capitalize',
           }}
         >
-          {optionsCategory.map((s) => (
+          {optionsCategory?.map((category) => (
             <MenuItem
-              key={s}
-              value={s}
+              key={category.id}
+              value={category.id}
               sx={{
                 mx: 1,
                 my: 0.5,
@@ -96,8 +99,8 @@ export default function ProductTableToolbar({
                 padding: 0,
               }}
             >
-              <Checkbox size='small' checked={filterCategory.indexOf(s) > -1} />
-              {s}
+              <Checkbox size='small' checked={filterCategory.indexOf(category.id) > -1} />
+              {category.name}
             </MenuItem>
           ))}
         </Select>
@@ -110,16 +113,19 @@ export default function ProductTableToolbar({
           value={filterBrand}
           onChange={onFilterBrand}
           input={<OutlinedInput label="Thương hiệu" />}
-          renderValue={(selected) => selected.join(', ')}
+          renderValue={(selected) => {
+            const selectedBrands = optionsBrand.filter(brand => selected.includes(brand.id));
+            return selectedBrands.map(brand => brand.name).join(', ');
+          }}
           sx={{
             maxWidth: { md: INPUT_WIDTH },
             textTransform: 'capitalize',
           }}
         >
-          {optionsBrand.map((s) => (
+          {optionsBrand?.map((brand) => (
             <MenuItem
-              key={s}
-              value={s}
+              key={brand.id}
+              value={brand.id}
               sx={{
                 mx: 1,
                 my: 0.5,
@@ -129,8 +135,8 @@ export default function ProductTableToolbar({
                 padding: 0,
               }}
             >
-              <Checkbox size='small' checked={filterBrand.indexOf(s) > -1} />
-              {s}
+              <Checkbox size='small' checked={filterBrand.indexOf(brand.id) > -1} />
+              {brand.name}
             </MenuItem>
           ))}
         </Select>
