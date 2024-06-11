@@ -1,7 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\Bills\BillController;
-use App\Http\Controllers\Api\Accounts\AccountController;
+use App\Http\Controllers\Api\Accounts\CustomerController;
+use App\Http\Controllers\Api\Accounts\EmpolyeeController;
 use App\Http\Controllers\Api\Vouchers\VoucherController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;

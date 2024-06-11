@@ -22,6 +22,7 @@ class AccountResource extends JsonResource
             'birthDate' => $this->birth_date,
             'gender' =>  $this->gender,
             'status' => $this->status,
+            'role' => $this->role,
             'createdAt' => $this->created_at,
         ];
     }
@@ -41,6 +42,7 @@ class AccountResource extends JsonResource
             'gender',
             'status',
             'created_at',
+            'role'
         ];
     }
 }

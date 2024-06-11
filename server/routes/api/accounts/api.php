@@ -1,6 +1,7 @@
 <?php
 
-use App\Http\Controllers\Api\Accounts\AccountController;
+use App\Http\Controllers\Api\Accounts\CustomerController;
+use App\Http\Controllers\Api\Accounts\EmpolyeeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -16,5 +17,9 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::middleware('api')->group(function () {
-    Route::get('/accounts', [AccountController::class, 'index']);
+    Route::get('/accounts/customer', [CustomerController::class, 'index']);
+});
+
+Route::middleware('api')->group(function () {
+    Route::get('/accounts/employee', [EmpolyeeController::class, 'index']);
 });

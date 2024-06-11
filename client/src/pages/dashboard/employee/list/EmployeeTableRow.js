@@ -63,7 +63,7 @@ export default function EmployeTableRow({ row, selected, onSelectRow, onEditRow,
 
       <TableCell align="left">{birthDate}</TableCell>
 
-      <TableCell align="left">{gender}</TableCell>
+      <TableCell align="left">{gender === 0 ? 'Nam' : 'Nữ'}</TableCell>
 
       <TableCell align="left">
         <Label

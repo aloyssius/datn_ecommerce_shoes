@@ -128,6 +128,7 @@ export default function CustomerList() {
   const { data, totalElements, totalPages, setParams, fetchCount, statusCounts, otherData } = useFetch(ADMIN_API.customer.all);
 
   const handleFilter = () => {
+
     let gender;
     if (filterGender === AccountGenderOption.vi.MEN) {
       gender = 0;

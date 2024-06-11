@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 // @mui
 import {
@@ -19,6 +19,10 @@ import {
   TablePagination,
   Pagination,
 } from '@mui/material';
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
+import { ADMIN_API } from '../../../../api/apiConfig';
+import useFetch from '../../../../hooks/useFetch';
 import { All, AccountGenderOption, AccountStatusTab } from '../../../../constants/enum';
 // routes
 import { PATH_DASHBOARD } from '../../../../routes/paths';
@@ -72,6 +76,8 @@ export default function EmployeeList() {
     onSelectAllRows,
     onSort,
     rowsPerPage,
+    page,
+    onChangePage,
     onChangeRowsPerPage,
   } = useTable({});
 
@@ -121,8 +127,59 @@ export default function EmployeeList() {
     navigate(PATH_DASHBOARD.account.employee.edit(id));
   };
 
+  const { data, totalElements, totalPages, setParams, fetchCount, statusCounts, otherData } = useFetch(ADMIN_API.employee.all);
+
+  const handleFilter = () => {
+
+    let gender;
+    if (filterGender === AccountGenderOption.vi.MEN) {
+      gender = 0;
+    } else if (filterGender === AccountGenderOption.vi.WOMEN) {
+      gender = 1;
+    } else {
+      gender = null;
+    }
+
+    const params = {
+      currentPage: page,
+      pageSize: rowsPerPage,
+      search: filterSearch || null,
+      status: filterStatus !== All.EN ? filterStatus : null,
+      gender,
+    };
+    setParams(params);
+  }
+
+  useEffect(() => {
+    if (fetchCount > 0) {
+      handleFilter();
+    }
+  }, [page, rowsPerPage, filterSearch, filterStatus, filterGender]);
+
+  useEffect(() => {
+    if (statusCounts) {
+
+      const updatedTabs = tabs.map(tab => {
+        let count = 0;
+        if (tab.value === All.EN) {
+          count = statusCounts.reduce((acc, curr) => acc + curr.count, 0);
+        } else {
+          const statusCount = statusCounts.find(item => item.status === tab.value);
+          count = statusCount ? statusCount.count : tab.count;
+        }
+
+        return {
+          ...tab,
+          count,
+        };
+      });
+
+      setTabs(updatedTabs);
+    }
+  }, [statusCounts]);
+
   const dataFiltered = applySortFilter({
-    tableData,
+    data,
     comparator: getComparator(order, orderBy),
   });
 
@@ -132,7 +189,7 @@ export default function EmployeeList() {
         <HeaderBreadcrumbs
           heading="Danh sách nhân viên"
           links={[
-            { name: 'Quản lý nhân viên', href: PATH_DASHBOARD.account.customer.list },
+            { name: 'Quản lý nhân viên', href: PATH_DASHBOARD.account.employee.list },
             { name: 'Danh sách nhân viên' },
           ]}
           action={
@@ -225,11 +282,11 @@ export default function EmployeeList() {
               {selected.length > 0 && (
                 <TableSelectedActions
                   numSelected={selected.length}
-                  rowCount={tableData.length}
+                  rowCount={totalElements}
                   onSelectAllRows={(checked) =>
                     onSelectAllRows(
                       checked,
-                      tableData.map((row) => row.id)
+                      data.map((row) => row.id)
                     )
                   }
                   actions={
@@ -249,13 +306,13 @@ export default function EmployeeList() {
                   order={order}
                   orderBy={orderBy}
                   headLabel={TABLE_HEAD}
-                  rowCount={tableData.length}
+                  rowCount={totalElements}
                   numSelected={selected.length}
                   onSort={onSort}
                   onSelectAllRows={(checked) =>
                     onSelectAllRows(
                       checked,
-                      tableData.map((row) => row.id)
+                      data.map((row) => row.id)
                     )
                   }
                 />
@@ -296,7 +353,9 @@ export default function EmployeeList() {
 
             <Pagination
               sx={{ px: 1 }}
-              count={10}
+              page={page}
+              count={totalPages}
+              onChange={onChangePage}
             />
           </Box>
         </Card>
@@ -309,10 +368,10 @@ export default function EmployeeList() {
 // ----------------------------------------------------------------------
 
 function applySortFilter({
-  tableData,
+  data,
   comparator,
 }) {
-  const stabilizedThis = tableData.map((el, index) => [el, index]);
+  const stabilizedThis = data.map((el, index) => [el, index]);
 
   stabilizedThis.sort((a, b) => {
     const order = comparator(a[0], b[0]);
@@ -320,8 +379,8 @@ function applySortFilter({
     return a[1] - b[1];
   });
 
-  tableData = stabilizedThis.map((el) => el[0]);
+  data = stabilizedThis.map((el) => el[0]);
 
-  return tableData;
+  return data;
 }
 

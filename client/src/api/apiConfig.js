@@ -12,14 +12,23 @@ export const ADMIN_API = {
     put: (id) => path(ROOTS_API, `/bills/${id}`),
     details: (id) => path(ROOTS_API, `/bills/${id}`),
   },
+
   product: {
     all: path(ROOTS_API, '/products'),
     // post: path(ROOTS_API, '/bills'),
     // put: (id) => path(ROOTS_API, `/bills/${id}`),
     // details: (id) => path(ROOTS_API, `/bills/${id}`),
   },
+
   customer: {
-    all: path(ROOTS_API, '/accounts'),
+    all: path(ROOTS_API, '/accounts/customer'),
+    // post: path(ROOTS_API, '/bills'),
+    // put: (id) => path(ROOTS_API, `/bills/${id}`),
+    // details: (id) => path(ROOTS_API, `/bills/${id}`),
+  },
+
+  employee: {
+    all: path(ROOTS_API, '/accounts/employee'),
     // post: path(ROOTS_API, '/bills'),
     // put: (id) => path(ROOTS_API, `/bills/${id}`),
     // details: (id) => path(ROOTS_API, `/bills/${id}`),
