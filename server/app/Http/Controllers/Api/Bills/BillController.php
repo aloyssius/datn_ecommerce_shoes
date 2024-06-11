@@ -15,7 +15,6 @@ class BillController extends Controller
 {
     public function index(BillRequest $req)
     {
-        DB::enableQueryLog();
 
         $bills = Bill::select(BillResource::fields());
 
@@ -50,7 +49,7 @@ class BillController extends Controller
         QueryHelper::buildOrderBy($bills, 'created_at', 'desc');
         $bills = QueryHelper::buildPagination($bills, $req);
 
-        return ApiResponse::responsePage(BillResource::collection($bills), $statusCounts, null);
+        return ApiResponse::responsePage(BillResource::collection($bills), $statusCounts);
     }
 
     public function show($id)
