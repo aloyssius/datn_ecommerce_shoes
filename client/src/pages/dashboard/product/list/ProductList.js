@@ -43,6 +43,7 @@ import { TableEmptyRows, TableHeadCustom, TableNoData, TableSelectedActions } fr
 import ProductTableRow from './ProductTableRow';
 import ProductTableToolbar from './ProductTableToolBar';
 import ProductTagFiltered from './ProductTagFiltered';
+import { convertedtArr } from '../../../../utils/convertArray';
 
 // ----------------------------------------------------------------------
 
@@ -53,10 +54,10 @@ const STOCK_OPTIONS = [
 ]
 
 const TABLE_HEAD = [
+  { id: 'sku', label: 'Mã SKU', align: 'left'},
   { id: 'name', label: 'Sản phẩm', align: 'left' },
   { id: 'createdAt', label: 'Ngày tạo', align: 'left' },
   { id: 'totalQuantity', label: 'Số lượng tồn', align: 'left' },
-  { id: 'sku', label: 'SKU', align: 'left' },
   { id: 'status', label: 'Trạng thái', align: 'left' },
   { id: 'action', label: '', align: 'left' },
 ];
@@ -140,7 +141,7 @@ export default function ProductList() {
     brandSelecteds.length === 0 &&
     filterStatus === All.EN;
 
-  const { data, totalElements, totalPages, setParams, fetchCount, statusCounts, otherData } = useFetch(ADMIN_API.product.all);
+  const { data, totalElements, totalPages, setParams, fetchCount, statusCounts, otherData, loading } = useFetch(ADMIN_API.product.all);
 
   const convertedStockSelected = (stocks) => {
     const converted = stocks.map(item => {
@@ -154,21 +155,18 @@ export default function ProductList() {
       return "";
     });
 
-    const convertedStocks = converted.join(",");
-    return convertedStocks;
+    return converted;
   };
 
   const handleFilter = () => {
-    const convertedBrandIds = brandSelecteds.join(",");
-    const convertedCategoryIds = categorySelecteds.join(",");
     const params = {
       currentPage: page,
       pageSize: rowsPerPage,
       search: filterSearch || null,
       status: filterStatus !== All.EN ? filterStatus : null,
-      brandIds: brandSelecteds.length === 0 ? null : convertedBrandIds,
-      categoryIds: categorySelecteds.length === 0 ? null : convertedCategoryIds,
-      quantityConditions: stockSelecteds.length === 0 ? null : convertedStockSelected(stockSelecteds),
+      brandIds: brandSelecteds.length === 0 ? null : convertedtArr(brandSelecteds),
+      categoryIds: categorySelecteds.length === 0 ? null : convertedtArr(categorySelecteds),
+      quantityConditions: stockSelecteds.length === 0 ? null : convertedtArr(convertedStockSelected(stockSelecteds)),
     };
     setParams(params);
   }
@@ -300,42 +298,12 @@ export default function ProductList() {
 
           <Scrollbar>
             <TableContainer sx={{ minWidth: 800, position: 'relative' }}>
-              {selected.length > 0 && (
-                <TableSelectedActions
-                  numSelected={selected.length}
-                  rowCount={totalElements}
-                  onSelectAllRows={(checked) =>
-                    onSelectAllRows(
-                      checked,
-                      data.map((row) => row.id)
-                    )
-                  }
-                  actions={
-                    <Stack spacing={1} direction="row">
-                      <Tooltip title="Delete">
-                        <IconButton color="primary">
-                          <Iconify icon={'eva:trash-2-outline'} />
-                        </IconButton>
-                      </Tooltip>
-                    </Stack>
-                  }
-                />
-              )}
-
               <Table>
                 <TableHeadCustom
                   order={order}
                   orderBy={orderBy}
                   headLabel={TABLE_HEAD}
-                  rowCount={totalElements}
-                  numSelected={selected.length}
                   onSort={onSort}
-                  onSelectAllRows={(checked) =>
-                    onSelectAllRows(
-                      checked,
-                      data.map((row) => row.id)
-                    )
-                  }
                 />
 
                 <TableBody>

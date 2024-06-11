@@ -23,8 +23,6 @@ import { convertProductStatus } from '../../../../utils/ConvertEnum';
 
 ProductTableRow.propTypes = {
   row: PropTypes.object.isRequired,
-  selected: PropTypes.bool,
-  onSelectRow: PropTypes.func,
   onEditRow: PropTypes.func,
 };
 const BorderLinearProgress = ({ value }) => {
@@ -53,7 +51,7 @@ const BorderLinearProgress = ({ value }) => {
 };
 
 
-export default function ProductTableRow({ row, selected, onSelectRow, onEditRow }) {
+export default function ProductTableRow({ row, onEditRow }) {
   const theme = useTheme();
 
   const { sku, name, brand, image, createdAt, totalQuantity, status, stockStatus } = row;
@@ -63,9 +61,14 @@ export default function ProductTableRow({ row, selected, onSelectRow, onEditRow 
   const formattedTime = format(parsedDateTime, 'HH:mm');
 
   return (
-    <TableRow hover selected={selected}>
-      <TableCell padding="checkbox">
-        <Checkbox checked={selected} onClick={onSelectRow} />
+    <TableRow hover>
+
+      <TableCell align="left">
+        <Stack>
+          <Link noWrap variant="subtitle2" onClick={onEditRow} sx={{ color: 'black', cursor: 'pointer' }}>
+            {`#${sku}`}
+          </Link>
+        </Stack>
       </TableCell>
 
       <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
@@ -100,19 +103,9 @@ export default function ProductTableRow({ row, selected, onSelectRow, onEditRow 
           </Typography>
           <Typography noWrap variant="body2" sx={{ color: '#696969	', fontSize: '12px', marginTop: 1 }}>
             {`${totalQuantity} (${stockStatus})`}
-
           </Typography>
         </Stack>
       </TableCell>
-
-      <TableCell align="left">
-        <Stack>
-          <Typography variant="subtitle2" noWrap>
-            {sku}
-          </Typography>
-        </Stack>
-      </TableCell>
-
 
       <TableCell align="left">
         <Label

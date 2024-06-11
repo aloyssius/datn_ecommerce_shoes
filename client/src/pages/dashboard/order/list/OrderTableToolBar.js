@@ -1,14 +1,15 @@
+import { useState, useEffect } from "react";
 import PropTypes from 'prop-types';
-import { Stack, InputAdornment, TextField, MenuItem, Button } from '@mui/material';
+import { Stack, InputAdornment, TextField } from '@mui/material';
 import DatePicker from '@mui/lab/DatePicker';
 // components
 import Iconify from '../../../../components/Iconify';
+import useDebounce from "../../../../hooks/useDebounce";
 // ----------------------------------------------------------------------
 
 const INPUT_WIDTH = 200;
 
 OrderTableToolbar.propTypes = {
-  filterSearch: PropTypes.string,
   filterStartDate: PropTypes.instanceOf(Date),
   filterEndDate: PropTypes.instanceOf(Date),
   onFilterSearch: PropTypes.func,
@@ -17,13 +18,21 @@ OrderTableToolbar.propTypes = {
 };
 
 export default function OrderTableToolbar({
-  filterSearch,
   filterStartDate,
   filterEndDate,
   onFilterSearch,
   onFilterStartDate,
   onFilterEndDate,
 }) {
+
+  const [filterSearch, setFilterSearch] = useState('');
+
+  const debounceValue = useDebounce(filterSearch, 500);
+
+  useEffect(() => {
+    onFilterSearch(debounceValue);
+  }, [debounceValue]);
+
   return (
     <Stack spacing={2} direction={{ xs: 'column', md: 'row' }} sx={{ py: 2.5, px: 2 }}>
 
@@ -62,7 +71,7 @@ export default function OrderTableToolbar({
       <TextField
         fullWidth
         value={filterSearch}
-        onChange={(event) => onFilterSearch(event.target.value)}
+        onChange={(event) => { setFilterSearch(event.target.value) }}
         placeholder="Tìm kiếm theo mã đơn hàng hoặc khách hàng..."
         InputProps={{
           startAdornment: (
@@ -75,3 +84,4 @@ export default function OrderTableToolbar({
     </Stack>
   );
 }
+

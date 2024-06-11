@@ -18,8 +18,10 @@ axiosInstance.interceptors.response.use(
 );
 
 export const apiGet = (url, params) => {
-  return axiosInstance.get(url, { params })
-}
+  return axiosInstance.get(url, {
+    params,
+  });
+};
 
 export const apiPost = (url, data) => {
   return axiosInstance.post(url, data);

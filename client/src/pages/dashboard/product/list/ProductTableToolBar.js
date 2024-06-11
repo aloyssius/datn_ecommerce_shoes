@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import PropTypes from 'prop-types';
 import { Stack, FormControlLabel, InputAdornment, TextField, MenuItem, Button, FormControl, InputLabel, Select, Checkbox, ListItemText, OutlinedInput, Chip } from '@mui/material';
 import DatePicker from '@mui/lab/DatePicker';
@@ -13,7 +14,6 @@ ProductTableToolbar.propTypes = {
   optionsStock: PropTypes.array,
   optionsBrand: PropTypes.array,
   optionsCategory: PropTypes.array,
-  filterSearch: PropTypes.string,
   filterStock: PropTypes.arrayOf(PropTypes.string),
   onFilterSearch: PropTypes.func,
   onFilterStock: PropTypes.func,
@@ -25,7 +25,6 @@ export default function ProductTableToolbar({
   optionsStock,
   optionsBrand,
   optionsCategory,
-  filterSearch,
   filterStock,
   filterBrand,
   filterCategory,
@@ -34,6 +33,14 @@ export default function ProductTableToolbar({
   onFilterBrand,
   onFilterCategory,
 }) {
+
+  const [filterSearch, setFilterSearch] = useState('');
+
+  const debounceValue = useDebounce(filterSearch, 500);
+
+  useEffect(() => {
+    onFilterSearch(debounceValue);
+  }, [debounceValue]);
 
   return (
     <Stack spacing={2} direction={{ xs: 'column', md: 'row' }} sx={{ py: 2.5, px: 2 }}>
@@ -145,7 +152,7 @@ export default function ProductTableToolbar({
       <TextField
         fullWidth
         value={filterSearch}
-        onChange={(event) => onFilterSearch(event.target.value)}
+        onChange={(event) => { setFilterSearch(event.target.value) }}
         placeholder="Tìm kiếm sản phẩm..."
         InputProps={{
           startAdornment: (
@@ -157,4 +164,17 @@ export default function ProductTableToolbar({
       />
     </Stack>
   );
+}
+function useDebounce(cb, delay) {
+  const [debounceValue, setDebounceValue] = useState(cb);
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebounceValue(cb);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [cb, delay]);
+  return debounceValue;
 }
