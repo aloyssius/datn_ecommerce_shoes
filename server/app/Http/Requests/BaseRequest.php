@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Constants\ConstantSystem;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Contracts\Validation\Validator;
@@ -23,28 +24,34 @@ class BaseRequest extends FormRequest
      */
     public function rules(): array
     {
-        $currentPage = $this->input('currentPage', 1);
-        $pageSize = $this->input('pageSize', 10);
-
-        $this->merge([
-            'currentPage' => $currentPage,
-            'pageSize' => $pageSize,
-        ]);
+        $this->merge($this->defaultRequest());
 
         return [
             'currentPage' => 'integer|min:1',
-            'pageSize' => 'integer|min:1|max:25',
+            'pageSize' => 'integer|min:10|max:25',
         ];
     }
+
+    protected function defaultRequest()
+    {
+        $currentPage = $this->input('currentPage', ConstantSystem::CURRENT_PAGE);
+        $pageSize = $this->input('pageSize', ConstantSystem::PAGE_SIZE);
+
+        return [
+            'currentPage' => $currentPage,
+            'pageSize' => $pageSize,
+        ];
+    }
+
     public function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(response()->json([
             'success'   => false,
+            'status'   => 422,
             'message'   => 'Lỗi xác thực',
-            'data'      => $validator->errors()
-        ]));
+            'error'      => $validator->errors()->first()
+        ], 422));
     }
-
 
     public function messages()
     {
@@ -52,7 +59,7 @@ class BaseRequest extends FormRequest
             'currentPage.integer' => 'Trang hiện tại phải là số.',
             'currentPage.min' => 'Trang hiện tại phải có ít nhất là 1.',
             'pageSize.integer' => 'Kích thước trang phải là số nguyên.',
-            'pageSize.min' => 'Kích thước trang phải ít nhất là 1.',
+            'pageSize.min' => 'Kích thước trang phải ít nhất là 10.',
             'pageSize.max' => 'Kích thước trang không được lớn hơn 25.',
         ];
     }

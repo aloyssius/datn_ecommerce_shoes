@@ -3,8 +3,7 @@ import { useState } from 'react';
 // @mui
 import { useTheme } from '@mui/material/styles';
 import { Tooltip, Checkbox, IconButton, TableRow, TableCell, Typography, Stack, Link, MenuItem } from '@mui/material';
-import { AccountGenderOptions, AccountStatusTab } from '../../../../constants/enum';
-// utils
+import { AccountGenderOption, AccountStatusTab } from '../../../../constants/enum';
 import { fDate } from '../../../../utils/formatTime';
 import createAvatar from '../../../../utils/createAvatar';
 import { fCurrency } from '../../../../utils/formatNumber';

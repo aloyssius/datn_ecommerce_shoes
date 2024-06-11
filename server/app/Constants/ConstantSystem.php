@@ -13,4 +13,7 @@ class ConstantSystem
     const EMAIL_MAX_LENGTH = 254;
     const IDENTITY_CARD_MAX_LENGTH = 12;
     const URL_MAX_LENGTH = 2048;
+
+    const CURRENT_PAGE = 1;
+    const PAGE_SIZE = 10;
 }
