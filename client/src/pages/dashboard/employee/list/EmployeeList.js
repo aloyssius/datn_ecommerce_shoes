@@ -339,7 +339,7 @@ export default function EmployeeList() {
 
           <Box sx={{ position: 'relative', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', alignItems: 'center' }}>
             <TablePagination
-              rowsPerPageOptions={[5, 10, 25]}
+              rowsPerPageOptions={[10, 15, 25]}
               component="div"
               rowsPerPage={rowsPerPage}
               onRowsPerPageChange={onChangeRowsPerPage}

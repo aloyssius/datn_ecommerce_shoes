@@ -19,6 +19,10 @@ import {
   Pagination,
   Typography,
 } from '@mui/material';
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
+import { ADMIN_API } from '../../../../api/apiConfig';
+import useFetch from '../../../../hooks/useFetch';
 import { All, VoucherTypeOption, DiscountStatusTab } from '../../../../constants/enum';
 // routes
 import { PATH_DASHBOARD } from '../../../../routes/paths';
@@ -42,17 +46,18 @@ import PromotionTagFiltered from './PromotionTagFiltered';
 
 // ----------------------------------------------------------------------
 
+
 const TABLE_HEAD = [
   { id: 'name', label: 'Tên', align: 'left' },
   { id: 'value', label: 'Giá trị', align: 'left' },
-  { id: 'dateTime', label: 'Thời gian', align: 'left' },
+  { id: 'createdAt', label: 'Thời gian', align: 'left' },
   { id: 'status', label: 'Trạng Thái', align: 'left' },
-  { id: 'action', label: 'Thao tác', align: 'left' },
+  { id: 'action', label: '', align: 'left' },
 ];
 
 // ----------------------------------------------------------------------
 
-export default function VoucherList() {
+export default function PromotionList() {
   const { themeStretch } = useSettings();
 
   const navigate = useNavigate();
@@ -65,6 +70,8 @@ export default function VoucherList() {
     onSelectAllRows,
     onSort,
     rowsPerPage,
+    page,
+    onChangePage,
     onChangeRowsPerPage,
   } = useTable({});
 
@@ -85,46 +92,6 @@ export default function VoucherList() {
       value: 500000,
       dateTime: '17/05/2023 - 18/05/2024',
       status: 'ACTIVE',
-    },
-    {
-      id: 2,
-      code: '113123',
-      name: 'ABCD',
-      value: 100000,
-      dateTime: '17/05/2023 - 18/05/2024',
-      status: 'ACTIVE',
-    },
-    {
-      id: 3,
-      code: '1231234',
-      name: 'ABCC',
-      value: 400000,
-      dateTime: '17/05/2023 - 18/05/2024',
-      status: 'ACTIVE',
-    },
-    {
-      id: 4,
-      code: '1231235',
-      name: 'ABCK',
-      value: 300000,
-      dateTime: '17/05/2023 - 18/05/2024',
-      status: 'up_comming',
-    },
-    {
-      id: 5,
-      code: '1231239',
-      name: 'ABCL',
-      value: 200000,
-      dateTime: '17/05/2023 - 18/05/2024',
-      status: 'finished',
-    },
-    {
-      id: 6,
-      code: '1231231',
-      name: 'ABCQ',
-      value: 600000,
-      dateTime: '17/05/2023 - 18/05/2024',
-      status: 'on_going',
     },
   ]);
 
@@ -148,11 +115,52 @@ export default function VoucherList() {
   };
 
   const handleEditRow = (id) => {
-    navigate(PATH_DASHBOARD.discount.voucher.edit(id));
+    navigate(PATH_DASHBOARD.discount.promotion.edit(id));
   };
 
+  const { data, totalElements, totalPages, setParams, fetchCount, statusCounts, otherData } = useFetch(ADMIN_API.promotion.all);
+
+  const handleFilter = () => {
+
+    const params = {
+      currentPage: page,
+      pageSize: rowsPerPage,
+      search: filterSearch || null,
+      status: filterStatus !== All.EN ? filterStatus : null,
+    };
+    setParams(params);
+  }
+
+  useEffect(() => {
+    if (fetchCount > 0) {
+      handleFilter();
+    }
+  }, [page, rowsPerPage, filterSearch, filterStatus]);
+
+  useEffect(() => {
+    if (statusCounts) {
+
+      const updatedTabs = tabs.map(tab => {
+        let count = 0;
+        if (tab.value === All.EN) {
+          count = statusCounts.reduce((acc, curr) => acc + curr.count, 0);
+        } else {
+          const statusCount = statusCounts.find(item => item.status === tab.value);
+          count = statusCount ? statusCount.count : tab.count;
+        }
+
+        return {
+          ...tab,
+          count,
+        };
+      });
+
+      setTabs(updatedTabs);
+    }
+  }, [statusCounts]);
+
   const dataFiltered = applySortFilter({
-    tableData,
+    data,
     comparator: getComparator(order, orderBy),
   });
 
@@ -263,11 +271,11 @@ export default function VoucherList() {
               {selected.length > 0 && (
                 <TableSelectedActions
                   numSelected={selected.length}
-                  rowCount={tableData.length}
+                  rowCount={totalElements}
                   onSelectAllRows={(checked) =>
                     onSelectAllRows(
                       checked,
-                      tableData.map((row) => row.id)
+                      data.map((row) => row.id)
                     )
                   }
                   actions={
@@ -287,13 +295,13 @@ export default function VoucherList() {
                   order={order}
                   orderBy={orderBy}
                   headLabel={TABLE_HEAD}
-                  rowCount={tableData.length}
+                  rowCount={totalElements}
                   numSelected={selected.length}
                   onSort={onSort}
                   onSelectAllRows={(checked) =>
                     onSelectAllRows(
                       checked,
-                      tableData.map((row) => row.id)
+                      data.map((row) => row.id)
                     )
                   }
                 />
@@ -319,7 +327,7 @@ export default function VoucherList() {
 
           <Box sx={{ position: 'relative', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', alignItems: 'center' }}>
             <TablePagination
-              rowsPerPageOptions={[5, 10, 25]}
+              rowsPerPageOptions={[10, 15, 25]}
               component="div"
               rowsPerPage={rowsPerPage}
               onRowsPerPageChange={onChangeRowsPerPage}
@@ -333,7 +341,9 @@ export default function VoucherList() {
 
             <Pagination
               sx={{ px: 1 }}
-              count={10}
+              page={page}
+              count={totalPages}
+              onChange={onChangePage}
             />
           </Box>
         </Card>
@@ -345,10 +355,10 @@ export default function VoucherList() {
 // ----------------------------------------------------------------------
 
 function applySortFilter({
-  tableData,
+  data,
   comparator,
 }) {
-  const stabilizedThis = tableData.map((el, index) => [el, index]);
+  const stabilizedThis = data.map((el, index) => [el, index]);
 
   stabilizedThis.sort((a, b) => {
     const order = comparator(a[0], b[0]);
@@ -356,9 +366,9 @@ function applySortFilter({
     return a[1] - b[1];
   });
 
-  tableData = stabilizedThis.map((el) => el[0]);
+  data = stabilizedThis.map((el) => el[0]);
 
-  return tableData;
+  return data;
 }
 
 // ----------------------------------------------------------------------

@@ -48,7 +48,6 @@ class ApiResponse
                 'pageSize' => $page->perPage(),
                 'totalElements' => $page->total(),
             ],
-            'otherData'    => $otherData,
             'sql' => $showSql,
 
         ];
@@ -61,7 +60,7 @@ class ApiResponse
         }
 
         if ($otherData) {
-            $response['otherData'] = $statusCounts;
+            $response['otherData'] = $otherData;
         }
 
         return response()->json($response, $code);

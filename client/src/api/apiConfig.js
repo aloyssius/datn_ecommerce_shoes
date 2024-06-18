@@ -20,6 +20,13 @@ export const ADMIN_API = {
     // details: (id) => path(ROOTS_API, `/bills/${id}`),
   },
 
+  promotion: {
+    all: path(ROOTS_API, '/promotions'),
+    // post: path(ROOTS_API, '/bills'),
+    // put: (id) => path(ROOTS_API, `/bills/${id}`),
+    // details: (id) => path(ROOTS_API, `/bills/${id}`),
+  },
+
   customer: {
     all: path(ROOTS_API, '/accounts/customer'),
     // post: path(ROOTS_API, '/bills'),

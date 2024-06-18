@@ -3,10 +3,10 @@
 namespace App\Http\Requests;
 
 use App\Constants\CommonStatus;
-use App\Constants\Role;
+use App\Constants\DiscountStatus;
 use Illuminate\Validation\Rule;
 
-class AccountRequest extends BaseRequest
+class PromotionRequest extends BaseRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,12 +26,8 @@ class AccountRequest extends BaseRequest
         return array_merge(parent::rules(), [
             'search' => 'string|nullable',
             'status' => [
-                Rule::in(CommonStatus::toArray()), 'nullable'
+                Rule::in(DiscountStatus::toArray()), 'nullable'
             ],
-            'gender' => 'boolean|nullable',
-            'role' => [
-                Rule::in(Role::toArray()), 'nullable'
-            ]
         ]);
     }
 
@@ -39,8 +35,7 @@ class AccountRequest extends BaseRequest
     {
 
         return array_merge(parent::messages(), [
-            'status.in' => 'Trạng thái tài khoản không hợp lệ.',
-            'role.in' => 'Trạng thái tài khoản không hợp lệ.',
+            'status.in' => 'Trạng thái khuyến mãi không hợp lệ.',
         ]);
     }
 }
