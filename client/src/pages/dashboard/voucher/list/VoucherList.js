@@ -19,6 +19,10 @@ import {
   Pagination,
   Typography,
 } from '@mui/material';
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
+import { ADMIN_API } from '../../../../api/apiConfig';
+import useFetch from '../../../../hooks/useFetch';
 import { All, VoucherTypeOption, DiscountStatusTab } from '../../../../constants/enum';
 // routes
 import { PATH_DASHBOARD } from '../../../../routes/paths';
@@ -54,7 +58,7 @@ const TABLE_HEAD = [
   { id: 'type', label: 'Loại', align: 'left' },
   { id: 'value', label: 'Giá trị', align: 'left' },
   { id: 'quantity', label: 'Số lượng', align: 'left' },
-  { id: 'dateTime', label: 'Thời gian', align: 'left' },
+  { id: 'startTime', label: 'Thời gian', align: 'left' },
   { id: 'status', label: 'Trạng Thái', align: 'left' },
   { id: 'action', label: 'Thao tác', align: 'center' },
 ];
@@ -74,6 +78,8 @@ export default function VoucherList() {
     onSelectAllRows,
     onSort,
     rowsPerPage,
+    page,
+    onChangePage,
     onChangeRowsPerPage,
   } = useTable({});
 
@@ -161,11 +167,62 @@ export default function VoucherList() {
 
   const [foundLengthData, setFoundLengthData] = useState(0);
 
+  let type;
+    if (filterType === VoucherTypeOption.en.PUBLIC) {
+      type = 'public';
+    } else if (filterType === VoucherTypeOption.en.PRIVATE) {
+      type= 'private';
+    } else {
+      type= null;
+    }
+
   const isDefault =
     filterStartDate === null &&
     filterEndDate === null &&
     filterStatus === All.EN &&
     filterType === All.EN;
+
+    const { data, totalElements, totalPages, setParams, fetchCount, statusCounts, otherData } = useFetch(ADMIN_API.voucher.all);
+
+  
+    const handleFilter = () => {
+      const params = {
+        currentPage: page,
+        pageSize: rowsPerPage,
+        search: filterSearch || null,
+        status: filterStatus !== All.EN ? filterStatus : null,
+        type
+      };
+      setParams(params);
+    }
+  
+    useEffect(() => {
+      if (fetchCount > 0) {
+        handleFilter();
+      }
+    }, [page, rowsPerPage, filterSearch, filterStatus, filterType]);
+  
+    useEffect(() => {
+      if (statusCounts) {
+  
+        const updatedTabs = tabs.map(tab => {
+          let count = 0;
+          if (tab.value === All.EN) {
+            count = statusCounts.reduce((acc, curr) => acc + curr.count, 0);
+          } else {
+            const statusCount = statusCounts.find(item => item.status === tab.value);
+            count = statusCount ? statusCount.count : tab.count;
+          }
+  
+          return {
+            ...tab,
+            count,
+          };
+        });
+  
+        setTabs(updatedTabs);
+      }
+    }, [statusCounts]);
 
   const handleFilterSearch = (filterSearch) => {
     setFilterSearch(filterSearch);
@@ -180,7 +237,7 @@ export default function VoucherList() {
   };
 
   const dataFiltered = applySortFilter({
-    tableData,
+    data,
     comparator: getComparator(order, orderBy),
   });
 
@@ -297,11 +354,11 @@ export default function VoucherList() {
               {selected.length > 0 && (
                 <TableSelectedActions
                   numSelected={selected.length}
-                  rowCount={tableData.length}
+                  rowCount={data.length}
                   onSelectAllRows={(checked) =>
                     onSelectAllRows(
                       checked,
-                      tableData.map((row) => row.id)
+                      data.map((row) => row.id)
                     )
                   }
                   actions={
@@ -321,13 +378,13 @@ export default function VoucherList() {
                   order={order}
                   orderBy={orderBy}
                   headLabel={TABLE_HEAD}
-                  rowCount={tableData.length}
+                  rowCount={data.length}
                   numSelected={selected.length}
                   onSort={onSort}
                   onSelectAllRows={(checked) =>
                     onSelectAllRows(
                       checked,
-                      tableData.map((row) => row.id)
+                      data.map((row) => row.id)
                     )
                   }
                 />
@@ -353,8 +410,8 @@ export default function VoucherList() {
           <Divider />
 
           <Box sx={{ position: 'relative', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', alignItems: 'center' }}>
-            <TablePagination
-              rowsPerPageOptions={[5, 10, 25]}
+          <TablePagination
+              rowsPerPageOptions={[10, 15, 25]}
               component="div"
               rowsPerPage={rowsPerPage}
               onRowsPerPageChange={onChangeRowsPerPage}
@@ -368,7 +425,9 @@ export default function VoucherList() {
 
             <Pagination
               sx={{ px: 1 }}
-              count={10}
+              page={page}
+              count={totalPages}
+              onChange={onChangePage}
             />
           </Box>
         </Card>
@@ -380,10 +439,10 @@ export default function VoucherList() {
 // ----------------------------------------------------------------------
 
 function applySortFilter({
-  tableData,
+  data,
   comparator,
 }) {
-  const stabilizedThis = tableData.map((el, index) => [el, index]);
+  const stabilizedThis = data.map((el, index) => [el, index]);
 
   stabilizedThis.sort((a, b) => {
     const order = comparator(a[0], b[0]);
@@ -391,9 +450,9 @@ function applySortFilter({
     return a[1] - b[1];
   });
 
-  tableData = stabilizedThis.map((el) => el[0]);
+  data = stabilizedThis.map((el) => el[0]);
 
-  return tableData;
+  return data;
 }
 
 // ----------------------------------------------------------------------

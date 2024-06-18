@@ -24,4 +24,11 @@ export const ADMIN_API = {
     // put: (id) => path(ROOTS_API, `/bills/${id}`),
     // details: (id) => path(ROOTS_API, `/bills/${id}`),
   },
+
+  voucher: {
+    all: path(ROOTS_API, '/vouchers'),
+    // post: path(ROOTS_API, '/bills'),
+    // put: (id) => path(ROOTS_API, `/bills/${id}`),
+    // details: (id) => path(ROOTS_API, `/bills/${id}`),
+  },
 };
