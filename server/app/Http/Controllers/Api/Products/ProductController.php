@@ -16,7 +16,6 @@ class ProductController extends Controller
 {
     public function index(ProductRequest $req)
     {
-        DB::enableQueryLog();
         $products = Product::join('product_details', 'products.id', '=', 'product_details.product_id')
             ->join('brands', 'product_details.brand_id', '=', 'brands.id')
             ->join('categories', 'product_details.category_id', '=', 'categories.id')

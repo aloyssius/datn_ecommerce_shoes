@@ -28,7 +28,7 @@ class CustomerController extends Controller {
 
         if( $req->filled('search') ){
             $search = $req->search;
-            $searchFields = ['code', 'full_name', 'phone_number'];
+            $searchFields = ['accounts.code', 'full_name', 'phone_number'];
             QueryHelper::buildQuerySearchContains($accounts, $search, $searchFields);
         }
 

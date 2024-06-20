@@ -1,27 +1,36 @@
 import PropTypes from 'prop-types';
+import { useEffect, useState } from 'react';
 import { Stack, InputAdornment, TextField, MenuItem, Button } from '@mui/material';
 import DatePicker from '@mui/lab/DatePicker';
 // components
+import useDebounce from '../../../../hooks/useDebounce';
 import Iconify from '../../../../components/Iconify';
 // ----------------------------------------------------------------------
 
 const INPUT_WIDTH = 160;
 
 EmployeeTableToolBar.propTypes = {
-  filterSearch: PropTypes.string,
-  filterGender: PropTypes.string,
-  onFilterSearch: PropTypes.func,
-  onFilterGender: PropTypes.func,
-  optionsGender: PropTypes.arrayOf(PropTypes.string),
+    filterSearch: PropTypes.string,
+    filterGender: PropTypes.string,
+    onFilterSearch: PropTypes.func,
+    onFilterGender: PropTypes.func,
+    optionsGender: PropTypes.arrayOf(PropTypes.string),
 };
 
 export default function EmployeeTableToolBar({
-  filterSearch,
-  filterGender,
-  onFilterSearch,
-  onFilterGender,
-  optionsGender,
+    filterGender,
+    onFilterSearch,
+    onFilterGender,
+    optionsGender,
 }) {
+
+    const [filterSearch, setFilterSearch] = useState('');
+
+    const debounceValue = useDebounce(filterSearch, 500);
+
+    useEffect(() => {
+        onFilterSearch(debounceValue);
+    }, [debounceValue]);
     return (
         <Stack spacing={2} direction={{ xs: 'column', md: 'row' }} sx={{ py: 2.5, px: 3 }}>
             <TextField
@@ -61,7 +70,7 @@ export default function EmployeeTableToolBar({
             <TextField
                 fullWidth
                 value={filterSearch}
-                onChange={(event) => onFilterSearch(event.target.value)}
+                onChange={(event) => setFilterSearch(event.target.value)}
                 placeholder="Tìm kiếm nhân viên..."
                 InputProps={{
                     startAdornment: (

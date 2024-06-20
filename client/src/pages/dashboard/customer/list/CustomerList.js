@@ -87,19 +87,7 @@ export default function CustomerList() {
     ]
   );
 
-  const [tableData, setTableData] = useState([
-    {
-      id: 1,
-      code: 'PH22590',
-      fullName: 'Hồ Khánh Đăng',
-      birthDate: '11/11/2003',
-      phoneNumber: '0978267385',
-      email: 'danghkph22590@fpt.edu.vn',
-      gender: 'Nam',
-      avatar: 'none',
-      status: 'ACTIVE',
-    },
-  ]);
+
 
   const [filterSearch, setFilterSearch] = useState('');
 

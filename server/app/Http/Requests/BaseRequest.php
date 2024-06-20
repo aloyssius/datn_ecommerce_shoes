@@ -47,7 +47,7 @@ class BaseRequest extends FormRequest
     {
         throw new HttpResponseException(response()->json([
             'success'   => false,
-            'status'   => 422,
+            'statusCode'   => 422,
             'message'   => 'Lỗi xác thực',
             'error'      => $validator->errors()->first()
         ], 422));
