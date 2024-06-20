@@ -20,12 +20,12 @@ import { displayCurrencyVnd } from '../../../../utils/formatCurrency';
 
 // ----------------------------------------------------------------------
 
-OrderTableRow.propTypes = {
+BillTableRow.propTypes = {
   row: PropTypes.object.isRequired,
   onEditRow: PropTypes.func,
 };
 
-export default function OrderTableRow({ row, onEditRow }) {
+export default function BillTableRow({ row, onEditRow }) {
   const theme = useTheme();
 
   const { code, fullName, phoneNumber, createdAt, totalMoney, status } = row;

@@ -197,7 +197,7 @@ export default function VoucherList() {
             <Button
               variant="contained"
               component={RouterLink}
-              to={PATH_DASHBOARD.invoice.new}
+              to={PATH_DASHBOARD.discount.voucher.new}
               startIcon={<Iconify icon={'eva:plus-fill'} />}
             >
               Tạo mã giảm giá

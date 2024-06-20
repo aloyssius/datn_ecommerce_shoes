@@ -50,7 +50,7 @@ function labelPriceRange(range) {
   return 'Above $75';
 }
 
-OrderTagFiltered.propTypes = {
+BillTagFiltered.propTypes = {
   status: PropTypes.string,
   startDate: PropTypes.instanceOf(Date),
   endDate: PropTypes.instanceOf(Date),
@@ -60,7 +60,7 @@ OrderTagFiltered.propTypes = {
   onResetAll: PropTypes.func,
 };
 
-export default function OrderTagFiltered({
+export default function BillTagFiltered({
   status,
   startDate,
   endDate,

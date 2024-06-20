@@ -9,7 +9,7 @@ import useDebounce from "../../../../hooks/useDebounce";
 
 const INPUT_WIDTH = 200;
 
-OrderTableToolbar.propTypes = {
+BillTableToolbar.propTypes = {
   filterStartDate: PropTypes.instanceOf(Date),
   filterEndDate: PropTypes.instanceOf(Date),
   onFilterSearch: PropTypes.func,
@@ -17,7 +17,7 @@ OrderTableToolbar.propTypes = {
   onFilterEndDate: PropTypes.func,
 };
 
-export default function OrderTableToolbar({
+export default function BillTableToolbar({
   filterStartDate,
   filterEndDate,
   onFilterSearch,

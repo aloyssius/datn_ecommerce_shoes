@@ -40,17 +40,11 @@ import Scrollbar from '../../../../components/Scrollbar';
 import HeaderBreadcrumbs from '../../../../components/HeaderBreadcrumbs';
 import { TableEmptyRows, TableHeadCustom, TableNoData, TableSelectedActions } from '../../../../components/table';
 // sections
-import OrderTableRow from './OrderTableRow';
-import OrderTableToolBar from './OrderTableToolBar';
-import OrderTagFiltered from './OrderTagFiltered';
+import BillTableRow from './BillTableRow';
+import BillTableToolBar from './BillTableToolBar';
+import BillTagFiltered from './BillTagFiltered';
 
 // ----------------------------------------------------------------------
-
-const TYPE_OPTIONS = [
-  All.VI,
-  BillTypeOption.vi.AT_THE_COUNTER,
-  BillTypeOption.vi.DELIVERY,
-];
 
 const TABLE_HEAD = [
   { id: 'code', label: 'Mã đơn hàng', align: 'left' },
@@ -63,7 +57,7 @@ const TABLE_HEAD = [
 
 // ----------------------------------------------------------------------
 
-export default function OrderList() {
+export default function BillList() {
   const { themeStretch } = useSettings();
 
   const navigate = useNavigate();
@@ -74,9 +68,7 @@ export default function OrderList() {
     rowsPerPage,
     page,
     onChangePage,
-    selected,
     onSelectRow,
-    onSelectAllRows,
     onSort,
     onChangeRowsPerPage,
   } = useTable({});
@@ -166,7 +158,7 @@ export default function OrderList() {
         <HeaderBreadcrumbs
           heading="Danh sách đơn hàng"
           links={[
-            { name: 'Quản lý đơn hàng', href: PATH_DASHBOARD.order.list },
+            { name: 'Quản lý đơn hàng', href: PATH_DASHBOARD.bill.list },
             { name: 'Danh sách đơn hàng' },
           ]}
         />
@@ -212,7 +204,7 @@ export default function OrderList() {
 
           <Divider />
 
-          <OrderTableToolBar
+          <BillTableToolBar
             filterStartDate={filterStartDate}
             filterEndDate={filterEndDate}
             onFilterSearch={handleFilterSearch}
@@ -227,7 +219,7 @@ export default function OrderList() {
           {!isDefault &&
             <Stack sx={{ mb: 3, px: 2 }}>
               <>
-                <OrderTagFiltered
+                <BillTagFiltered
                   isShowReset={isDefault}
                   status={filterStatus}
                   startDate={filterStartDate ? dayjs(filterStartDate).format('DD-MM-YYYY') : null}
@@ -258,10 +250,9 @@ export default function OrderList() {
 
                 <TableBody>
                   {dataFiltered.map((row) => (
-                    <OrderTableRow
+                    <BillTableRow
                       key={row.id}
                       row={row}
-                      selected={selected.includes(row.id)}
                       onSelectRow={() => onSelectRow(row.id)}
                       onEditRow={() => handleEditRow(row.id)}
                     />

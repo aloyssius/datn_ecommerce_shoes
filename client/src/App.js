@@ -1,3 +1,5 @@
+// css
+import style from './app.css';
 // routes
 import Router from './routes';
 // theme
