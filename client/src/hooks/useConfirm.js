@@ -25,6 +25,7 @@ const useConfirm = () => {
       customClass: {
         container: 'my-swal'
       },
+
     }).then((result) => {
       if (result.isConfirmed) {
         Swal.fire({
