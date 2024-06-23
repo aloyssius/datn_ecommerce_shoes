@@ -15,6 +15,4 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('api')->group(function () {
-    Route::get('/vouchers', [VoucherController::class, 'index']);
-});
+Route::get('/vouchers', [VoucherController::class, 'index']);
