@@ -3,6 +3,7 @@ import { useState } from 'react';
 // @mui
 import { useTheme } from '@mui/material/styles';
 import { Tooltip, Checkbox, IconButton, TableRow, TableCell, Typography, Stack, Link, MenuItem } from '@mui/material';
+import { format, parse } from 'date-fns';
 import { DiscountStatusTab } from '../../../../constants/enum';
 // utils
 import { fDate } from '../../../../utils/formatTime';
@@ -27,7 +28,16 @@ VoucherTableRow.propTypes = {
 export default function VoucherTableRow({ row, selected, onSelectRow, onEditRow }) {
   const theme = useTheme();
 
-  const { code, name, type, value, quantity, dateTime, status } = row;
+  const { code, name, type, value, quantity, startTime, endTime, status } = row;
+
+  const parsedStartTime = parse(startTime, 'HH:mm:ss dd-MM-yyyy', new Date());
+
+  const parsedEndTime = parse(endTime, 'HH:mm:ss dd-MM-yyyy', new Date());
+
+
+  const formattedStartTime = format(parsedStartTime, 'dd/MM/yyyy');
+
+  const formattedEndTime = format(parsedEndTime, 'dd/MM/yyyy');
 
   return (
     <TableRow hover selected={selected}>
@@ -53,7 +63,7 @@ export default function VoucherTableRow({ row, selected, onSelectRow, onEditRow 
 
       <TableCell align="left">{quantity}</TableCell>
 
-      <TableCell align="left">{dateTime}</TableCell>
+      <TableCell align="left">{formattedStartTime} - {formattedEndTime}</TableCell>
 
       <TableCell align="left">
         <Label

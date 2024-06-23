@@ -29,4 +29,18 @@ class VoucherResource extends JsonResource
             'endTime' => $this->end_time,
         ];
     }
+
+    public static function fields()
+    {
+        return [
+            'code',
+            'name',
+            'value',
+            'type',
+            'quantity',
+            'status',
+            'start_time',
+            'end_time',
+        ];
+    }
 }
