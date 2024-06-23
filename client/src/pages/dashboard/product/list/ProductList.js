@@ -19,8 +19,6 @@ import {
   Pagination,
   Typography,
 } from '@mui/material';
-import dayjs from 'dayjs'
-import relativeTime from 'dayjs/plugin/relativeTime'
 import { ADMIN_API } from '../../../../api/apiConfig';
 import useFetch from '../../../../hooks/useFetch';
 import { All, ProductStatusTab, ProductStockOption } from '../../../../constants/enum';
@@ -38,11 +36,12 @@ import Label from '../../../../components/Label';
 import Iconify from '../../../../components/Iconify';
 import Scrollbar from '../../../../components/Scrollbar';
 import HeaderBreadcrumbs from '../../../../components/HeaderBreadcrumbs';
-import { TableEmptyRows, TableHeadCustom, TableNoData, TableSelectedActions } from '../../../../components/table';
+import { TableEmptyRows, TableHeadCustom, TableNoData } from '../../../../components/table';
 // sections
 import ProductTableRow from './ProductTableRow';
 import ProductTableToolbar from './ProductTableToolBar';
 import ProductTagFiltered from './ProductTagFiltered';
+// utils
 import { convertedtArr } from '../../../../utils/convertArray';
 
 // ----------------------------------------------------------------------
@@ -54,7 +53,7 @@ const STOCK_OPTIONS = [
 ]
 
 const TABLE_HEAD = [
-  { id: 'sku', label: 'Mã SKU', align: 'left'},
+  { id: 'sku', label: 'Mã SKU', align: 'left' },
   { id: 'name', label: 'Sản phẩm', align: 'left' },
   { id: 'createdAt', label: 'Ngày tạo', align: 'left' },
   { id: 'totalQuantity', label: 'Số lượng tồn', align: 'left' },
@@ -73,9 +72,6 @@ export default function ProductList() {
     order,
     orderBy,
     rowsPerPage,
-    selected,
-    onSelectRow,
-    onSelectAllRows,
     onSort,
     page,
     onChangePage,
@@ -213,6 +209,16 @@ export default function ProductList() {
             { name: 'Quản lý sản phẩm', href: PATH_DASHBOARD.product.list },
             { name: 'Danh sách sản phẩm' },
           ]}
+          action={
+            <Button
+              variant="contained"
+              component={RouterLink}
+              to={PATH_DASHBOARD.product.new}
+              startIcon={<Iconify icon={'eva:plus-fill'} />}
+            >
+              Tạo sản phẩm
+            </Button>
+          }
         />
 
         <Card>
@@ -311,8 +317,6 @@ export default function ProductList() {
                     <ProductTableRow
                       key={row.id}
                       row={row}
-                      selected={selected.includes(row.id)}
-                      onSelectRow={() => onSelectRow(row.id)}
                       onEditRow={() => handleEditRow(row.id)}
                     />
                   ))}

@@ -182,7 +182,7 @@ export default function CustomerList() {
             <Button
               variant="contained"
               component={RouterLink}
-              to={PATH_DASHBOARD.invoice.new}
+              to={PATH_DASHBOARD.account.customer.new}
               startIcon={<Iconify icon={'eva:plus-fill'} />}
             >
               Tạo tài khoản
