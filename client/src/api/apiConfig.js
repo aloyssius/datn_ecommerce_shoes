@@ -20,7 +20,8 @@ export const ADMIN_API = {
   },
   customer: {
     all: path(ROOTS_API, '/accounts'),
-    // post: path(ROOTS_API, '/bills'),
+    details: (id) => path(ROOTS_API, `/bills/${id}`),
+    post: path(ROOTS_API, '/bills'),
     // put: (id) => path(ROOTS_API, `/bills/${id}`),
     // details: (id) => path(ROOTS_API, `/bills/${id}`),
   },

@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 // @mui
 import { Container } from '@mui/material';
@@ -9,6 +10,8 @@ import useSettings from '../../../../hooks/useSettings';
 import Page from '../../../../components/Page';
 import HeaderBreadcrumbs from '../../../../components/HeaderBreadcrumbs';
 import CustomerNewEditForm from './CustomerNewEditForm';
+import useFetch from '../../../../hooks/useFetch';
+import { ADMIN_API } from '../../../../api/apiConfig';
 
 // ----------------------------------------------------------------------
 
@@ -17,7 +20,7 @@ export default function CustomerNewEdit() {
   const { pathname } = useLocation();
   const { id } = useParams();
   const isEdit = pathname.includes('edit');
-  const currentCustomer = {};
+  const { data } = useFetch(ADMIN_API.customer.details(id), { fetch: isEdit })
 
   return (
 
@@ -27,10 +30,10 @@ export default function CustomerNewEdit() {
           heading={!isEdit ? 'Tạo khách hàng' : 'Cập nhật khách hàng'}
           links={[
             { name: 'Danh sách khách hàng', href: PATH_DASHBOARD.account.customer.list },
-            { name: !isEdit ? 'Tạo khách hàng' : 'Customer-name' },
+            { name: !isEdit ? 'Tạo khách hàng' : data?.id },
           ]}
         />
-        <CustomerNewEditForm isEdit={isEdit} currentCustomer={currentCustomer} />
+        <CustomerNewEditForm isEdit={isEdit} currentCustomer={data} />
       </Container>
     </Page>
   );

@@ -94,7 +94,7 @@ export default function VoucherNewEditForm({ isEdit, currentVoucher }) {
         <Grid item xs={12} md={8}>
           <Card sx={{ p: 3 }}>
             <Stack spacing={3}>
-              <RHFTextField name="name" label="Tên sản phẩm" />
+              <RHFTextField name="name" placeholder="VD: Coupon 10%" />
 
               <RHFTextField name="code" label="Mã sản phẩm" />
 

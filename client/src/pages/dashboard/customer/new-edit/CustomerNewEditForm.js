@@ -1,23 +1,30 @@
 import PropTypes from 'prop-types';
 import * as Yup from 'yup';
 import { useCallback, useEffect, useMemo } from 'react';
-import { useSnackbar } from 'notistack';
 import { useNavigate } from 'react-router-dom';
 // form
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
-import { LoadingButton } from '@mui/lab';
-import { Autocomplete, Box, TextField, Card, Grid, Stack, Switch, Typography, FormControlLabel } from '@mui/material';
+import { Button, Autocomplete, Box, TextField, Card, Grid, Stack, Switch, Typography, FormControlLabel } from '@mui/material';
+import DatePicker from '@mui/lab/DatePicker';
+import { styled } from '@mui/material/styles';
+// hooks
+import useConfirm from '../../../../hooks/useConfirm'
+import useNotification from '../../../../hooks/useNotification';
 // utils
 import { fData } from '../../../../utils/formatNumber';
 // routes
 import { PATH_DASHBOARD } from '../../../../routes/paths';
-// _mock
-import { countries } from '../../../../_mock';
 // components
 import Label from '../../../../components/Label';
-import { FormProvider, RHFSelect, RHFSwitch, RHFTextField, RHFUploadAvatar } from '../../../../components/hook-form';
+import { FormProvider, RHFRadioGroup, RHFTextField, RHFUploadAvatar } from '../../../../components/hook-form';
+import { AccountGenderOption, AccountStatusTab } from '../../../../constants/enum';
+import CustomerNewEditListAddress from './CustomerNewEditListAddress';
+import { isPastOrPresentDate, isVietnamesePhoneNumberValid } from '../../../../utils/validate';
+import { convertDateGMT, convertDateParam } from '../../../../utils/convertDate';
+import useFetch from '../../../../hooks/useFetch';
+import { ADMIN_API } from '../../../../api/apiConfig';
 
 // ----------------------------------------------------------------------
 
@@ -26,46 +33,114 @@ CustomerNewEditForm.propTypes = {
   currentCustomer: PropTypes.object,
 };
 
+const IOSSwitch = styled((props) => (
+  <Switch focusVisibleClassName=".Mui-focusVisible" disableRipple {...props} />
+))(({ theme }) => ({
+  width: 38,
+  height: 21,
+  padding: 0,
+  '& .MuiSwitch-switchBase': {
+    padding: 0,
+    margin: 2,
+    transitionDuration: '300ms',
+    '&.Mui-checked': {
+      transform: 'translateX(16px)',
+      color: '#fff',
+      '& + .MuiSwitch-track': {
+        backgroundColor: theme.palette.mode === '#2065D1',
+        opacity: 1,
+        border: 0,
+      },
+      '&.Mui-disabled + .MuiSwitch-track': {
+        opacity: 0.5,
+      },
+    },
+    '&.Mui-focusVisible .MuiSwitch-thumb': {
+      color: '#33cf4d',
+      border: '6px solid #fff',
+    },
+    '&.Mui-disabled .MuiSwitch-thumb': {
+      color:
+        theme.palette.mode === 'light'
+          ? theme.palette.grey[100]
+          : theme.palette.grey[600],
+    },
+    '&.Mui-disabled + .MuiSwitch-track': {
+      opacity: theme.palette.mode === 'light' ? 0.7 : 0.3,
+    },
+  },
+  '& .MuiSwitch-thumb': {
+    boxSizing: 'border-box',
+    width: 17,
+    height: 17,
+  },
+  '& .MuiSwitch-track': {
+    borderRadius: 26 / 2,
+    backgroundColor: theme.palette.mode === 'light' ? '#C1C1C1' : '#39393D',
+    opacity: 1,
+    transition: theme.transitions.create(['background-color'], {
+      duration: 500,
+    }),
+  },
+}));
+
+const LabelStyleHeader = styled(Typography)(({ theme }) => ({
+  ...theme.typography.subtitle2,
+  color: theme.palette.text.black,
+  fontSize: 16.5,
+}));
+
+const LabelStyle = styled(Typography)(({ theme }) => ({
+  ...theme.typography.subtitle2,
+  marginBottom: theme.spacing(0.5),
+  color: theme.palette.text.secondary,
+}));
+
 export default function CustomerNewEditForm({ isEdit, currentCustomer }) {
   const navigate = useNavigate();
 
-  const { enqueueSnackbar } = useSnackbar();
+  const NewCustomerSchemahema = Yup.object().shape({
+    fullName: Yup.string().test(
+      'max',
+      'Họ và tên quá dài (tối đa 50 ký tự)',
+      value => value.trim().length <= 50
+    ).required('Họ và tên không được để trống'),
 
-  const NewUserSchema = Yup.object().shape({
-    name: Yup.string().required('Name is required'),
-    email: Yup.string().required('Email is required').email(),
-    phoneNumber: Yup.string().required('Phone number is required'),
-    address: Yup.string().required('Address is required'),
-    country: Yup.string().required('country is required'),
-    company: Yup.string().required('Company is required'),
-    state: Yup.string().required('State is required'),
-    city: Yup.string().required('City is required'),
-    role: Yup.string().required('Role Number is required'),
-    // avatarUrl: Yup.mixed().test('required', 'Avatar is required', (value) => value !== ''),
+    email: Yup.string().test(
+      'max',
+      'Email không hợp lệ',
+      value => value.trim().length <= 254
+    ).required('Email không được để trống').email('Email không hợp lệ'),
+
+    phoneNumber: Yup.string().test('is-vietnamese-phone-number', 'SĐT không hợp lệ', (value) => {
+      return isVietnamesePhoneNumberValid(value);
+    }).required('SĐT không được để trống'),
+
+    birthDate: Yup.string().nullable()
+      .test('date-validation', 'Ngày sinh không hợp lệ', (value) => {
+        if (value) {
+          return isPastOrPresentDate(convertDateGMT(value))
+        }
+        return true;
+      }),
   });
 
   const defaultValues = useMemo(
     () => ({
-      name: currentCustomer?.name || '',
+      fullName: currentCustomer?.fullName || '',
       email: currentCustomer?.email || '',
       phoneNumber: currentCustomer?.phoneNumber || '',
-      address: currentCustomer?.address || '',
-      country: currentCustomer?.country || '',
-      state: currentCustomer?.state || '',
-      city: currentCustomer?.city || '',
-      zipCode: currentCustomer?.zipCode || '',
+      birthDate: currentCustomer?.birthDate || null,
+      gender: currentCustomer?.gender || AccountGenderOption.vi.MEN,
+      status: currentCustomer?.status || AccountStatusTab.en.IS_ACTIVE,
       avatarUrl: currentCustomer?.avatarUrl || '',
-      isVerified: currentCustomer?.isVerified || true,
-      status: currentCustomer?.status,
-      company: currentCustomer?.company || '',
-      role: currentCustomer?.role || '',
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [currentCustomer]
   );
 
   const methods = useForm({
-    resolver: yupResolver(NewUserSchema),
+    resolver: yupResolver(NewCustomerSchemahema),
     defaultValues,
   });
 
@@ -90,15 +165,25 @@ export default function CustomerNewEditForm({ isEdit, currentCustomer }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEdit, currentCustomer]);
 
-  const onSubmit = async () => {
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      reset();
-      enqueueSnackbar(!isEdit ? 'Create success!' : 'Update success!');
-      navigate(PATH_DASHBOARD.user.list);
-    } catch (error) {
-      console.error(error);
+  const { post } = useFetch(null, { fetch: false });
+
+  const { showConfirm } = useConfirm();
+  const { onOpenSuccessNotify, onOpenErrorNotify } = useNotification();
+
+  const onFinish = (data) => {
+    onOpenSuccessNotify('Thêm mới khách hàng thành công!')
+    console.log(data);
+    navigate(PATH_DASHBOARD.account.customer.edit(data?.id));
+  }
+
+  const onSubmit = async (data) => {
+    const body = {
+      ...data,
+      gender: data === AccountGenderOption.vi.MEN ? 0 : 1,
+      birthDate: convertDateParam(data.birthDate)
     }
+    console.log(body);
+    showConfirm("Xác nhận?", () => post(ADMIN_API.customer.post, body, (response) => onFinish(response)));
   };
 
   const handleDrop = useCallback(
@@ -118,153 +203,143 @@ export default function CustomerNewEditForm({ isEdit, currentCustomer }) {
   );
 
   return (
-    <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={4}>
-          <Card sx={{ py: 10, px: 3 }}>
-            {isEdit && (
-              <Label
-                color={values.status !== 'active' ? 'error' : 'success'}
-                sx={{ textTransform: 'uppercase', position: 'absolute', top: 24, right: 24 }}
-              >
-                {values.status}
-              </Label>
-            )}
+    <>
+      <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={4}>
+            <Card sx={{ py: !isEdit ? 8.8 : 4, px: 3 }} className='card'>
 
-            <Box sx={{ mb: 5 }}>
-              <RHFUploadAvatar
-                name="avatarUrl"
-                accept="image/*"
-                maxSize={3145728}
-                onDrop={handleDrop}
-                helperText={
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      mt: 2,
-                      mx: 'auto',
-                      display: 'block',
-                      textAlign: 'center',
-                      color: 'text.secondary',
-                    }}
-                  >
-                    Allowed *.jpeg, *.jpg, *.png, *.gif
-                    <br /> max size of {fData(3145728)}
-                  </Typography>
-                }
-              />
-            </Box>
-
-            {isEdit && (
-              <FormControlLabel
-                labelPlacement="start"
-                control={
-                  <Controller
-                    name="status"
-                    control={control}
-                    render={({ field }) => (
-                      <Switch
-                        {...field}
-                        checked={field.value !== 'active'}
-                        onChange={(event) => field.onChange(event.target.checked ? 'banned' : 'active')}
-                      />
-                    )}
-                  />
-                }
-                label={
-                  <>
-                    <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
-                      Banned
+              <Box sx={{ mt: 5 }}>
+                <RHFUploadAvatar
+                  name="avatarUrl"
+                  accept="image/*"
+                  maxSize={3145728}
+                  onDrop={handleDrop}
+                  helperText={
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        mt: 2,
+                        mx: 'auto',
+                        display: 'block',
+                        textAlign: 'center',
+                        color: 'text.secondary',
+                      }}
+                    >
+                      Cho phép định dạng *.jpeg, *.jpg, *.png, *.gif
+                      <br /> kích thước tối đa {fData(3145728)}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                      Apply disable account
-                    </Typography>
-                  </>
-                }
-                sx={{ mx: 0, mb: 3, width: 1, justifyContent: 'space-between' }}
-              />
-            )}
+                  }
+                />
+              </Box>
 
-            {isEdit && (
-              <RHFSwitch
-                name="isVerified"
-                labelPlacement="start"
-                label={
-                  <>
-                    <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
-                      Trạng thái
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                      Hoạt động
-                    </Typography>
-                  </>
-                }
-                sx={{ mx: 0, width: 1, justifyContent: 'space-between' }}
-              />
-            )}
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} md={8}>
-          <Card sx={{ p: 3 }}>
-            <Box
-              sx={{
-                display: 'grid',
-                columnGap: 2,
-                rowGap: 3,
-                gridTemplateColumns: { xs: 'repeat(1, 1fr)', sm: 'repeat(2, 1fr)' },
-              }}
-            >
-              <RHFTextField name="name" label="Full Name" />
-              <RHFTextField name="email" label="Email Address" />
-              <RHFTextField name="phoneNumber" label="Phone Number" />
-
-              <Autocomplete
-                id="country-select-demo"
-                options={countries}
-                autoHighlight
-                fullWidth
-                getOptionLabel={(option) => option.label}
-                renderOption={(props, option) => (
-                  <Box component="li" sx={{ '& > img': { mr: 2, flexShrink: 0 } }} {...props}>
-                    <img
-                      loading="lazy"
-                      width="20"
-                      srcSet={`https://flagcdn.com/w40/${option.code.toLowerCase()}.png 2x`}
-                      src={`https://flagcdn.com/w20/${option.code.toLowerCase()}.png`}
-                      alt=""
+              {isEdit && (
+                <FormControlLabel
+                  labelPlacement="start"
+                  control={
+                    <Controller
+                      name="status"
+                      control={control}
+                      render={({ field }) => (
+                        <IOSSwitch
+                          {...field}
+                          checked={field.value === AccountStatusTab.vi.IS_ACTIVE}
+                          onChange={(event) => field.onChange(event.target.checked ? AccountStatusTab.vi.IS_ACTIVE : AccountStatusTab.vi.UN_ACTIVE)}
+                        />
+                      )}
                     />
-                    {option.label} ({option.code}) +{option.phone}
-                  </Box>
-                )}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="Choose a country"
-                    inputProps={{
-                      ...params.inputProps,
-                      autoComplete: 'new-password', // disable autocomplete and autofill
-                    }}
-                  />
-                )}
-              />
+                  }
+                  label={
+                    <>
+                      <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
+                        Trạng thái
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                        {values.status}
+                      </Typography>
+                    </>
+                  }
+                  sx={{ mx: 0, mt: 4, width: 1, justifyContent: 'space-between' }}
+                />
+              )}
+            </Card>
+          </Grid>
 
-              <RHFTextField name="state" label="State/Region" />
-              <RHFTextField name="city" label="City" />
-              <RHFTextField name="address" label="Address" />
-              <RHFTextField name="zipCode" label="Zip/Code" />
-              <RHFTextField name="company" label="Company" />
-              <RHFTextField name="role" label="Role" />
-            </Box>
+          <Grid item xs={12} md={8}>
+            <Card sx={{ p: 2 }} className='card'>
+              <LabelStyleHeader sx={{ ml: 0.8 }}>Thông tin khách hàng</LabelStyleHeader>
+              <Box
+                sx={{
+                  p: 1,
+                  mt: 1.5,
+                  display: 'grid',
+                  columnGap: 3.5,
+                  rowGap: 2.5,
+                  gridTemplateColumns: { xs: 'repeat(1, 1fr)', sm: 'repeat(2, 1fr)' },
+                }}
+              >
+                <RHFTextField name="fullName" topLabel="Họ và tên" placeholder="Nhập họ và tên" isRequired />
+                <RHFTextField name="email" topLabel="Email" isRequired placeholder="Nhập email" />
+                <RHFTextField name="phoneNumber" topLabel="Số điện thoại" placeholder="Nhập số điện thoại" isRequired />
 
-            <Stack alignItems="flex-end" sx={{ mt: 3 }}>
-              <LoadingButton type="submit" variant="contained" loading={isSubmitting}>
-                {!isEdit ? 'Create User' : 'Save Changes'}
-              </LoadingButton>
-            </Stack>
-          </Card>
+                <RHFRadioGroup
+                  name="gender"
+                  options={[AccountGenderOption.vi.MEN, AccountGenderOption.vi.WOMEN]}
+                  topLabel="Giới tính"
+                  isRequired
+                />
+
+                <Controller
+                  name='birthDate'
+                  control={control}
+                  render={({ field, fieldState: { error } }) => (
+                    <Grid>
+                      <LabelStyle>
+                        Ngày sinh <span className="required">*</span>
+                      </LabelStyle>
+                      <DatePicker
+                        {...field}
+                        inputProps={{
+                          placeholder: "dd/MM/yyyy"
+                        }}
+                        inputFormat="dd/MM/yyyy"
+                        maxDate={new Date()}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            fullWidth
+                            size='small'
+                            error={!!error}
+                            helperText={error?.message}
+                            sx={{
+                              '& fieldset': {
+                                borderRadius: '6px',
+                              },
+                              "& .Mui-error": {
+                                marginLeft: 0,
+                              },
+                            }}
+                          />
+                        )}
+                      />
+                    </Grid>
+                  )}
+                />
+              </Box>
+
+              <Stack direction="row" justifyContent="flex-end" spacing={1.5} sx={{ mt: 3, px: 1 }}>
+                <Button color="inherit" variant="contained">
+                  Hủy
+                </Button>
+                <Button type="submit" variant="contained">
+                  Lưu
+                </Button>
+              </Stack>
+            </Card>
+          </Grid>
         </Grid>
-      </Grid>
-    </FormProvider>
+      </FormProvider>
+      <CustomerNewEditListAddress isEdit={isEdit} />
+    </>
   );
 }

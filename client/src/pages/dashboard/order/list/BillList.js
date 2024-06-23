@@ -105,7 +105,7 @@ export default function BillList() {
     navigate(PATH_DASHBOARD.discount.voucher.edit(id));
   };
 
-  const { data, totalPages, setParams, fetchCount, statusCounts } = useFetch(ADMIN_API.bill.all);
+  const { data, totalPages, setParams, firstFetch, statusCounts } = useFetch(ADMIN_API.bill.all);
 
   const handleFilter = () => {
     const params = {
@@ -120,7 +120,8 @@ export default function BillList() {
   }
 
   useEffect(() => {
-    if (fetchCount > 0) {
+    console.log(firstFetch)
+    if (firstFetch) {
       handleFilter();
     }
   }, [page, rowsPerPage, filterSearch, filterStatus, filterStartDate, filterEndDate]);
