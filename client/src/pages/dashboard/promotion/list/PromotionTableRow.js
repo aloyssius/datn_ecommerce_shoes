@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import { useState } from 'react';
 // @mui
+import { format, parse } from 'date-fns';
 import { useTheme } from '@mui/material/styles';
 import { Tooltip, Checkbox, IconButton, TableRow, TableCell, Typography, Stack, Link, MenuItem } from '@mui/material';
 import { DiscountStatusTab } from '../../../../constants/enum';
@@ -27,7 +28,11 @@ PromotionTableRow.propTypes = {
 export default function PromotionTableRow({ row, selected, onSelectRow, onEditRow }) {
   const theme = useTheme();
 
-  const { name, value, dateTime, status } = row;
+  const { name, value, createdAt, status } = row;
+
+  const parsedDateTime = parse(createdAt, 'HH:mm:ss dd-MM-yyyy', new Date());
+  const formattStartDate = format(parsedDateTime, 'dd/MM/yyyy');
+  const formattEndDate = format(parsedDateTime, 'dd/MM/yyyy');
 
   return (
     <TableRow hover selected={selected}>
@@ -41,7 +46,7 @@ export default function PromotionTableRow({ row, selected, onSelectRow, onEditRo
         {value}
       </TableCell>
 
-      <TableCell align="left">{dateTime}</TableCell>
+      <TableCell align="left">{formattStartDate}  - {formattEndDate}</TableCell>
 
       <TableCell align="left">
         <Label

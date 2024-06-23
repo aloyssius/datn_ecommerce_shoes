@@ -295,7 +295,7 @@ export default function CustomerNewEditForm({ isEdit, currentCustomer }) {
                   render={({ field, fieldState: { error } }) => (
                     <Grid>
                       <LabelStyle>
-                        Ngày sinh <span className="required">*</span>
+                        Ngày sinh
                       </LabelStyle>
                       <DatePicker
                         {...field}
