@@ -23,6 +23,10 @@ class Account extends BaseModel
         'role_id',
     ];
 
+    protected $casts = [
+        'gender' => 'integer',
+    ];
+
     public function __construct(array $attributes = [])
     {
         $this->fillable = array_merge(parent::getBaseFillable(), $this->fillable);

@@ -24,6 +24,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 DB::enableQueryLog();
 Route::apiResource('/vouchers', VoucherController::class);
-require __DIR__ . '/api/bills/api.php';
-require __DIR__ . '/api/accounts/api.php';
-require __DIR__ . '/api/products/api.php';
+
+Route::middleware('api')->group(function () {
+    require __DIR__ . '/api/accounts/api.php';
+    require __DIR__ . '/api/bills/api.php';
+    require __DIR__ . '/api/products/api.php';
+});
