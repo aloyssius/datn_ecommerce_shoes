@@ -10,6 +10,7 @@ use App\Helpers\QueryHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Bill\BillRequest;
 use App\Http\Requests\Bill\BillRequestBody;
+use App\Http\Resources\Accounts\AccountResource;
 use App\Http\Resources\Bills\BillResource;
 use App\Models\Account;
 use App\Models\Bill;
@@ -60,23 +61,23 @@ class BillController extends Controller
 
     public function show($id)
     {
-        $account = Account::findOrFail($id);
-        return ApiResponse::responseObject($account);
+        // $account = Account::findOrFail($id);
+        // return ApiResponse::responseObject($account);
     }
 
     public function store(BillRequestBody $req)
     {
-        $account = Account::query();
-        $prefix = 'KH';
-
-        $roleCustomer = ModelsRole::where('code', Role::CUSTOMER)->first();
-        $moreColumns = [
-            'code' => CustomCodeHelper::generateCode($account, $prefix),
-            'roleId' => $roleCustomer->id,
-        ];
-        $accountConverted = ConvertHelper::convertColumnsToSnakeCase($req->all(), $moreColumns);
-        $accountCreated = Account::create($accountConverted);
-
-        return ApiResponse::responseObject($accountCreated);
+        // $account = Account::query();
+        // $prefix = 'KH';
+        //
+        // $roleCustomer = ModelsRole::where('code', Role::CUSTOMER)->first();
+        // $moreColumns = [
+        //     'code' => CustomCodeHelper::generateCode($account, $prefix),
+        //     'roleId' => $roleCustomer->id,
+        // ];
+        // $accountConverted = ConvertHelper::convertColumnsToSnakeCase($req->all(), $moreColumns);
+        // $accountCreated = Account::create($accountConverted);
+        //
+        // return ApiResponse::responseObject(new AccountResource($accountCreated));
     }
 }

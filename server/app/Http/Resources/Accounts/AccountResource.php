@@ -18,11 +18,12 @@ class AccountResource extends JsonResource
             'id' => $this->id,
             'code' => $this->code,
             'fullName' => $this->full_name,
+            'email' => $this->email,
+            'avatarUrl' => $this->avatar_url,
             'phoneNumber' => $this->phone_number,
             'birthDate' => $this->birth_date,
             'gender' =>  $this->gender,
             'status' => $this->status,
-            'role' => $this->role,
             'createdAt' => $this->created_at,
         ];
     }
@@ -42,7 +43,6 @@ class AccountResource extends JsonResource
             'gender',
             'status',
             'created_at',
-            'role'
         ];
     }
 }

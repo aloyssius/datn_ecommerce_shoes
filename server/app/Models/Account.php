@@ -35,6 +35,9 @@ class Account extends BaseModel
 
     public function getBirthDateAttribute($value)
     {
-        return Carbon::parse($value)->format('d-m-Y');
+        if ($value !== null) {
+            return Carbon::parse($value)->format('d-m-Y');
+        }
+        return null;
     }
 }

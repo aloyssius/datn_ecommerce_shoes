@@ -60,7 +60,7 @@ class ProductController extends Controller
         $otherData['brands'] = $brands;
         $otherData['categories'] = $categories;
 
-        QueryHelper::buildOrderBy($products, 'created_at', 'desc');
+        QueryHelper::buildOrderBy($products, 'products.created_at', 'desc');
         $products = QueryHelper::buildPagination($products, $req);
 
         return ApiResponse::responsePage(ProductResource::collection($products), $statusCounts, $otherData);

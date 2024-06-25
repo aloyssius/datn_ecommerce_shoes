@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Account;
 
 use App\Constants\CommonStatus;
-use App\Constants\Role;
+use App\Http\Requests\BaseRequest;
 use Illuminate\Validation\Rule;
 
 class AccountRequest extends BaseRequest
@@ -29,9 +29,6 @@ class AccountRequest extends BaseRequest
                 Rule::in(CommonStatus::toArray()), 'nullable'
             ],
             'gender' => 'boolean|nullable',
-            'role' => [
-                Rule::in(Role::toArray()), 'nullable'
-            ]
         ]);
     }
 
@@ -40,7 +37,7 @@ class AccountRequest extends BaseRequest
 
         return array_merge(parent::messages(), [
             'status.in' => 'Trạng thái tài khoản không hợp lệ.',
-            'role.in' => 'Trạng thái tài khoản không hợp lệ.',
+            'gender.boolean' => 'Giới tính không hợp lệ.',
         ]);
     }
 }

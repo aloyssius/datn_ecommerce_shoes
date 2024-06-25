@@ -16,6 +16,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/accounts/customer', [CustomerController::class, 'index']);
+Route::get('/customers', [CustomerController::class, 'index']);
+Route::post('/customers', [CustomerController::class, 'store']);
+Route::put('/customers/{id}', [CustomerController::class, 'update']);
+Route::get('/customers/{id}', [CustomerController::class, 'show']);
 
-Route::get('/accounts/employee', [EmpolyeeController::class, 'index']);
+Route::get('/employees', [EmpolyeeController::class, 'index']);
