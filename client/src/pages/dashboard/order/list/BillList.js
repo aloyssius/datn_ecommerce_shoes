@@ -51,7 +51,8 @@ const TABLE_HEAD = [
   { id: 'fullName', label: 'Khách hàng', align: 'left' },
   { id: 'createdAt', label: 'Ngày tạo', align: 'left' },
   { id: 'totalMoney', label: 'Tổng tiền', align: 'left' },
-  { id: 'status', label: 'Trạng thái', align: 'left' },
+  { id: 'status', label: 'Trạng thái thanh toán', align: 'left' },
+  { id: 'status', label: 'Trạng thái xử lý', align: 'left' },
   { id: 'action', label: '', align: 'left' },
 ];
 
@@ -105,7 +106,7 @@ export default function BillList() {
     navigate(PATH_DASHBOARD.discount.voucher.edit(id));
   };
 
-  const { data, totalPages, setParams, fetchCount, statusCounts } = useFetch(ADMIN_API.bill.all);
+  const { data, totalPages, setParams, firstFetch, statusCounts } = useFetch(ADMIN_API.bill.all);
 
   const handleFilter = () => {
     const params = {
@@ -120,7 +121,8 @@ export default function BillList() {
   }
 
   useEffect(() => {
-    if (fetchCount > 0) {
+    console.log(firstFetch)
+    if (firstFetch) {
       handleFilter();
     }
   }, [page, rowsPerPage, filterSearch, filterStatus, filterStartDate, filterEndDate]);
@@ -163,7 +165,7 @@ export default function BillList() {
           ]}
         />
 
-        <Card>
+        <Card className='card-round-1'>
           <Tabs
             allowScrollButtonsMobile
             variant="scrollable"

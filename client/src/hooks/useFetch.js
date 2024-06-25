@@ -1,34 +1,39 @@
 import { useState, useEffect } from 'react';
+import Swal from 'sweetalert2'
 import { apiGet, apiPost, apiPut, apiDelete } from '../utils/axios';
 import useLoading from './useLoading';
 
-const useFetch = (url, options = { fetch: true, page: true }) => {
+const useFetch = (url, options = { fetch: true }) => {
   const { onOpenLoading, onCloseLoading } = useLoading();
   const [data, setData] = useState([]);
   const [totalElements, setTotalElements] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [params, setParams] = useState({});
   const [otherData, setOtherData] = useState({});
   const [fetchCount, setFetchCount] = useState(0);
+  const [firstFetch, setFirstFetch] = useState(false);
   const [statusCounts, setStatusCounts] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true);
+      console.log(url);
+      setIsLoading(true);
       onOpenLoading();
       try {
         console.log(params);
         const response = await apiGet(url, params);
         const data = response.data;
         setData(data.data);
+        console.log(data.data);
 
-        setStatusCounts(data.statusCounts);
-
-        if (options.page) {
+        if (data.page) {
           setTotalElements(data.page.totalElements);
           setTotalPages(data.page.totalPages);
+        }
+
+        if (data.statusCounts) {
+          setStatusCounts(data.statusCounts);
         }
 
         if (data.otherData) {
@@ -36,13 +41,14 @@ const useFetch = (url, options = { fetch: true, page: true }) => {
         }
 
         setFetchCount(prevCount => prevCount + 1);
+        setFirstFetch(true);
         onCloseLoading();
-        setLoading(false);
+        setIsLoading(false);
 
       } catch (error) {
-        setError(error)
+        console.log(error);
         onCloseLoading();
-        setLoading(false);
+        setIsLoading(false);
       }
     }
 
@@ -51,18 +57,17 @@ const useFetch = (url, options = { fetch: true, page: true }) => {
     }
   }, [url, options.fetch, params])
 
-  // const post = async (body) => {
-  //   onOpenLoading();
-  //   try {
-  //     const response = await post(url, body);
-  //     setData(response.data);
-  //     onCloseLoading();
-  //   } catch (error) {
-  //     setError(error);
-  //     onCloseLoading();
-  //   }
-  // };
-  //
+  const post = async (url, data, onFinish) => {
+    try {
+      const response = await apiPost(url, data);
+      Swal.close();
+      onFinish?.(response.data.data);
+    } catch (error) {
+      console.log(error);
+      Swal.close();
+    }
+  };
+
   // const put = async (url, body) => {
   //   onOpenLoading();
   //   try {
@@ -70,7 +75,6 @@ const useFetch = (url, options = { fetch: true, page: true }) => {
   //     setData(response.data);
   //     onCloseLoading();
   //   } catch (error) {
-  //     setError(error);
   //     onCloseLoading();
   //   }
   // };
@@ -85,11 +89,10 @@ const useFetch = (url, options = { fetch: true, page: true }) => {
   //     }, 500)
   //   } catch (error) {
   //     onCloseLoading();
-  //     setError(error);
   //   }
   // };
 
-  return { data, totalElements, totalPages, loading, error/* , post, put, remove */, setParams, fetchCount, statusCounts, otherData };
+  return { data, firstFetch, totalElements, totalPages, isLoading, post, setParams, fetchCount, statusCounts, otherData };
 }
 
 export default useFetch;

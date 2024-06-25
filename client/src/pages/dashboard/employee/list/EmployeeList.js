@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 // @mui
 import {
@@ -19,6 +19,10 @@ import {
   TablePagination,
   Pagination,
 } from '@mui/material';
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
+import { ADMIN_API } from '../../../../api/apiConfig';
+import useFetch from '../../../../hooks/useFetch';
 import { All, AccountGenderOption, AccountStatusTab } from '../../../../constants/enum';
 // routes
 import { PATH_DASHBOARD } from '../../../../routes/paths';
@@ -38,6 +42,7 @@ import { TableEmptyRows, TableHeadCustom, TableNoData, TableSelectedActions } fr
 import EmployeeTableToolBar from './EmployeeTableToolBar';
 import EmployeeTableRow from './EmployeeTableRow';
 import EmployeeTagFiltered from './EmployeeTagFiltered';
+import { convertAccountGender } from '../../../../utils/ConvertEnum';
 
 // section
 
@@ -50,13 +55,13 @@ const GENDER_OPTIONS = [
 ];
 
 const TABLE_HEAD = [
-  { id: 'name', label: 'Nhân viên', align: 'left' },
   { id: 'code', label: 'Mã nhân viên', align: 'left' },
-  { id: 'phone', label: 'Số điện thoại', align: 'left' },
-  { id: 'birth', label: 'Ngày sinh', align: 'left' },
+  { id: 'fullName', label: 'Tên nhân viên', align: 'left' },
+  { id: 'email', label: 'Email', align: 'left' },
+  { id: 'phoneNumber', label: 'Số điện thoại', align: 'left' },
   { id: 'gender', label: 'Giới tính', align: 'left' },
   { id: 'status', label: 'Trạng Thái', align: 'left' },
-  { id: 'action', label: 'Thao tác', align: 'left' },
+  { id: 'action', label: '', align: 'left' },
 ];
 
 export default function EmployeeList() {
@@ -67,11 +72,10 @@ export default function EmployeeList() {
   const {
     order,
     orderBy,
-    selected,
-    onSelectRow,
-    onSelectAllRows,
     onSort,
     rowsPerPage,
+    page,
+    onChangePage,
     onChangeRowsPerPage,
   } = useTable({});
 
@@ -83,27 +87,11 @@ export default function EmployeeList() {
     ]
   );
 
-  const [tableData, setTableData] = useState([
-    {
-      id: 1,
-      code: 'PH22590',
-      fullName: 'Hồ Khánh Đăng',
-      birthDate: '11/11/2003',
-      phoneNumber: '0978267385',
-      email: 'danghkph22590@fpt.edu.vn',
-      gender: 'Nam',
-      avatar: 'none',
-      status: 'ACTIVE',
-    },
-  ]);
-
   const [filterSearch, setFilterSearch] = useState('');
 
   const [filterGender, setFilterGender] = useState(All.VI);
 
   const { currentTab: filterStatus, onChangeTab: onFilterStatus } = useTabs(All.EN);
-
-  const [foundLengthData, setFoundLengthData] = useState(0);
 
   const isDefault =
     filterGender === All.VI &&
@@ -121,8 +109,49 @@ export default function EmployeeList() {
     navigate(PATH_DASHBOARD.account.employee.edit(id));
   };
 
+  const { data, totalPages, setParams, statusCounts, firstFetch } = useFetch(ADMIN_API.employee.all);
+
+  const handleFilter = () => {
+    const params = {
+      currentPage: page,
+      pageSize: rowsPerPage,
+      search: filterSearch || null,
+      status: filterStatus !== All.EN ? filterStatus : null,
+      gender: convertAccountGender(filterGender),
+    };
+    setParams(params);
+  }
+
+  useEffect(() => {
+    if (firstFetch) {
+      handleFilter();
+    }
+  }, [page, rowsPerPage, filterSearch, filterStatus, filterGender]);
+
+  useEffect(() => {
+    if (statusCounts) {
+
+      const updatedTabs = tabs.map(tab => {
+        let count = 0;
+        if (tab.value === All.EN) {
+          count = statusCounts.reduce((acc, curr) => acc + curr.count, 0);
+        } else {
+          const statusCount = statusCounts.find(item => item.status === tab.value);
+          count = statusCount ? statusCount.count : tab.count;
+        }
+
+        return {
+          ...tab,
+          count,
+        };
+      });
+
+      setTabs(updatedTabs);
+    }
+  }, [statusCounts]);
+
   const dataFiltered = applySortFilter({
-    tableData,
+    data,
     comparator: getComparator(order, orderBy),
   });
 
@@ -132,7 +161,7 @@ export default function EmployeeList() {
         <HeaderBreadcrumbs
           heading="Danh sách nhân viên"
           links={[
-            { name: 'Quản lý nhân viên', href: PATH_DASHBOARD.account.customer.list },
+            { name: 'Quản lý nhân viên', href: PATH_DASHBOARD.account.employee.list },
             { name: 'Danh sách nhân viên' },
           ]}
           action={
@@ -199,10 +228,6 @@ export default function EmployeeList() {
           {!isDefault &&
             <Stack sx={{ mb: 3, px: 2 }}>
               <>
-                <Typography sx={{ px: 1 }} variant="body2" gutterBottom>
-                  <strong>{foundLengthData}</strong>
-                  &nbsp; Nhân viên được tìm thấy
-                </Typography>
                 <EmployeeTagFiltered
                   isShowReset={isDefault}
                   status={filterStatus}
@@ -222,42 +247,12 @@ export default function EmployeeList() {
 
           <Scrollbar>
             <TableContainer sx={{ minWidth: 800, position: 'relative' }}>
-              {selected.length > 0 && (
-                <TableSelectedActions
-                  numSelected={selected.length}
-                  rowCount={tableData.length}
-                  onSelectAllRows={(checked) =>
-                    onSelectAllRows(
-                      checked,
-                      tableData.map((row) => row.id)
-                    )
-                  }
-                  actions={
-                    <Stack spacing={1} direction="row">
-                      <Tooltip title="Delete">
-                        <IconButton color="primary">
-                          <Iconify icon={'eva:trash-2-outline'} />
-                        </IconButton>
-                      </Tooltip>
-                    </Stack>
-                  }
-                />
-              )}
-
               <Table>
                 <TableHeadCustom
                   order={order}
                   orderBy={orderBy}
                   headLabel={TABLE_HEAD}
-                  rowCount={tableData.length}
-                  numSelected={selected.length}
                   onSort={onSort}
-                  onSelectAllRows={(checked) =>
-                    onSelectAllRows(
-                      checked,
-                      tableData.map((row) => row.id)
-                    )
-                  }
                 />
 
                 <TableBody>
@@ -265,8 +260,6 @@ export default function EmployeeList() {
                     <EmployeeTableRow
                       key={row.id}
                       row={row}
-                      selected={selected.includes(row.id)}
-                      onSelectRow={() => onSelectRow(row.id)}
                       onEditRow={() => handleEditRow(row.id)}
                     />
                   ))}
@@ -282,7 +275,7 @@ export default function EmployeeList() {
 
           <Box sx={{ position: 'relative', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', alignItems: 'center' }}>
             <TablePagination
-              rowsPerPageOptions={[5, 10, 25]}
+              rowsPerPageOptions={[10, 15, 25]}
               component="div"
               rowsPerPage={rowsPerPage}
               onRowsPerPageChange={onChangeRowsPerPage}
@@ -296,7 +289,9 @@ export default function EmployeeList() {
 
             <Pagination
               sx={{ px: 1 }}
-              count={10}
+              page={page}
+              count={totalPages}
+              onChange={onChangePage}
             />
           </Box>
         </Card>
@@ -309,10 +304,10 @@ export default function EmployeeList() {
 // ----------------------------------------------------------------------
 
 function applySortFilter({
-  tableData,
+  data,
   comparator,
 }) {
-  const stabilizedThis = tableData.map((el, index) => [el, index]);
+  const stabilizedThis = data.map((el, index) => [el, index]);
 
   stabilizedThis.sort((a, b) => {
     const order = comparator(a[0], b[0]);
@@ -320,8 +315,8 @@ function applySortFilter({
     return a[1] - b[1];
   });
 
-  tableData = stabilizedThis.map((el) => el[0]);
+  data = stabilizedThis.map((el) => el[0]);
 
-  return tableData;
+  return data;
 }
 

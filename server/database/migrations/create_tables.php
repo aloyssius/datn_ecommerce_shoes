@@ -44,7 +44,7 @@ return new class extends Migration
             $table->string('password', ConstantSystem::PASSWORD_MAX_LENGTH)->nullable();
             $table->string('email', ConstantSystem::EMAIL_MAX_LENGTH)->unique();
             $table->string('identity_card', ConstantSystem::IDENTITY_CARD_MAX_LENGTH)->nullable()->unique();
-            $table->boolean('gender')->nullable();
+            $table->boolean('gender');
             $table->enum('status', CommonStatus::toArray());
             $table->string('avatar_url', ConstantSystem::URL_MAX_LENGTH)->nullable();
             $table->foreignUuid('role_id')->references('id')->on('roles');
@@ -59,7 +59,7 @@ return new class extends Migration
             $table->string('province_id');
             $table->string('district_id');
             $table->string('ward_code');
-            $table->boolean('is_default')->nullable(); // default true
+            $table->boolean('is_default')->nullable();
             $table->foreignUuid('account_id')->references('id')->on('accounts');
         });
 
@@ -96,28 +96,28 @@ return new class extends Migration
 
         // Carts
         $schema->create('carts', function (BaseBlueprint $table) {
-            $table->baseColumn()->addSoftDeletes();
+            $table->baseColumn();
             $table->uuid('account_id')->unique();
         });
 
         // Categorys
         $schema->create('categories', function (BaseBlueprint $table) {
-            $table->baseColumn()->addColumnCode()->addSoftDeletes()->addColumnName();
+            $table->baseColumn()->addColumnCode()->addColumnName();
         });
 
         // Sizes
         $schema->create('sizes', function (BaseBlueprint $table) {
-            $table->baseColumn()->addColumnCode()->addSoftDeletes()->addColumnName();
+            $table->baseColumn()->addColumnCode()->addColumnName();
         });
 
         // Colors
         $schema->create('colors', function (BaseBlueprint $table) {
-            $table->baseColumn()->addColumnCode()->addSoftDeletes()->addColumnName();
+            $table->baseColumn()->addColumnCode()->addColumnName();
         });
 
         // Brands
         $schema->create('brands', function (BaseBlueprint $table) {
-            $table->baseColumn()->addColumnCode()->addSoftDeletes()->addColumnName();
+            $table->baseColumn()->addColumnCode()->addColumnName();
         });
 
         // Products
@@ -181,12 +181,12 @@ return new class extends Migration
             $table->string('email', ConstantSystem::EMAIL_MAX_LENGTH);
             $table->string('address', ConstantSystem::ADDRESS_MAX_LENGTH);
             $table->string('phone_number', ConstantSystem::PHONE_NUMBER_MAX_LENGTH);
-            $table->bigDecimalNullable('money_ship');
+            $table->bigDecimal('money_ship');
             $table->bigDecimal('total_money');
             $table->bigDecimalNullable('discount_amount');
             $table->foreignUuid('customer_id')->references('id')->on('accounts');
             $table->foreignUuid('employee_id')->references('id')->on('accounts');
-            $table->index(['full_name', 'created_at', 'phone_number', 'code', 'status']);
+            // $table->index(['full_name', 'created_at', 'phone_number', 'code', 'status']);
         });
 
         // Bill_details

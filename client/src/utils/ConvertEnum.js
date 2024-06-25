@@ -1,4 +1,4 @@
-import { All, AccountStatusTab, DiscountStatusTab, BillStatusTab, VoucherTypeOption, ProductStockOption, ProductStatusTab } from '../constants/enum'
+import { All, AccountStatusTab, DiscountStatusTab, BillStatusTab, VoucherTypeOption, ProductStockOption, ProductStatusTab, AccountGenderOption } from '../constants/enum'
 
 export const convertProductStatus = (status) => {
   let statusConverted = "";
@@ -27,22 +27,6 @@ export const convertAccountStatus = (status) => {
 
   return statusConverted;
 }
-export const getQuantityInStock = (stockOption) => {
-  let quantityInStock = 0;
-  switch (stockOption) {
-    case ProductStockOption.OUT_OF_STOCK:
-      quantityInStock = 0;
-      break;
-    case ProductStockOption.LOW_STOCK:
-      quantityInStock = 5;
-      break;
-    default:
-      quantityInStock = 20;
-      break;
-  }
-  return quantityInStock;
-
-};
 
 export const convertVoucherType = (type) => {
   let typeConverted = "";
@@ -59,6 +43,46 @@ export const convertVoucherType = (type) => {
   }
 
   return typeConverted;
+}
+
+export const convertToEnumAccountGender = (gender) => {
+  let genderConverted = AccountGenderOption.vi.MEN;
+  switch (gender) {
+    case 0:
+      genderConverted = AccountGenderOption.vi.MEN;
+      break;
+    case 1:
+      genderConverted = AccountGenderOption.vi.WOMEN;
+      break;
+    case true:
+      genderConverted = AccountGenderOption.vi.MEN;
+      break;
+    case false:
+      genderConverted = AccountGenderOption.vi.WOMEN;
+      break;
+    default:
+      genderConverted = AccountGenderOption.vi.MEN;
+      break;
+  }
+
+  return genderConverted;
+}
+
+export const convertAccountGender = (gender) => {
+  let genderConverted = null;
+  switch (gender) {
+    case AccountGenderOption.vi.MEN:
+      genderConverted = 0;
+      break;
+    case AccountGenderOption.vi.WOMEN:
+      genderConverted = 1;
+      break;
+    default:
+      genderConverted = null;
+      break;
+  }
+
+  return genderConverted;
 }
 
 export const convertDiscountStatus = (status) => {

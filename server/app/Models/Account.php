@@ -23,6 +23,10 @@ class Account extends BaseModel
         'role_id',
     ];
 
+    protected $casts = [
+        'gender' => 'integer',
+    ];
+
     public function __construct(array $attributes = [])
     {
         $this->fillable = array_merge(parent::getBaseFillable(), $this->fillable);
@@ -31,6 +35,9 @@ class Account extends BaseModel
 
     public function getBirthDateAttribute($value)
     {
-        return Carbon::parse($value)->format('d-m-Y');
+        if ($value !== null) {
+            return Carbon::parse($value)->format('d-m-Y');
+        }
+        return null;
     }
 }

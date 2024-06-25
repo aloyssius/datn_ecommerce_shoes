@@ -137,7 +137,7 @@ export default function ProductList() {
     brandSelecteds.length === 0 &&
     filterStatus === All.EN;
 
-  const { data, totalElements, totalPages, setParams, fetchCount, statusCounts, otherData, loading } = useFetch(ADMIN_API.product.all);
+  const { data, totalPages, setParams, firstFetch, statusCounts, otherData } = useFetch(ADMIN_API.product.all);
 
   const convertedStockSelected = (stocks) => {
     const converted = stocks.map(item => {
@@ -168,7 +168,7 @@ export default function ProductList() {
   }
 
   useEffect(() => {
-    if (fetchCount > 0) {
+    if (firstFetch) {
       handleFilter();
     }
   }, [page, rowsPerPage, filterSearch, filterStatus, categorySelecteds, brandSelecteds, stockSelecteds]);
@@ -221,7 +221,7 @@ export default function ProductList() {
           }
         />
 
-        <Card>
+        <Card className='card-round-1'>
           <Tabs
             allowScrollButtonsMobile
             variant="scrollable"

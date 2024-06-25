@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Resources\Accounts;
+namespace App\Http\Resources\Promotions;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class AccountResource extends JsonResource
+class PromotionResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -16,13 +16,8 @@ class AccountResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'code' => $this->code,
-            'fullName' => $this->full_name,
-            'email' => $this->email,
-            'avatarUrl' => $this->avatar_url,
-            'phoneNumber' => $this->phone_number,
-            'birthDate' => $this->birth_date,
-            'gender' =>  $this->gender,
+            'name' => $this->name,
+            'value' => $this->value,
             'status' => $this->status,
             'createdAt' => $this->created_at,
         ];
@@ -36,11 +31,8 @@ class AccountResource extends JsonResource
     {
         return [
             'id',
-            'code',
-            'full_name',
-            'phone_number',
-            'birth_date',
-            'gender',
+            'name',
+            'value',
             'status',
             'created_at',
         ];

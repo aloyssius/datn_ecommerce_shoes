@@ -28,7 +28,7 @@ class ApiResponse
 
         $response = [
             'success' => true,
-            'statusCode' => $code,
+            'status' => $code,
             'data'    => $data,
             'sql' => $showSql,
         ];
@@ -44,7 +44,7 @@ class ApiResponse
 
         $response = [
             'success' => true,
-            'statusCode' => $code,
+            'status' => $code,
             'data'    => $page->items(),
             'page' => [
                 'currentPage' => $page->currentPage(),
@@ -67,6 +67,16 @@ class ApiResponse
             $response['otherData'] = $otherData;
         }
 
+        return response()->json($response, $code);
+    }
+
+    public static function responseError($code = 500, $error = '', $message = '')
+    {
+        $response = [
+            'status' => $code,
+            'error' => $error,
+            'message'    => $message,
+        ];
         return response()->json($response, $code);
     }
 }

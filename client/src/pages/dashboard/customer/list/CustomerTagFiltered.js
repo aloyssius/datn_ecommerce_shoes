@@ -6,7 +6,7 @@ import { Chip, Typography, Stack, Button } from '@mui/material';
 import { All } from '../../../../constants/enum';
 // utils
 import getColorName from '../../../../utils/getColorName';
-import {convertAccountStatus} from '../../../../utils/ConvertEnum';
+import { convertAccountStatus } from '../../../../utils/ConvertEnum';
 // components
 import Iconify from '../../../../components/Iconify';
 
@@ -39,16 +39,6 @@ const LabelStyle = styled((props) => <Typography component="span" variant="subti
 }));
 
 // ----------------------------------------------------------------------
-
-function labelPriceRange(range) {
-  if (range === 'below') {
-    return 'Below $25';
-  }
-  if (range === 'between') {
-    return 'Between $25 - $75';
-  }
-  return 'Above $75';
-}
 
 CustomerTagFiltered.propTypes = {
   status: PropTypes.string,
@@ -87,7 +77,6 @@ export default function CustomerTagFiltered({
           </Stack>
         </WrapperStyle>
       )}
-
 
       {!isShowReset && (
         <Button color="error" size="small" onClick={onResetAll} startIcon={<Iconify icon={'ic:round-clear-all'} />}>

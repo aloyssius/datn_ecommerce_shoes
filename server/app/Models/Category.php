@@ -8,8 +8,6 @@ class Category extends BaseModel
 {
     protected $table = 'categories';
 
-    use SoftDeletes;
-
     protected $fillable = [
         'code',
         'name',

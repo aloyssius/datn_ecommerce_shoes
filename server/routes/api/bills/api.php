@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('api')->group(function () {
-    Route::get('/bills', [BillController::class, 'index']);
-});
+Route::get('/bills', [BillController::class, 'index']);
+Route::post('/bills', [BillController::class, 'store']);
+Route::put('/bills/{id}', [BillController::class, 'update']);
+Route::get('/bills/{id}', [BillController::class, 'show']);

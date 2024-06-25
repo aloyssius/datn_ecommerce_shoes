@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\Api\Bills\BillController;
-use App\Http\Controllers\Api\Accounts\AccountController;
+use App\Http\Controllers\Api\Accounts\CustomerController;
+use App\Http\Controllers\Api\Accounts\EmpolyeeController;
 use App\Http\Controllers\Api\Vouchers\VoucherController;
+use App\Http\Controllers\Api\Promotions\PromotionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -23,8 +25,11 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 DB::enableQueryLog();
-Route::apiResource('/vouchers', VoucherController::class);
-require __DIR__ . '/api/bills/api.php';
-require __DIR__ . '/api/accounts/api.php';
-require __DIR__ . '/api/products/api.php';
-require __DIR__ . '/api/vouchers/api.php';
+
+Route::middleware('api')->group(function () {
+    require __DIR__ . '/api/accounts/api.php';
+    require __DIR__ . '/api/bills/api.php';
+    require __DIR__ . '/api/products/api.php';
+    require __DIR__ . '/api/vouchers/api.php';
+    require __DIR__ . '/api/promotions/api.php';
+});

@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\Api\Vouchers\VoucherController;
+use App\Http\Controllers\Api\Promotions\PromotionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -15,4 +15,4 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/vouchers', [VoucherController::class, 'index']);
+Route::get('/promotions', [PromotionController::class, 'index']);

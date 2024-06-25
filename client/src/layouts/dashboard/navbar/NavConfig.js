@@ -53,14 +53,14 @@ const navConfig = [
         ],
       },
       {
-        title: 'Giảm Giá',
+        title: 'Khuyến mại',
         path: PATH_DASHBOARD.discount.root,
         icon: ICONS.discount,
         children: [
           // { title: 'posts', path: PATH_DASHBOARD.blog.posts },
           // { title: 'post', path: PATH_DASHBOARD.blog.demoView },
           { title: 'Mã Giảm Giá', path: PATH_DASHBOARD.discount.voucher.list },
-          { title: 'Đợt Giảm Giá', path: PATH_DASHBOARD.discount.promotion.list },
+          // { title: 'Đợt Giảm Giá', path: PATH_DASHBOARD.discount.promotion.list },
         ],
       },
     ],
@@ -81,65 +81,65 @@ const navConfig = [
 
   // MANAGEMENT
   // ----------------------------------------------------------------------
-  {
-    subheader: 'management',
-    items: [
-      // USER
-      {
-        title: 'user',
-        path: PATH_DASHBOARD.user.root,
-        icon: ICONS.user,
-        children: [
-          { title: 'profile', path: PATH_DASHBOARD.user.profile },
-          { title: 'cards', path: PATH_DASHBOARD.user.cards },
-          { title: 'list', path: PATH_DASHBOARD.user.list },
-          { title: 'create', path: PATH_DASHBOARD.user.new },
-          { title: 'edit', path: PATH_DASHBOARD.user.demoEdit },
-          { title: 'account', path: PATH_DASHBOARD.user.account },
-        ],
-      },
+  // {
+  //   subheader: 'management',
+  //   items: [
+  //     // USER
+  //     {
+  //       title: 'user',
+  //       path: PATH_DASHBOARD.user.root,
+  //       icon: ICONS.user,
+  //       children: [
+  //         { title: 'profile', path: PATH_DASHBOARD.user.profile },
+  //         { title: 'cards', path: PATH_DASHBOARD.user.cards },
+  //         { title: 'list', path: PATH_DASHBOARD.user.list },
+  //         { title: 'create', path: PATH_DASHBOARD.user.new },
+  //         { title: 'edit', path: PATH_DASHBOARD.user.demoEdit },
+  //         { title: 'account', path: PATH_DASHBOARD.user.account },
+  //       ],
+  //     },
 
-      // E-COMMERCE
-      {
-        title: 'e-commerce',
-        path: PATH_DASHBOARD.eCommerce.root,
-        icon: ICONS.order,
-        children: [
-          { title: 'shop', path: PATH_DASHBOARD.eCommerce.shop },
-          { title: 'product', path: PATH_DASHBOARD.eCommerce.demoView },
-          { title: 'list', path: PATH_DASHBOARD.eCommerce.list },
-          { title: 'create', path: PATH_DASHBOARD.eCommerce.new },
-          { title: 'edit', path: PATH_DASHBOARD.eCommerce.demoEdit },
-          { title: 'checkout', path: PATH_DASHBOARD.eCommerce.checkout },
-        ],
-      },
+  //     // E-COMMERCE
+  //     {
+  //       title: 'e-commerce',
+  //       path: PATH_DASHBOARD.eCommerce.root,
+  //       icon: ICONS.order,
+  //       children: [
+  //         { title: 'shop', path: PATH_DASHBOARD.eCommerce.shop },
+  //         { title: 'product', path: PATH_DASHBOARD.eCommerce.demoView },
+  //         { title: 'list', path: PATH_DASHBOARD.eCommerce.list },
+  //         { title: 'create', path: PATH_DASHBOARD.eCommerce.new },
+  //         { title: 'edit', path: PATH_DASHBOARD.eCommerce.demoEdit },
+  //         { title: 'checkout', path: PATH_DASHBOARD.eCommerce.checkout },
+  //       ],
+  //     },
 
-      // INVOICE
-      {
-        title: 'invoice',
-        path: PATH_DASHBOARD.invoice.root,
-        icon: ICONS.order,
-        children: [
-          { title: 'list', path: PATH_DASHBOARD.invoice.list },
-          { title: 'details', path: PATH_DASHBOARD.invoice.demoView },
-          { title: 'create', path: PATH_DASHBOARD.invoice.new },
-          { title: 'edit', path: PATH_DASHBOARD.invoice.demoEdit },
-        ],
-      },
+  //     // INVOICE
+  //     {
+  //       title: 'invoice',
+  //       path: PATH_DASHBOARD.invoice.root,
+  //       icon: ICONS.order,
+  //       children: [
+  //         { title: 'list', path: PATH_DASHBOARD.invoice.list },
+  //         { title: 'details', path: PATH_DASHBOARD.invoice.demoView },
+  //         { title: 'create', path: PATH_DASHBOARD.invoice.new },
+  //         { title: 'edit', path: PATH_DASHBOARD.invoice.demoEdit },
+  //       ],
+  //     },
 
-      // BLOG
-      // {
-      //   title: 'blog',
-      //   path: PATH_DASHBOARD.blog.root,
-      //   icon: ICONS.blog,
-      //   children: [
-      //     // { title: 'posts', path: PATH_DASHBOARD.blog.posts },
-      //     // { title: 'post', path: PATH_DASHBOARD.blog.demoView },
-      //     { title: 'create', path: PATH_DASHBOARD.blog.new },
-      //   ],
-      // },
-    ],
-  },
+  //     // BLOG
+  //     // {
+  //     //   title: 'blog',
+  //     //   path: PATH_DASHBOARD.blog.root,
+  //     //   icon: ICONS.blog,
+  //     //   children: [
+  //     //     // { title: 'posts', path: PATH_DASHBOARD.blog.posts },
+  //     //     // { title: 'post', path: PATH_DASHBOARD.blog.demoView },
+  //     //     { title: 'create', path: PATH_DASHBOARD.blog.new },
+  //     //   ],
+  //     // },
+  //   ],
+  // },
 
 
   // APP

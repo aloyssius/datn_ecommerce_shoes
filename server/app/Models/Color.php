@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Color extends BaseModel
 {
-    use SoftDeletes;
 
     protected $fillable = [
         'code',

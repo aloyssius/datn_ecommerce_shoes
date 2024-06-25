@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Constants\ConstantSystem;
+use App\Helpers\ApiResponse;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Contracts\Validation\Validator;
@@ -45,12 +46,7 @@ class BaseRequest extends FormRequest
 
     public function failedValidation(Validator $validator)
     {
-        throw new HttpResponseException(response()->json([
-            'success'   => false,
-            'statusCode'   => 422,
-            'message'   => 'Lỗi xác thực',
-            'error'      => $validator->errors()->first()
-        ], 422));
+        throw new HttpResponseException(ApiResponse::responseError(ConstantSystem::VALIDATION_ERROR_CODE, ConstantSystem::VALIDATION_ERROR, $validator->errors()->first()));
     }
 
     public function messages()

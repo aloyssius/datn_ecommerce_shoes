@@ -1,20 +1,15 @@
 import PropTypes from 'prop-types';
-import { useState } from 'react';
 // @mui
 import { format, parse } from 'date-fns';
 import { useTheme } from '@mui/material/styles';
 import { Tooltip, Checkbox, IconButton, TableRow, TableCell, Typography, Stack, Link, MenuItem } from '@mui/material';
 import { BillStatusTab } from '../../../../constants/enum';
 // utils
-import { fDate } from '../../../../utils/formatTime';
 import createAvatar from '../../../../utils/createAvatar';
-import { fCurrency } from '../../../../utils/formatNumber';
 // components
 import Label from '../../../../components/Label';
 import Avatar from '../../../../components/Avatar';
 import Iconify from '../../../../components/Iconify';
-import { TableMoreMenu } from '../../../../components/table';
-import { PATH_DASHBOARD } from '../../../../routes/paths';
 import { convertOrderStatus } from '../../../../utils/ConvertEnum';
 import { displayCurrencyVnd } from '../../../../utils/formatCurrency';
 
@@ -39,7 +34,7 @@ export default function BillTableRow({ row, onEditRow }) {
 
       <TableCell align="left">
         <Stack>
-          <Link noWrap variant="subtitle2" onClick={onEditRow} sx={{ color: 'black', cursor: 'pointer' }}>
+          <Link noWrap variant="subtitle2" onClick={onEditRow} sx={{ color: 'primary.main', cursor: 'pointer' }}>
             {`#${code}`}
           </Link>
         </Stack>
@@ -93,8 +88,23 @@ export default function BillTableRow({ row, onEditRow }) {
       </TableCell>
 
       <TableCell align="left">
+        <Label
+          variant={theme.palette.mode === 'light' ? 'ghost' : 'filled'}
+          color={
+            (status === BillStatusTab.en.COMPLETED && 'success') ||
+            (status === BillStatusTab.en.PENDING_CONFIRM && 'warning') ||
+            (status === BillStatusTab.en.CANCELED && 'error') ||
+            'default'
+          }
+          sx={{ textTransform: 'capitalize' }}
+        >
+          {convertOrderStatus(status)}
+        </Label>
+      </TableCell>
 
-        <Tooltip title='Cập nhật'>
+      <TableCell align="left">
+
+        <Tooltip title='Xem chi tiết'>
           <IconButton onClick={onEditRow}>
             <Iconify
               icon={'eva:edit-2-fill'}

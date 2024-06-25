@@ -15,6 +15,4 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('api')->group(function () {
-    Route::get('/products', [ProductController::class, 'index']);
-});
+Route::get('/products', [ProductController::class, 'index']);
