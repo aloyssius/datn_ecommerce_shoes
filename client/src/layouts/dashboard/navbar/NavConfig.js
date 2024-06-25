@@ -22,8 +22,7 @@ const navConfig = [
   {
     items: [
       { title: 'Thống kê', path: PATH_DASHBOARD.general.app, icon: ICONS.dashboard },
-      { title: 'Bán Hàng Tại Quầy', path: PATH_DASHBOARD.general.ecommerce, icon: ICONS.point_of_sale },
-      { title: 'Quản Lý Đơn Hàng', path: PATH_DASHBOARD.order.list, icon: ICONS.order },
+      { title: 'Quản Lý Đơn Hàng', path: PATH_DASHBOARD.bill.list, icon: ICONS.order },
       {
         title: 'Quản Lý Sản Phẩm',
         path: PATH_DASHBOARD.eCommerce.root,

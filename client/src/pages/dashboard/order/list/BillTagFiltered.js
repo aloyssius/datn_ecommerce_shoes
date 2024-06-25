@@ -50,7 +50,7 @@ function labelPriceRange(range) {
   return 'Above $75';
 }
 
-OrderTagFiltered.propTypes = {
+BillTagFiltered.propTypes = {
   status: PropTypes.string,
   startDate: PropTypes.instanceOf(Date),
   endDate: PropTypes.instanceOf(Date),
@@ -60,7 +60,7 @@ OrderTagFiltered.propTypes = {
   onResetAll: PropTypes.func,
 };
 
-export default function OrderTagFiltered({
+export default function BillTagFiltered({
   status,
   startDate,
   endDate,
@@ -69,24 +69,46 @@ export default function OrderTagFiltered({
   isShowReset,
   onResetAll,
 }) {
-  const dateCurrent = new Date();
-
-  const monthNames = [...Array(12).keys()].map(month =>
-    new Intl.DateTimeFormat('vi-VN', { month: 'long' }).format(new Date(2024, month))
-  );
 
   const getDateLabel = (startDate, endDate) => {
-    const monthName = monthNames[dateCurrent.getMonth()];
+    const parseDate = (dateString) => {
+      const dateArray = dateString.split("-");
+      const day = dateArray[0];
+      const month = dateArray[1];
+      const year = dateArray[2];
 
-    if (startDate && !endDate) {
-      return `${startDate.getDate()} - ? ${monthName} 2024`;
-    }
-    if (endDate && !startDate) {
-      return `? - ${endDate.getDate()} ${monthName} 2024`;
-    }
+      const monthNames = [
+        "Tháng 1",
+        "Tháng 2",
+        "Tháng 3",
+        "Tháng 4",
+        "Tháng 5",
+        "Tháng 6",
+        "Tháng 7",
+        "Tháng 8",
+        "Tháng 9",
+        "Tháng 10",
+        "Tháng 11",
+        "Tháng 12"
+      ];
+
+      const formattedDate = `${day} ${monthNames[Number(month) - 1]} ${year}`;
+      return formattedDate;
+    };
+
+    const formattedStartDate = parseDate(String(startDate));
+    const formattedEndDate = parseDate(String(endDate));
+
     if (startDate && endDate) {
-      return `${startDate.getDate()} - ${endDate.getDate()} ${monthName} 2024`;
+      return `${formattedStartDate} - ${formattedEndDate}`;
     }
+    if (startDate && !endDate) {
+      return `${formattedStartDate} - ?`;
+    }
+    if (!startDate && endDate) {
+      return `? - ${formattedEndDate}`;
+    }
+
     return 'No Dates Available';
   };
 

@@ -16,6 +16,7 @@ const useFetch = (url, options = { fetch: true, page: true }) => {
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       onOpenLoading();
       try {
         console.log(params);
@@ -36,10 +37,12 @@ const useFetch = (url, options = { fetch: true, page: true }) => {
 
         setFetchCount(prevCount => prevCount + 1);
         onCloseLoading();
+        setLoading(false);
 
       } catch (error) {
         setError(error)
         onCloseLoading();
+        setLoading(false);
       }
     }
 
@@ -86,7 +89,7 @@ const useFetch = (url, options = { fetch: true, page: true }) => {
   //   }
   // };
 
-  return { data, totalElements, totalPages, /* loading, */ error/* , post, put, remove */, setParams, fetchCount, statusCounts, otherData };
+  return { data, totalElements, totalPages, loading, error/* , post, put, remove */, setParams, fetchCount, statusCounts, otherData };
 }
 
 export default useFetch;

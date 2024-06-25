@@ -34,14 +34,11 @@ export const PATH_PAGE = {
 
 export const PATH_DASHBOARD = {
   root: ROOTS_DASHBOARD,
-  order: {
-    root: path(ROOTS_DASHBOARD, '/order'),
-    list: path(ROOTS_DASHBOARD, '/order/list'),
-    new: path(ROOTS_DASHBOARD, '/order/new'),
-    edit: (id) => path(ROOTS_DASHBOARD, `/order/${id}/edit`),
-  },
-  pos: {
-    root: path(ROOTS_DASHBOARD, '/point-of-sale'),
+  bill: {
+    root: path(ROOTS_DASHBOARD, '/bill'),
+    list: path(ROOTS_DASHBOARD, '/bill/list'),
+    new: path(ROOTS_DASHBOARD, '/bill/new'),
+    edit: (id) => path(ROOTS_DASHBOARD, `/bill/${id}/edit`),
   },
   product: {
     root: path(ROOTS_DASHBOARD, '/product'),

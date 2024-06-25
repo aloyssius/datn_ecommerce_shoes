@@ -20,14 +20,12 @@ import { displayCurrencyVnd } from '../../../../utils/formatCurrency';
 
 // ----------------------------------------------------------------------
 
-OrderTableRow.propTypes = {
+BillTableRow.propTypes = {
   row: PropTypes.object.isRequired,
-  selected: PropTypes.bool,
-  onSelectRow: PropTypes.func,
   onEditRow: PropTypes.func,
 };
 
-export default function OrderTableRow({ row, selected, onSelectRow, onEditRow }) {
+export default function BillTableRow({ row, onEditRow }) {
   const theme = useTheme();
 
   const { code, fullName, phoneNumber, createdAt, totalMoney, status } = row;
@@ -37,10 +35,7 @@ export default function OrderTableRow({ row, selected, onSelectRow, onEditRow })
   const formattedTime = format(parsedDateTime, 'HH:mm');
 
   return (
-    <TableRow hover selected={selected}>
-      <TableCell padding="checkbox">
-        <Checkbox checked={selected} onClick={onSelectRow} />
-      </TableCell>
+    <TableRow hover >
 
       <TableCell align="left">
         <Stack>

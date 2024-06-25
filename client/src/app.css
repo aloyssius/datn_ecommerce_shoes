@@ -1,0 +1,13 @@
+.my-swal {
+  z-index: 99999;
+  overflow-y: hidden !important;
+  height: auto !important;
+}
+
+body {
+  padding-right: 0 !important;
+}
+
+/* MuiDialog-root { */
+/*   position: fixed; */
+/* } */

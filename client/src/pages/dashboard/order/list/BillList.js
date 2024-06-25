@@ -40,17 +40,11 @@ import Scrollbar from '../../../../components/Scrollbar';
 import HeaderBreadcrumbs from '../../../../components/HeaderBreadcrumbs';
 import { TableEmptyRows, TableHeadCustom, TableNoData, TableSelectedActions } from '../../../../components/table';
 // sections
-import OrderTableRow from './OrderTableRow';
-import OrderTableToolBar from './OrderTableToolBar';
-import OrderTagFiltered from './OrderTagFiltered';
+import BillTableRow from './BillTableRow';
+import BillTableToolBar from './BillTableToolBar';
+import BillTagFiltered from './BillTagFiltered';
 
 // ----------------------------------------------------------------------
-
-const TYPE_OPTIONS = [
-  All.VI,
-  BillTypeOption.vi.AT_THE_COUNTER,
-  BillTypeOption.vi.DELIVERY,
-];
 
 const TABLE_HEAD = [
   { id: 'code', label: 'Mã đơn hàng', align: 'left' },
@@ -63,7 +57,7 @@ const TABLE_HEAD = [
 
 // ----------------------------------------------------------------------
 
-export default function OrderList() {
+export default function BillList() {
   const { themeStretch } = useSettings();
 
   const navigate = useNavigate();
@@ -74,9 +68,7 @@ export default function OrderList() {
     rowsPerPage,
     page,
     onChangePage,
-    selected,
     onSelectRow,
-    onSelectAllRows,
     onSort,
     onChangeRowsPerPage,
   } = useTable({});
@@ -113,7 +105,7 @@ export default function OrderList() {
     navigate(PATH_DASHBOARD.discount.voucher.edit(id));
   };
 
-  const { data, totalElements, totalPages, setParams, fetchCount, statusCounts } = useFetch(ADMIN_API.bill.all);
+  const { data, totalPages, setParams, fetchCount, statusCounts } = useFetch(ADMIN_API.bill.all);
 
   const handleFilter = () => {
     const params = {
@@ -166,7 +158,7 @@ export default function OrderList() {
         <HeaderBreadcrumbs
           heading="Danh sách đơn hàng"
           links={[
-            { name: 'Quản lý đơn hàng', href: PATH_DASHBOARD.order.list },
+            { name: 'Quản lý đơn hàng', href: PATH_DASHBOARD.bill.list },
             { name: 'Danh sách đơn hàng' },
           ]}
         />
@@ -212,8 +204,7 @@ export default function OrderList() {
 
           <Divider />
 
-          <OrderTableToolBar
-            filterSearch={filterSearch}
+          <BillTableToolBar
             filterStartDate={filterStartDate}
             filterEndDate={filterEndDate}
             onFilterSearch={handleFilterSearch}
@@ -228,11 +219,11 @@ export default function OrderList() {
           {!isDefault &&
             <Stack sx={{ mb: 3, px: 2 }}>
               <>
-                <OrderTagFiltered
+                <BillTagFiltered
                   isShowReset={isDefault}
                   status={filterStatus}
-                  startDate={filterStartDate}
-                  endDate={filterEndDate}
+                  startDate={filterStartDate ? dayjs(filterStartDate).format('DD-MM-YYYY') : null}
+                  endDate={filterEndDate ? dayjs(filterEndDate).format('DD-MM-YYYY') : null}
                   onRemoveStatus={() => onFilterStatus(null, All.EN)}
                   onRemoveDate={() => {
                     setFilterEndDate(null);
@@ -247,53 +238,21 @@ export default function OrderList() {
               </>
             </Stack>
           }
-
           <Scrollbar>
             <TableContainer sx={{ minWidth: 800, position: 'relative' }}>
-              {selected.length > 0 && (
-                <TableSelectedActions
-                  numSelected={selected.length}
-                  rowCount={totalElements}
-                  onSelectAllRows={(checked) =>
-                    onSelectAllRows(
-                      checked,
-                      data.map((row) => row.id)
-                    )
-                  }
-                  actions={
-                    <Stack spacing={1} direction="row">
-                      <Tooltip title="Delete">
-                        <IconButton color="primary">
-                          <Iconify icon={'eva:trash-2-outline'} />
-                        </IconButton>
-                      </Tooltip>
-                    </Stack>
-                  }
-                />
-              )}
-
               <Table>
                 <TableHeadCustom
                   order={order}
                   orderBy={orderBy}
                   headLabel={TABLE_HEAD}
-                  rowCount={totalElements}
-                  numSelected={selected.length}
                   onSort={onSort}
-                  onSelectAllRows={(checked) =>
-                    onSelectAllRows(
-                      checked,
-                      data.map((row) => row.id)
-                    )
-                  }
                 />
 
                 <TableBody>
                   {dataFiltered.map((row) => (
-                    <OrderTableRow
+                    <BillTableRow
                       key={row.id}
                       row={row}
-                      selected={selected.includes(row.id)}
                       onSelectRow={() => onSelectRow(row.id)}
                       onEditRow={() => handleEditRow(row.id)}
                     />
@@ -356,46 +315,3 @@ function applySortFilter({
 
 // ----------------------------------------------------------------------
 
-// const dataFiltered = applySortFilter({
-//   tableData,
-//   comparator: getComparator(order, orderBy),
-//   filterSearch,
-//   filterStatus,
-//   filterStartDate,
-//   filterEndDate,
-//   filterDiscountValue,
-//   filterQuantity,
-//   filterType,
-//   filterTypeDiscount,
-// });
-
-// ----------------------------------------------------------------------
-
-// function useDebounce(cb, delay) {
-//   const [debounceValue, setDebounceValue] = useState(cb);
-//   useEffect(() => {
-//     const handler = setTimeout(() => {
-//       setDebounceValue(cb);
-//     }, delay);
-//
-//     return () => {
-//       clearTimeout(handler);
-//     };
-//   }, [cb, delay]);
-//   return debounceValue;
-// }
-//
-// const debounceValue = useDebounce(filterSearch, 300);
-//
-// useEffect(() => {
-//   const dataFiltered = applySortFilter({
-//     tableData,
-//     comparator: getComparator(order, orderBy),
-//     filterSearch,
-//   });
-//   setTableFiltered(dataFiltered);
-// }, [debounceValue]);
-//
-// const handleFilterType = (event) => {
-//   setFilterType(event.target.value);
-// };

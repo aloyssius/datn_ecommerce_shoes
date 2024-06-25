@@ -87,77 +87,79 @@ export default function ProductTagFiltered({
   }
 
   return (
-    <RootStyle>
-      {status !== All.EN && (
-        <WrapperStyle>
-          <LabelStyle>Trạng thái:</LabelStyle>
-          <Stack direction="row" flexWrap="wrap" sx={{ p: 0.75 }}>
-            <Chip size="small" color='primary' label={convertProductStatus(status)} deleteIcon={'ic:round-clear-all'} onDelete={onRemoveStatus} sx={{ m: 0.5 }} />
-          </Stack>
-        </WrapperStyle>
-      )}
+    <>
+      <RootStyle>
+        {status !== All.EN && (
+          <WrapperStyle>
+            <LabelStyle>Trạng thái:</LabelStyle>
+            <Stack direction="row" flexWrap="wrap" sx={{ p: 0.75 }}>
+              <Chip size="small" color='primary' label={convertProductStatus(status)} deleteIcon={'ic:round-clear-all'} onDelete={onRemoveStatus} sx={{ m: 0.5 }} />
+            </Stack>
+          </WrapperStyle>
+        )}
 
-      {stocks.length > 0 && (
-        <WrapperStyle>
-          <LabelStyle>Số lượng tồn:</LabelStyle>
-          <Stack direction="row" flexWrap="wrap" sx={{ p: 0.75 }}>
-            {stocks.map((s) => (
-              <Chip
-                key={s}
-                color='primary'
-                deleteIcon={'ic:round-clear-all'}
-                label={s}
-                size="small"
-                onDelete={() => onRemoveStock(s)}
-                sx={{ m: 0.5 }}
-              />
-            ))}
-          </Stack>
-        </WrapperStyle>
-      )}
+        {stocks.length > 0 && (
+          <WrapperStyle>
+            <LabelStyle>Số lượng tồn:</LabelStyle>
+            <Stack direction="row" flexWrap="wrap" sx={{ p: 0.75 }}>
+              {stocks.map((s) => (
+                <Chip
+                  key={s}
+                  color='primary'
+                  deleteIcon={'ic:round-clear-all'}
+                  label={s}
+                  size="small"
+                  onDelete={() => onRemoveStock(s)}
+                  sx={{ m: 0.5 }}
+                />
+              ))}
+            </Stack>
+          </WrapperStyle>
+        )}
 
-      {categories.length > 0 && (
-        <WrapperStyle>
-          <LabelStyle>Danh mục:</LabelStyle>
-          <Stack direction="row" flexWrap="wrap" sx={{ p: 0.75 }}>
-            {categories.map((s) => (
-              <Chip
-                key={s.id}
-                deleteIcon={'ic:round-clear-all'}
-                label={findCategoryName(s)}
-                color='primary'
-                size="small"
-                onDelete={() => onRemoveCategory(s)}
-                sx={{ m: 0.5 }}
-              />
-            ))}
-          </Stack>
-        </WrapperStyle>
-      )}
-      {brands.length > 0 && (
-        <WrapperStyle>
-          <LabelStyle>Thương hiệu:</LabelStyle>
-          <Stack direction="row" flexWrap="wrap" sx={{ p: 0.75 }}>
-            {brands.map((s) => (
-              <Chip
-                key={s}
-                label={findBrandName(s)}
-                color='primary'
-                deleteIcon={'ic:round-clear-all'}
-                size="small"
-                onDelete={() => onRemoveBrand(s)}
-                sx={{ m: 0.5 }}
-              />
-            ))}
-          </Stack>
-        </WrapperStyle>
-      )}
+        {categories.length > 0 && (
+          <WrapperStyle>
+            <LabelStyle>Danh mục:</LabelStyle>
+            <Stack direction="row" flexWrap="wrap" sx={{ p: 0.75 }}>
+              {categories.map((s) => (
+                <Chip
+                  key={s.id}
+                  deleteIcon={'ic:round-clear-all'}
+                  label={findCategoryName(s)}
+                  color='primary'
+                  size="small"
+                  onDelete={() => onRemoveCategory(s)}
+                  sx={{ m: 0.5 }}
+                />
+              ))}
+            </Stack>
+          </WrapperStyle>
+        )}
+        {brands.length > 0 && (
+          <WrapperStyle>
+            <LabelStyle>Thương hiệu:</LabelStyle>
+            <Stack direction="row" flexWrap="wrap" sx={{ p: 0.75 }}>
+              {brands.map((s) => (
+                <Chip
+                  key={s}
+                  label={findBrandName(s)}
+                  color='primary'
+                  deleteIcon={'ic:round-clear-all'}
+                  size="small"
+                  onDelete={() => onRemoveBrand(s)}
+                  sx={{ m: 0.5 }}
+                />
+              ))}
+            </Stack>
+          </WrapperStyle>
+        )}
 
-      {!isShowReset && (
-        <Button color="error" size="small" onClick={onResetAll} startIcon={<Iconify icon={'ic:round-clear-all'} />}>
-          Làm Mới
-        </Button>
-      )}
-    </RootStyle>
+        {!isShowReset && (
+          <Button color="error" size="small" onClick={onResetAll} startIcon={<Iconify icon={'ic:round-clear-all'} />}>
+            Làm Mới
+          </Button>
+        )}
+      </RootStyle>
+    </>
   );
 }
