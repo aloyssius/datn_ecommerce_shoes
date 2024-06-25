@@ -42,6 +42,7 @@ import { TableEmptyRows, TableHeadCustom, TableNoData, TableSelectedActions } fr
 import EmployeeTableToolBar from './EmployeeTableToolBar';
 import EmployeeTableRow from './EmployeeTableRow';
 import EmployeeTagFiltered from './EmployeeTagFiltered';
+import { convertAccountGender } from '../../../../utils/ConvertEnum';
 
 // section
 
@@ -54,13 +55,13 @@ const GENDER_OPTIONS = [
 ];
 
 const TABLE_HEAD = [
-  { id: 'name', label: 'Nhân viên', align: 'left' },
   { id: 'code', label: 'Mã nhân viên', align: 'left' },
-  { id: 'phone', label: 'Số điện thoại', align: 'left' },
-  { id: 'birth', label: 'Ngày sinh', align: 'left' },
+  { id: 'fullName', label: 'Tên nhân viên', align: 'left' },
+  { id: 'email', label: 'Email', align: 'left' },
+  { id: 'phoneNumber', label: 'Số điện thoại', align: 'left' },
   { id: 'gender', label: 'Giới tính', align: 'left' },
   { id: 'status', label: 'Trạng Thái', align: 'left' },
-  { id: 'action', label: 'Thao tác', align: 'left' },
+  { id: 'action', label: '', align: 'left' },
 ];
 
 export default function EmployeeList() {
@@ -71,9 +72,6 @@ export default function EmployeeList() {
   const {
     order,
     orderBy,
-    selected,
-    onSelectRow,
-    onSelectAllRows,
     onSort,
     rowsPerPage,
     page,
@@ -89,27 +87,11 @@ export default function EmployeeList() {
     ]
   );
 
-  const [tableData, setTableData] = useState([
-    {
-      id: 1,
-      code: 'PH22590',
-      fullName: 'Hồ Khánh Đăng',
-      birthDate: '11/11/2003',
-      phoneNumber: '0978267385',
-      email: 'danghkph22590@fpt.edu.vn',
-      gender: 'Nam',
-      avatar: 'none',
-      status: 'ACTIVE',
-    },
-  ]);
-
   const [filterSearch, setFilterSearch] = useState('');
 
   const [filterGender, setFilterGender] = useState(All.VI);
 
   const { currentTab: filterStatus, onChangeTab: onFilterStatus } = useTabs(All.EN);
-
-  const [foundLengthData, setFoundLengthData] = useState(0);
 
   const isDefault =
     filterGender === All.VI &&
@@ -127,31 +109,21 @@ export default function EmployeeList() {
     navigate(PATH_DASHBOARD.account.employee.edit(id));
   };
 
-  const { data, totalElements, totalPages, setParams, fetchCount, statusCounts, otherData } = useFetch(ADMIN_API.employee.all);
+  const { data, totalPages, setParams, statusCounts, firstFetch } = useFetch(ADMIN_API.employee.all);
 
   const handleFilter = () => {
-
-    let gender;
-    if (filterGender === AccountGenderOption.vi.MEN) {
-      gender = 0;
-    } else if (filterGender === AccountGenderOption.vi.WOMEN) {
-      gender = 1;
-    } else {
-      gender = null;
-    }
-
     const params = {
       currentPage: page,
       pageSize: rowsPerPage,
       search: filterSearch || null,
       status: filterStatus !== All.EN ? filterStatus : null,
-      gender,
+      gender: convertAccountGender(filterGender),
     };
     setParams(params);
   }
 
   useEffect(() => {
-    if (fetchCount > 0) {
+    if (firstFetch) {
       handleFilter();
     }
   }, [page, rowsPerPage, filterSearch, filterStatus, filterGender]);
@@ -256,10 +228,6 @@ export default function EmployeeList() {
           {!isDefault &&
             <Stack sx={{ mb: 3, px: 2 }}>
               <>
-                <Typography sx={{ px: 1 }} variant="body2" gutterBottom>
-                  <strong>{foundLengthData}</strong>
-                  &nbsp; Nhân viên được tìm thấy
-                </Typography>
                 <EmployeeTagFiltered
                   isShowReset={isDefault}
                   status={filterStatus}
@@ -279,42 +247,12 @@ export default function EmployeeList() {
 
           <Scrollbar>
             <TableContainer sx={{ minWidth: 800, position: 'relative' }}>
-              {selected.length > 0 && (
-                <TableSelectedActions
-                  numSelected={selected.length}
-                  rowCount={totalElements}
-                  onSelectAllRows={(checked) =>
-                    onSelectAllRows(
-                      checked,
-                      data.map((row) => row.id)
-                    )
-                  }
-                  actions={
-                    <Stack spacing={1} direction="row">
-                      <Tooltip title="Delete">
-                        <IconButton color="primary">
-                          <Iconify icon={'eva:trash-2-outline'} />
-                        </IconButton>
-                      </Tooltip>
-                    </Stack>
-                  }
-                />
-              )}
-
               <Table>
                 <TableHeadCustom
                   order={order}
                   orderBy={orderBy}
                   headLabel={TABLE_HEAD}
-                  rowCount={totalElements}
-                  numSelected={selected.length}
                   onSort={onSort}
-                  onSelectAllRows={(checked) =>
-                    onSelectAllRows(
-                      checked,
-                      data.map((row) => row.id)
-                    )
-                  }
                 />
 
                 <TableBody>
@@ -322,8 +260,6 @@ export default function EmployeeList() {
                     <EmployeeTableRow
                       key={row.id}
                       row={row}
-                      selected={selected.includes(row.id)}
-                      onSelectRow={() => onSelectRow(row.id)}
                       onEditRow={() => handleEditRow(row.id)}
                     />
                   ))}

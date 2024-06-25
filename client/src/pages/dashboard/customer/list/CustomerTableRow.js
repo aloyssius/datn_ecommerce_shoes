@@ -1,56 +1,30 @@
 import PropTypes from 'prop-types';
-import { useState } from 'react';
 // @mui
 import { useTheme } from '@mui/material/styles';
-import { Tooltip, Checkbox, IconButton, TableRow, TableCell, Typography, Stack, Link, MenuItem } from '@mui/material';
+import { Tooltip, IconButton, TableRow, TableCell, Typography, Stack, Link } from '@mui/material';
 import { AccountStatusTab } from '../../../../constants/enum';
 // utils
-import { fDate } from '../../../../utils/formatTime';
 import createAvatar from '../../../../utils/createAvatar';
-import { fCurrency } from '../../../../utils/formatNumber';
 // components
 import Label from '../../../../components/Label';
 import Avatar from '../../../../components/Avatar';
 import Iconify from '../../../../components/Iconify';
-import { TableMoreMenu } from '../../../../components/table';
-import { PATH_DASHBOARD } from '../../../../routes/paths';
+import { convertAccountStatus } from '../../../../utils/ConvertEnum';
 
 // ----------------------------------------------------------------------
 
 CustomerTableRow.propTypes = {
   row: PropTypes.object.isRequired,
-  selected: PropTypes.bool,
-  onSelectRow: PropTypes.func,
   onEditRow: PropTypes.func,
 };
 
-export default function CustomerTableRow({ row, selected, onSelectRow, onEditRow }) {
+export default function CustomerTableRow({ row, onEditRow }) {
   const theme = useTheme();
 
-  const { code, fullName, birthDate, phoneNumber, email, gender, avatar, status } = row;
+  const { code, fullName, phoneNumber, email, gender, avatarUrl, status } = row;
 
   return (
-    <TableRow hover selected={selected}>
-      <TableCell padding="checkbox">
-        <Checkbox checked={selected} onClick={onSelectRow} />
-      </TableCell>
-
-      <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
-        <Avatar alt={fullName} color={createAvatar(fullName).color} sx={{ mr: 2 }}>
-          {createAvatar(fullName).name}
-        </Avatar>
-
-        <Stack>
-          <Typography variant="body2" noWrap>
-            {fullName}
-          </Typography>
-
-          <Typography noWrap variant="body2" sx={{ color: 'text.disabled', fontSize: '13px' }}>
-            {email}
-          </Typography>
-        </Stack>
-      </TableCell>
-
+    <TableRow hover>
       <TableCell align="left">
         <Stack>
           <Typography variant="subtitle2" noWrap>
@@ -59,9 +33,21 @@ export default function CustomerTableRow({ row, selected, onSelectRow, onEditRow
         </Stack>
       </TableCell>
 
-      <TableCell align="left">{phoneNumber}</TableCell>
+      <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
+        <Avatar alt={fullName} color={createAvatar(fullName).color} sx={{ mr: 2 }}>
+          {createAvatar(fullName).name}
+        </Avatar>
 
-      <TableCell align="left">{birthDate}</TableCell>
+        <Stack>
+          <Link noWrap variant="subtitle2" onClick={onEditRow} sx={{ color: 'primary.main', cursor: 'pointer' }}>
+            {fullName}
+          </Link>
+        </Stack>
+      </TableCell>
+
+      <TableCell align="left">{email}</TableCell>
+
+      <TableCell align="left">{phoneNumber}</TableCell>
 
       <TableCell align="left">{gender === 0 ? 'Nam' : 'Nữ'}</TableCell>
 
@@ -69,13 +55,13 @@ export default function CustomerTableRow({ row, selected, onSelectRow, onEditRow
         <Label
           variant={theme.palette.mode === 'light' ? 'ghost' : 'filled'}
           color={
-            (status === AccountStatusTab.en.ACTIVE && 'success') ||
-            (status === AccountStatusTab.en.UNACTIVE && 'warning') ||
+            (status === AccountStatusTab.en.IS_ACTIVE && 'success') ||
+            (status === AccountStatusTab.en.UN_ACTIVE && 'error') ||
             'default'
           }
           sx={{ textTransform: 'capitalize' }}
         >
-          {status}
+          {convertAccountStatus(status)}
         </Label>
       </TableCell>
 

@@ -30,7 +30,7 @@ export default function CustomerNewEdit() {
           heading={!isEdit ? 'Tạo khách hàng' : 'Cập nhật khách hàng'}
           links={[
             { name: 'Danh sách khách hàng', href: PATH_DASHBOARD.account.customer.list },
-            { name: !isEdit ? 'Tạo khách hàng' : data?.id },
+            { name: !isEdit ? 'Tạo khách hàng' : data?.code },
           ]}
         />
         <CustomerNewEditForm isEdit={isEdit} currentCustomer={data} />

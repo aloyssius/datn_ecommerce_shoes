@@ -28,10 +28,10 @@ export const ADMIN_API = {
   },
 
   customer: {
-    all: path(ROOTS_API, '/accounts/customer'),
-    details: (id) => path(ROOTS_API, `/bills/${id}`),
-    post: path(ROOTS_API, '/accounts'),
-    put: (id) => path(ROOTS_API, `/account/${id}`),
+    all: path(ROOTS_API, '/customers'),
+    details: (id) => path(ROOTS_API, `/customers/${id}`),
+    post: path(ROOTS_API, '/customers'),
+    put: (id) => path(ROOTS_API, `/customers/${id}`),
     // details: (id) => path(ROOTS_API, `/bills/${id}`),
   },
 
@@ -40,7 +40,7 @@ export const ADMIN_API = {
   },
 
   employee: {
-    all: path(ROOTS_API, '/accounts/employee'),
+    all: path(ROOTS_API, '/employees'),
     // post: path(ROOTS_API, '/bills'),
     // put: (id) => path(ROOTS_API, `/bills/${id}`),
     // details: (id) => path(ROOTS_API, `/bills/${id}`),

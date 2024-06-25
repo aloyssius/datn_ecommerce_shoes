@@ -2,12 +2,18 @@ import PropTypes from 'prop-types';
 import * as Yup from 'yup';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+// import DatePicker from '@mui/lab/DatePicker';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import dayjs from 'dayjs'
+import { format } from "date-fns";
 // form
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
 import { Button, Autocomplete, Box, TextField, Card, Grid, Stack, Switch, Typography, FormControlLabel } from '@mui/material';
-import DatePicker from '@mui/lab/DatePicker';
 import { styled } from '@mui/material/styles';
 // hooks
 import useConfirm from '../../../../hooks/useConfirm'
@@ -22,7 +28,8 @@ import { FormProvider, RHFRadioGroup, RHFTextField, RHFUploadAvatar } from '../.
 import { AccountGenderOption, AccountStatusTab } from '../../../../constants/enum';
 import CustomerNewEditListAddress from './CustomerNewEditListAddress';
 import { isPastOrPresentDate, isVietnamesePhoneNumberValid } from '../../../../utils/validate';
-import { convertDateGMT, convertDateParam } from '../../../../utils/convertDate';
+import { convertDatePicker, convertDateParam } from '../../../../utils/convertDate';
+import { convertToEnumAccountGender, convertAccountGender, convertAccountStatus } from '../../../../utils/ConvertEnum';
 import useFetch from '../../../../hooks/useFetch';
 import { ADMIN_API } from '../../../../api/apiConfig';
 
@@ -96,7 +103,7 @@ const LabelStyle = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }));
 
-export default function CustomerNewEditForm({ isEdit, currentCustomer }) {
+export default function CustomerNewEditForm({ isEdit, currentCustomer, isLoading }) {
   const navigate = useNavigate();
 
   const NewCustomerSchemahema = Yup.object().shape({
@@ -116,13 +123,13 @@ export default function CustomerNewEditForm({ isEdit, currentCustomer }) {
       return isVietnamesePhoneNumberValid(value);
     }).required('SĐT không được để trống'),
 
-    birthDate: Yup.string().nullable()
-      .test('date-validation', 'Ngày sinh không hợp lệ', (value) => {
-        if (value) {
-          return isPastOrPresentDate(convertDateGMT(value))
-        }
-        return true;
-      }),
+    birthDate: Yup.string().nullable().test('is-past-or-present-date', 'Ngày sinh không hợp lệ', (value) => {
+      if (value) {
+        return isPastOrPresentDate(value);
+      }
+      return true;
+    }
+    ),
   });
 
   const defaultValues = useMemo(
@@ -130,8 +137,8 @@ export default function CustomerNewEditForm({ isEdit, currentCustomer }) {
       fullName: currentCustomer?.fullName || '',
       email: currentCustomer?.email || '',
       phoneNumber: currentCustomer?.phoneNumber || '',
-      birthDate: currentCustomer?.birthDate || null,
-      gender: currentCustomer?.gender || AccountGenderOption.vi.MEN,
+      birthDate: convertDatePicker(currentCustomer?.birthDate),
+      gender: convertToEnumAccountGender(currentCustomer?.gender),
       status: currentCustomer?.status || AccountStatusTab.en.IS_ACTIVE,
       avatarUrl: currentCustomer?.avatarUrl || '',
     }),
@@ -162,6 +169,7 @@ export default function CustomerNewEditForm({ isEdit, currentCustomer }) {
     if (!isEdit) {
       reset(defaultValues);
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEdit, currentCustomer]);
 
@@ -179,11 +187,11 @@ export default function CustomerNewEditForm({ isEdit, currentCustomer }) {
   const onSubmit = async (data) => {
     const body = {
       ...data,
-      gender: data === AccountGenderOption.vi.MEN ? 0 : 1,
+      gender: convertAccountGender(data?.gender),
       birthDate: convertDateParam(data.birthDate)
     }
     console.log(body);
-    showConfirm("Xác nhận?", () => post(ADMIN_API.customer.post, body, (response) => onFinish(response)));
+    showConfirm("Xác nhận thêm mới khách hàng?", () => post(ADMIN_API.customer.post, body, (response) => onFinish(response)));
   };
 
   const handleDrop = useCallback(
@@ -243,8 +251,8 @@ export default function CustomerNewEditForm({ isEdit, currentCustomer }) {
                       render={({ field }) => (
                         <IOSSwitch
                           {...field}
-                          checked={field.value === AccountStatusTab.vi.IS_ACTIVE}
-                          onChange={(event) => field.onChange(event.target.checked ? AccountStatusTab.vi.IS_ACTIVE : AccountStatusTab.vi.UN_ACTIVE)}
+                          checked={field.value === AccountStatusTab.en.IS_ACTIVE}
+                          onChange={(event) => field.onChange(event.target.checked ? AccountStatusTab.en.IS_ACTIVE : AccountStatusTab.en.UN_ACTIVE)}
                         />
                       )}
                     />
@@ -255,7 +263,7 @@ export default function CustomerNewEditForm({ isEdit, currentCustomer }) {
                         Trạng thái
                       </Typography>
                       <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                        {values.status}
+                        {convertAccountStatus(values.status)}
                       </Typography>
                     </>
                   }
@@ -293,24 +301,29 @@ export default function CustomerNewEditForm({ isEdit, currentCustomer }) {
                   name='birthDate'
                   control={control}
                   render={({ field, fieldState: { error } }) => (
-                    <Grid>
+                    <Grid className="custom-grid">
                       <LabelStyle>
                         Ngày sinh
                       </LabelStyle>
-                      <DatePicker
-                        {...field}
-                        inputProps={{
-                          placeholder: "dd/MM/yyyy"
-                        }}
-                        inputFormat="dd/MM/yyyy"
-                        maxDate={new Date()}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            fullWidth
-                            size='small'
-                            error={!!error}
-                            helperText={error?.message}
+                      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <DemoContainer components={["DatePicker"]}>
+                          <DatePicker
+                            disableFuture
+                            value={field.value}
+                            onChange={(newValue) => {
+                              console.log(newValue);
+                              field.onChange(newValue);
+                            }}
+                            format="DD/MM/YYYY"
+                            slotProps={{
+                              textField: {
+                                placeholder: 'dd/MM/yyyy',
+                                size: "small",
+                                fullWidth: true,
+                                error: !!error,
+                                helperText: error?.message,
+                              }
+                            }}
                             sx={{
                               '& fieldset': {
                                 borderRadius: '6px',
@@ -320,15 +333,15 @@ export default function CustomerNewEditForm({ isEdit, currentCustomer }) {
                               },
                             }}
                           />
-                        )}
-                      />
+                        </DemoContainer>
+                      </LocalizationProvider>
                     </Grid>
                   )}
                 />
               </Box>
 
               <Stack direction="row" justifyContent="flex-end" spacing={1.5} sx={{ mt: 3, px: 1 }}>
-                <Button color="inherit" variant="contained">
+                <Button onClick={() => console.log(values.birthDate)} color="inherit" variant="contained">
                   Hủy
                 </Button>
                 <Button type="submit" variant="contained">
@@ -337,8 +350,8 @@ export default function CustomerNewEditForm({ isEdit, currentCustomer }) {
               </Stack>
             </Card>
           </Grid>
-        </Grid>
-      </FormProvider>
+        </Grid >
+      </FormProvider >
       <CustomerNewEditListAddress isEdit={isEdit} />
     </>
   );

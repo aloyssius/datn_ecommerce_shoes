@@ -54,13 +54,14 @@ const TYPE_OPTIONS = [
 
 const TABLE_HEAD = [
   { id: 'code', label: 'Mã', align: 'left' },
-  { id: 'name', label: 'Tên', align: 'left' },
-  { id: 'type', label: 'Loại', align: 'left' },
-  { id: 'value', label: 'Giá trị', align: 'left' },
-  { id: 'quantity', label: 'Số lượng', align: 'left' },
-  { id: 'startTime', label: 'Thời gian', align: 'left' },
+  { id: 'value', label: 'Giá trị giảm', align: 'left' },
+  // { id: 'value', label: 'Giảm tối đa', align: 'left' },
+  // { id: 'value', label: 'Điều kiện', align: 'left' },
+  { id: 'quantity', label: 'Lượt sử dụng', align: 'left' },
+  { id: 'startTime', label: 'Ngày bắt đầu', align: 'left' },
+  { id: 'endTime', label: 'Ngày kết thúc', align: 'left' },
   { id: 'status', label: 'Trạng Thái', align: 'left' },
-  { id: 'action', label: 'Thao tác', align: 'center' },
+  { id: 'action', label: '', align: 'left' },
 ];
 
 // ----------------------------------------------------------------------
@@ -92,69 +93,6 @@ export default function VoucherList() {
     ]
   );
 
-  const [tableData, setTableData] = useState([
-    {
-      id: 1,
-      code: '123123',
-      name: 'ABC',
-      type: 'Công khai',
-      value: 500000,
-      quantity: 500,
-      dateTime: '17/05/2023 - 18/05/2024',
-      status: 'on_going',
-    },
-    {
-      id: 2,
-      code: '113123',
-      name: 'ABCD',
-      type: 'Cá nhân',
-      value: 100000,
-      quantity: 200,
-      dateTime: '17/05/2023 - 18/05/2024',
-      status: 'up_comming',
-    },
-    {
-      id: 3,
-      code: '1231234',
-      name: 'ABCC',
-      type: 'Công khai',
-      value: 400000,
-      quantity: 400,
-      dateTime: '17/05/2023 - 18/05/2024',
-      status: 'finished',
-    },
-    {
-      id: 4,
-      code: '1231235',
-      name: 'ABCK',
-      type: 'Công khai',
-      value: 300000,
-      quantity: 300,
-      dateTime: '17/05/2023 - 18/05/2024',
-      status: 'UNACTIVE',
-    },
-    {
-      id: 5,
-      code: '1231239',
-      name: 'ABCL',
-      type: 'Cá nhân',
-      value: 200000,
-      quantity: 200,
-      dateTime: '17/05/2023 - 18/05/2024',
-      status: 'EXPIRED',
-    },
-    {
-      id: 6,
-      code: '1231231',
-      name: 'ABCQ',
-      type: 'Công khai',
-      value: 600000,
-      quantity: 600,
-      dateTime: '17/05/2023 - 18/05/2024',
-      status: 'ACTIVE',
-    },
-  ]);
-
   const [filterSearch, setFilterSearch] = useState('');
 
   const [filterType, setFilterType] = useState(All.EN);
@@ -165,16 +103,14 @@ export default function VoucherList() {
 
   const { currentTab: filterStatus, onChangeTab: onFilterStatus } = useTabs(All.EN);
 
-  const [foundLengthData, setFoundLengthData] = useState(0);
-
   let type;
-    if (filterType === VoucherTypeOption.en.PUBLIC) {
-      type = 'public';
-    } else if (filterType === VoucherTypeOption.en.PRIVATE) {
-      type= 'private';
-    } else {
-      type= null;
-    }
+  if (filterType === VoucherTypeOption.en.PUBLIC) {
+    type = 'public';
+  } else if (filterType === VoucherTypeOption.en.PRIVATE) {
+    type = 'private';
+  } else {
+    type = null;
+  }
 
   const isDefault =
     filterStartDate === null &&
@@ -182,47 +118,47 @@ export default function VoucherList() {
     filterStatus === All.EN &&
     filterType === All.EN;
 
-    const { data, totalElements, totalPages, setParams, fetchCount, statusCounts, otherData } = useFetch(ADMIN_API.voucher.all);
+  const { data, totalPages, setParams, fetchCount, statusCounts, firstFetch } = useFetch(ADMIN_API.voucher.all);
 
-  
-    const handleFilter = () => {
-      const params = {
-        currentPage: page,
-        pageSize: rowsPerPage,
-        search: filterSearch || null,
-        status: filterStatus !== All.EN ? filterStatus : null,
-        type
-      };
-      setParams(params);
+
+  const handleFilter = () => {
+    const params = {
+      currentPage: page,
+      pageSize: rowsPerPage,
+      search: filterSearch || null,
+      status: filterStatus !== All.EN ? filterStatus : null,
+      type
+    };
+    setParams(params);
+  }
+
+  useEffect(() => {
+    if (firstFetch) {
+      handleFilter();
     }
-  
-    useEffect(() => {
-      if (fetchCount > 0) {
-        handleFilter();
-      }
-    }, [page, rowsPerPage, filterSearch, filterStatus, filterType]);
-  
-    useEffect(() => {
-      if (statusCounts) {
-  
-        const updatedTabs = tabs.map(tab => {
-          let count = 0;
-          if (tab.value === All.EN) {
-            count = statusCounts.reduce((acc, curr) => acc + curr.count, 0);
-          } else {
-            const statusCount = statusCounts.find(item => item.status === tab.value);
-            count = statusCount ? statusCount.count : tab.count;
-          }
-  
-          return {
-            ...tab,
-            count,
-          };
-        });
-  
-        setTabs(updatedTabs);
-      }
-    }, [statusCounts]);
+  }, [page, rowsPerPage, filterSearch, filterStatus, filterType]);
+
+  useEffect(() => {
+    if (statusCounts) {
+
+      const updatedTabs = tabs.map(tab => {
+        let count = 0;
+        if (tab.value === All.EN) {
+          count = statusCounts.reduce((acc, curr) => acc + curr.count, 0);
+        } else {
+          const statusCount = statusCounts.find(item => item.status === tab.value);
+          count = statusCount ? statusCount.count : tab.count;
+        }
+
+        return {
+          ...tab,
+          count,
+        };
+      });
+
+      setTabs(updatedTabs);
+    }
+  }, [statusCounts]);
 
   const handleFilterSearch = (filterSearch) => {
     setFilterSearch(filterSearch);
@@ -322,10 +258,6 @@ export default function VoucherList() {
           {!isDefault &&
             <Stack sx={{ mb: 3, px: 2 }}>
               <>
-                <Typography sx={{ px: 1 }} variant="body2" gutterBottom>
-                  <strong>{foundLengthData}</strong>
-                  &nbsp; Mã giảm giá được tìm thấy
-                </Typography>
                 <VoucherTagFiltered
                   isShowReset={isDefault}
                   status={filterStatus}
@@ -351,42 +283,12 @@ export default function VoucherList() {
 
           <Scrollbar>
             <TableContainer sx={{ minWidth: 800, position: 'relative' }}>
-              {selected.length > 0 && (
-                <TableSelectedActions
-                  numSelected={selected.length}
-                  rowCount={data.length}
-                  onSelectAllRows={(checked) =>
-                    onSelectAllRows(
-                      checked,
-                      data.map((row) => row.id)
-                    )
-                  }
-                  actions={
-                    <Stack spacing={1} direction="row">
-                      <Tooltip title="Delete">
-                        <IconButton color="primary">
-                          <Iconify icon={'eva:trash-2-outline'} />
-                        </IconButton>
-                      </Tooltip>
-                    </Stack>
-                  }
-                />
-              )}
-
               <Table>
                 <TableHeadCustom
                   order={order}
                   orderBy={orderBy}
                   headLabel={TABLE_HEAD}
-                  rowCount={data.length}
-                  numSelected={selected.length}
                   onSort={onSort}
-                  onSelectAllRows={(checked) =>
-                    onSelectAllRows(
-                      checked,
-                      data.map((row) => row.id)
-                    )
-                  }
                 />
 
                 <TableBody>
@@ -394,8 +296,6 @@ export default function VoucherList() {
                     <VoucherTableRow
                       key={row.id}
                       row={row}
-                      selected={selected.includes(row.id)}
-                      onSelectRow={() => onSelectRow(row.id)}
                       onEditRow={() => handleEditRow(row.id)}
                     />
                   ))}
@@ -410,7 +310,7 @@ export default function VoucherList() {
           <Divider />
 
           <Box sx={{ position: 'relative', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', alignItems: 'center' }}>
-          <TablePagination
+            <TablePagination
               rowsPerPageOptions={[10, 15, 25]}
               component="div"
               rowsPerPage={rowsPerPage}

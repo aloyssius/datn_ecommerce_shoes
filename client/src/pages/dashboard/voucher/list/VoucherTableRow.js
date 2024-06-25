@@ -20,50 +20,36 @@ import { PATH_DASHBOARD } from '../../../../routes/paths';
 
 VoucherTableRow.propTypes = {
   row: PropTypes.object.isRequired,
-  selected: PropTypes.bool,
-  onSelectRow: PropTypes.func,
   onEditRow: PropTypes.func,
 };
 
-export default function VoucherTableRow({ row, selected, onSelectRow, onEditRow }) {
+export default function VoucherTableRow({ row, onEditRow }) {
   const theme = useTheme();
 
   const { code, name, type, value, quantity, startTime, endTime, status } = row;
 
   const parsedStartTime = parse(startTime, 'HH:mm:ss dd-MM-yyyy', new Date());
-
   const parsedEndTime = parse(endTime, 'HH:mm:ss dd-MM-yyyy', new Date());
 
-
   const formattedStartTime = format(parsedStartTime, 'dd/MM/yyyy');
-
   const formattedEndTime = format(parsedEndTime, 'dd/MM/yyyy');
 
   return (
-    <TableRow hover selected={selected}>
-      <TableCell padding="checkbox">
-        <Checkbox checked={selected} onClick={onSelectRow} />
-      </TableCell>
-
+    <TableRow hover>
       <TableCell align="left">
         <Stack>
-          <Typography variant="subtitle2" noWrap>
-            {code}
-          </Typography>
+          <Link noWrap variant="subtitle2" onClick={onEditRow} sx={{ color: 'primary.main', cursor: 'pointer' }}>
+            {`${code}`}
+          </Link>
         </Stack>
       </TableCell>
 
-      <TableCell align="left">{name}</TableCell>
-
-      <TableCell align="left">{type}</TableCell>
-
-      <TableCell align="left" sx={{ textTransform: 'capitalize' }}>
-        {value}
-      </TableCell>
+      <TableCell align="left">{value}</TableCell>
 
       <TableCell align="left">{quantity}</TableCell>
 
-      <TableCell align="left">{formattedStartTime} - {formattedEndTime}</TableCell>
+      <TableCell align="left">{formattedStartTime}</TableCell>
+      <TableCell align="left">{formattedEndTime}</TableCell>
 
       <TableCell align="left">
         <Label

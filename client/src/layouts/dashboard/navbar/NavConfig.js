@@ -53,14 +53,14 @@ const navConfig = [
         ],
       },
       {
-        title: 'Giảm Giá',
+        title: 'Khuyến mại',
         path: PATH_DASHBOARD.discount.root,
         icon: ICONS.discount,
         children: [
           // { title: 'posts', path: PATH_DASHBOARD.blog.posts },
           // { title: 'post', path: PATH_DASHBOARD.blog.demoView },
           { title: 'Mã Giảm Giá', path: PATH_DASHBOARD.discount.voucher.list },
-          { title: 'Đợt Giảm Giá', path: PATH_DASHBOARD.discount.promotion.list },
+          // { title: 'Đợt Giảm Giá', path: PATH_DASHBOARD.discount.promotion.list },
         ],
       },
     ],

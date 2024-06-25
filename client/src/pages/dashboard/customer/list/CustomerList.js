@@ -9,18 +9,13 @@ import {
   Table,
   Stack,
   Button,
-  Tooltip,
   Divider,
   TableBody,
   Container,
-  IconButton,
   TableContainer,
   TablePagination,
   Pagination,
-  Typography,
 } from '@mui/material';
-import dayjs from 'dayjs'
-import relativeTime from 'dayjs/plugin/relativeTime'
 import { ADMIN_API } from '../../../../api/apiConfig';
 import useFetch from '../../../../hooks/useFetch';
 import { All, AccountStatusTab, AccountGenderOption } from '../../../../constants/enum';
@@ -42,6 +37,7 @@ import { TableEmptyRows, TableHeadCustom, TableNoData, TableSelectedActions } fr
 import CustomerTableToolBar from './CustomerTableToolBar';
 import CustomerTableRow from './CustomerTableRow';
 import CustomerTagFiltered from './CustomerTagFiltered';
+import { convertAccountGender } from '../../../../utils/ConvertEnum';
 
 // ----------------------------------------------------------------------
 
@@ -52,10 +48,10 @@ const GENDER_OPTIONS = [
 ];
 
 const TABLE_HEAD = [
-  { id: 'fullName', label: 'Khách hàng', align: 'left' },
   { id: 'code', label: 'Mã khách hàng', align: 'left' },
+  { id: 'fullName', label: 'Tên khách hàng', align: 'left' },
+  { id: 'email', label: 'Email', align: 'left' },
   { id: 'phoneNumber', label: 'Số điện thoại', align: 'left' },
-  { id: 'birthDate', label: 'Ngày sinh', align: 'left' },
   { id: 'gender', label: 'Giới tính', align: 'left' },
   { id: 'status', label: 'Trạng Thái', align: 'left' },
   { id: 'action', label: '', align: 'left' },
@@ -69,9 +65,6 @@ export default function CustomerList() {
   const {
     order,
     orderBy,
-    selected,
-    onSelectRow,
-    onSelectAllRows,
     onSort,
     rowsPerPage,
     page,
@@ -87,15 +80,11 @@ export default function CustomerList() {
     ]
   );
 
-
-
   const [filterSearch, setFilterSearch] = useState('');
 
   const [filterGender, setFilterGender] = useState(All.VI);
 
   const { currentTab: filterStatus, onChangeTab: onFilterStatus } = useTabs(All.EN);
-
-  const [foundLengthData, setFoundLengthData] = useState(0);
 
   const isDefault =
     filterGender === All.VI &&
@@ -113,31 +102,22 @@ export default function CustomerList() {
     navigate(PATH_DASHBOARD.account.customer.edit(id));
   };
 
-  const { data, totalElements, totalPages, setParams, fetchCount, statusCounts, otherData } = useFetch(ADMIN_API.customer.all);
+  const { data, totalPages, setParams, firstFetch, statusCounts } = useFetch(ADMIN_API.customer.all);
 
   const handleFilter = () => {
-
-    let gender;
-    if (filterGender === AccountGenderOption.vi.MEN) {
-      gender = 0;
-    } else if (filterGender === AccountGenderOption.vi.WOMEN) {
-      gender = 1;
-    } else {
-      gender = null;
-    }
 
     const params = {
       currentPage: page,
       pageSize: rowsPerPage,
       search: filterSearch || null,
       status: filterStatus !== All.EN ? filterStatus : null,
-      gender,
+      gender: convertAccountGender(filterGender),
     };
     setParams(params);
   }
 
   useEffect(() => {
-    if (fetchCount > 0) {
+    if (firstFetch) {
       handleFilter();
     }
   }, [page, rowsPerPage, filterSearch, filterStatus, filterGender]);
@@ -190,7 +170,7 @@ export default function CustomerList() {
           }
         />
 
-        <Card>
+        <Card className='card-round-1'>
           <Tabs
             allowScrollButtonsMobile
             variant="scrollable"
@@ -261,42 +241,12 @@ export default function CustomerList() {
 
           <Scrollbar>
             <TableContainer sx={{ minWidth: 800, position: 'relative' }}>
-              {selected.length > 0 && (
-                <TableSelectedActions
-                  numSelected={selected.length}
-                  rowCount={totalElements}
-                  onSelectAllRows={(checked) =>
-                    onSelectAllRows(
-                      checked,
-                      data.map((row) => row.id)
-                    )
-                  }
-                  actions={
-                    <Stack spacing={1} direction="row">
-                      <Tooltip title="Delete">
-                        <IconButton color="primary">
-                          <Iconify icon={'eva:trash-2-outline'} />
-                        </IconButton>
-                      </Tooltip>
-                    </Stack>
-                  }
-                />
-              )}
-
               <Table>
                 <TableHeadCustom
                   order={order}
                   orderBy={orderBy}
                   headLabel={TABLE_HEAD}
-                  rowCount={totalElements}
-                  numSelected={selected.length}
                   onSort={onSort}
-                  onSelectAllRows={(checked) =>
-                    onSelectAllRows(
-                      checked,
-                      data.map((row) => row.id)
-                    )
-                  }
                 />
 
                 <TableBody>
@@ -304,8 +254,6 @@ export default function CustomerList() {
                     <CustomerTableRow
                       key={row.id}
                       row={row}
-                      selected={selected.includes(row.id)}
-                      onSelectRow={() => onSelectRow(row.id)}
                       onEditRow={() => handleEditRow(row.id)}
                     />
                   ))}

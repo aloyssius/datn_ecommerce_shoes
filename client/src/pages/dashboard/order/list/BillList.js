@@ -51,7 +51,8 @@ const TABLE_HEAD = [
   { id: 'fullName', label: 'Khách hàng', align: 'left' },
   { id: 'createdAt', label: 'Ngày tạo', align: 'left' },
   { id: 'totalMoney', label: 'Tổng tiền', align: 'left' },
-  { id: 'status', label: 'Trạng thái', align: 'left' },
+  { id: 'status', label: 'Trạng thái thanh toán', align: 'left' },
+  { id: 'status', label: 'Trạng thái xử lý', align: 'left' },
   { id: 'action', label: '', align: 'left' },
 ];
 
@@ -164,7 +165,7 @@ export default function BillList() {
           ]}
         />
 
-        <Card>
+        <Card className='card-round-1'>
           <Tabs
             allowScrollButtonsMobile
             variant="scrollable"

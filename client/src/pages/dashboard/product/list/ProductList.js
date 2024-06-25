@@ -221,7 +221,7 @@ export default function ProductList() {
           }
         />
 
-        <Card>
+        <Card className='card-round-1'>
           <Tabs
             allowScrollButtonsMobile
             variant="scrollable"
