@@ -380,6 +380,7 @@ export default function ProductList() {
         </Card>
       </Container>
     </Page>
+
   );
 }
 
@@ -401,3 +402,20 @@ function applySortFilter({
 
   return data;
 }
+
+// function applySortFilterD({
+//   data,
+//   comparator,
+// }) {
+//   const stabilizedThis = data.map((el, index) => [el, index]);
+
+//   stabilizedThis.sort((a, b) => {
+//     const order = comparator(a[0], b[0]);
+//     if (order !== 0) return order;
+//     return a[1] - b[1];
+//   });
+
+//   data = stabilizedThis.map((el) => el[0]);
+
+//   return data;
+// }
