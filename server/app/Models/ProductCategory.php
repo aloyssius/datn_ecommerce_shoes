@@ -2,19 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\SoftDeletes;
-
-class CustomerVoucher extends BaseModel
+class ProductCategory extends BaseModel
 {
-    protected $table = 'customer_vouchers';
-
-    use SoftDeletes;
+    protected $table = 'product_categories';
 
     protected $fillable = [
-        'content',
-        'is_used',
-        'account_id',
-        'voucher_id',
+        'category_id',
+        'product_id',
     ];
 
     public function __construct(array $attributes = [])

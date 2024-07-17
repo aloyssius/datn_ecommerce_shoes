@@ -8,7 +8,9 @@ class Image extends BaseModel
 {
     protected $fillable = [
         'path_url',
-        'product_details_id',
+        'product_color_id',
+        'public_id',
+        'is_default'
     ];
 
     public function __construct(array $attributes = [])

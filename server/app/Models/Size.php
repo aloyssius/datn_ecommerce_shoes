@@ -10,6 +10,7 @@ class Size extends BaseModel
     protected $fillable = [
         'code',
         'name',
+        'status',
     ];
 
     public function __construct(array $attributes = [])

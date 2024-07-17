@@ -4,11 +4,13 @@ namespace Database\Seeders;
 
 use App\Constants\ProductStatus;
 use App\Models\Brand;
+use App\Models\Category;
+use App\Models\Product;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Faker\Factory as Faker;
 
-class ProductTableSeeder extends Seeder
+class CategoryTableSeeder extends Seeder
 {
     public function run()
     {
@@ -38,14 +40,10 @@ class ProductTableSeeder extends Seeder
         ];
 
         foreach (range(1, 2) as $index) {
-            DB::table('products')->insert([
+            DB::table('product_categories')->insert([
                 'id' => $faker->uuid,
-                'name' => $productNames[$index - 1],
-                'code' => "SKU{$index}",
-                'status' => $faker->randomElement(ProductStatus::toArray()),
-                'brand_id' => Brand::all()->random()->id,
-                'description' => $faker->text,
-                'created_at' => $faker->dateTime,
+                'category_id' => Category::all()->random()->id,
+                'product_id' => Product::all()->random()->id,
             ]);
         }
     }

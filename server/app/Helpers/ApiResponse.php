@@ -38,6 +38,37 @@ class ApiResponse
         return response()->json($response, $code);
     }
 
+    public static function responsePageCustom($data, $statusCounts = [], $otherData = [], $message = '', $code = 200)
+    {
+        $showSql = DB::getQueryLog();
+
+        $response = [
+            'success' => true,
+            'status' => $code,
+            'data'    => $data['data'],
+            'page' => [
+                'currentPage' => $data['currentPage'],
+                'totalPages' => $data['totalPages'],
+                'pageSize' => $data['pageSize'],
+            ],
+            'sql' => $showSql,
+
+        ];
+        if (!empty($message)) {
+            $response['message'] = $message;
+        }
+
+        if ($statusCounts) {
+            $response['statusCounts'] = $statusCounts;
+        }
+
+        if ($otherData) {
+            $response['otherData'] = $otherData;
+        }
+
+        return response()->json($response, $code);
+    }
+
     public static function responsePage($page, $statusCounts = [], $otherData = [], $message = '', $code = 200)
     {
         $showSql = DB::getQueryLog();

@@ -13,7 +13,6 @@ class Voucher extends BaseModel
         'code',
         'name',
         'value',
-        'type',
         'type_discount',
         'max_discount_value',
         'min_order_value',

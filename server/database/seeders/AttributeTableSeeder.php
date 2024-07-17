@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Constants\CommonStatus;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Faker\Factory as Faker;
@@ -12,28 +13,31 @@ class AttributeTableSeeder extends Seeder
     {
         $faker = Faker::create();
 
-        foreach (range(1, 2) as $index) {
+        foreach (range(1, 5) as $index) {
 
             DB::table('categories')->insert([
                 'id' => $faker->uuid,
-                'code' => "ATT{$index}",
+                'code' => "DM000{$index}",
                 'name' => $faker->name,
+                'status' => $faker->randomElement(CommonStatus::toArray()),
             ]);
-
             DB::table('brands')->insert([
                 'id' => $faker->uuid,
-                'code' => "ATT{$index}",
+                'code' => "TH000{$index}",
                 'name' => $faker->name,
+                'status' => $faker->randomElement(CommonStatus::toArray()),
             ]);
             DB::table('sizes')->insert([
                 'id' => $faker->uuid,
-                'code' => "ATT{$index}",
+                'code' => "KC000{$index}",
                 'name' => $faker->name,
+                'status' => $faker->randomElement(CommonStatus::toArray()),
             ]);
             DB::table('colors')->insert([
                 'id' => $faker->uuid,
-                'code' => "ATT{$index}",
+                'code' => "#D1D1D{$index}",
                 'name' => $faker->name,
+                'status' => $faker->randomElement(CommonStatus::toArray()),
             ]);
         }
     }

@@ -8,23 +8,17 @@ class ProductDetails extends BaseModel
 {
     protected $table = 'product_details';
 
-    use SoftDeletes;
-
     protected $fillable = [
-        'sub-sku',
+        'sku',
         'quantity',
         'price',
         'status',
-        'promotion_price',
         'product_id',
-        'category_id',
-        'brand_id',
         'color_id',
         'size_id',
     ];
 
     protected $casts = [
-        'promotion_price' => 'float',
         'price' => 'float',
     ];
 

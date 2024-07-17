@@ -21,7 +21,6 @@ class VoucherTableSeeder extends Seeder
                 'code' => "PGG{$index}",
                 'name' => "Giảm giá {$index}",
                 'value' => $faker->numberBetween(100000, 2000000),
-                'type' => $faker->randomElement(VoucherType::toArray()),
                 'type_discount' => $faker->randomElement(VoucherTypeDiscount::toArray()),
                 'max_discount_value' => $faker->numberBetween(10000, 2000000),
                 'min_order_value' => $faker->numberBetween(100000, 2000000),

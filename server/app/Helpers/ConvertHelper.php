@@ -29,4 +29,26 @@ class ConvertHelper
 
         return $convertedData;
     }
+
+    public static function formatCurrencyVnd($data)
+    {
+        $hasNonZeroNumber = preg_match('/\d*[1-9]\d*/', $data);
+
+        if ($hasNonZeroNumber) {
+            $formattedNumber = number_format($data, 0, ',', '.');
+            return str_replace('.', ',', $formattedNumber);
+        }
+        return "";
+    }
+
+    public static function formatNumberString($data)
+    {
+        $hasNonZeroNumber = preg_match('/\d*[1-9]\d*/', $data);
+
+        if ($hasNonZeroNumber) {
+            return preg_replace('/[^0-9]+/', '', $data);
+        }
+
+        return '';
+    }
 }
