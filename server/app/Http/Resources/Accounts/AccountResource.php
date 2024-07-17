@@ -4,6 +4,8 @@ namespace App\Http\Resources\Accounts;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use App\Http\Resources\Accounts\AddressResource;
+
 
 class AccountResource extends JsonResource
 {
@@ -25,7 +27,10 @@ class AccountResource extends JsonResource
             'gender' =>  $this->gender,
             'status' => $this->status,
             'createdAt' => $this->created_at,
+            'addresses' => $this->addresses,
         ];
+
+
     }
     /**
      * Get the fields that should be selected from the database.

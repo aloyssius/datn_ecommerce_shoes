@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\Api\Bills\BillController;
 use App\Http\Controllers\Api\Accounts\CustomerController;
-use App\Http\Controllers\Api\Accounts\EmpolyeeController;
+use App\Http\Controllers\Api\Accounts\EmployeeController;
 use App\Http\Controllers\Api\Vouchers\VoucherController;
 use App\Http\Controllers\Api\Promotions\PromotionController;
 use Illuminate\Http\Request;

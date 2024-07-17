@@ -99,6 +99,7 @@ export const convertAccountGender = (gender) => {
   return genderConverted;
 }
 
+
 export const convertDiscountStatus = (status) => {
   let statusConverted = "";
   switch (status) {

@@ -3,6 +3,9 @@ import { useEffect, useState } from 'react';
 // @mui
 import { styled } from '@mui/material/styles';
 import { Card, Box, Grid, Button, Stack, Typography } from '@mui/material';
+
+import { phoneNumber } from '../../../../_mock/phoneNumber';
+
 // routes
 import { PATH_DASHBOARD } from '../../../../routes/paths';
 // hooks
@@ -11,6 +14,8 @@ import useConfirm from '../../../../hooks/useConfirm'
 import Iconify from '../../../../components/Iconify';
 import Label from '../../../../components/Label';
 import CustomerAddressNewDialog from './CustomerAddressNewDialog';
+import { AddressDefault } from '../../../../constants/enum';
+
 
 // ----------------------------------------------------------------------
 
@@ -44,7 +49,17 @@ const DividerVertical = () => {
   )
 };
 
-export default function CustomerNewEditListAddress({ isEdit }) {
+export default function CustomerNewEditListAddress({ isEdit, listAddress }) {
+
+  const [addresses, setAddresses] = useState(listAddress);
+
+  const handleUpdateAddresses = (addresses) => {
+    setAddresses(addresses);
+  }
+
+  useEffect(() => {
+    setAddresses(listAddress);
+  }, [listAddress])
 
   const [open, setOpen] = useState(false);
 
@@ -58,50 +73,56 @@ export default function CustomerNewEditListAddress({ isEdit }) {
                 <LabelStyleHeader sx={{ ml: 0.8 }}>Địa chỉ nhận hàng</LabelStyleHeader>
               </Stack>
 
-              <Stack sx={{ p: 1, mt: 0.5 }}>
-                <Card sx={{ p: 2 }} className='card'>
+              {addresses?.map((address) => {
+                return (
+                  <Stack sx={{ p: 1, mt: 0.5 }}>
+                    <Card sx={{ p: 2 }} className='card'>
 
-                  <Stack direction="row" justifyContent="space-between" alignItems="center">
-                    <div>
-                      <Stack direction="row" spacing={0.7} >
-                        <LabelStyleBlack>Hà Hoàng</LabelStyleBlack>
-                        <DividerVertical />
-                        <LabelStyleGray> 0978774487</LabelStyleGray>
+                      <Stack direction="row" justifyContent="space-between" alignItems="center">
+                        <div>
+                          <Stack direction="row" spacing={0.7} >
+                            <LabelStyleBlack>{address?.fullName}</LabelStyleBlack>
+                            <DividerVertical />
+                            <LabelStyleGray>{address?.phoneNumber}</LabelStyleGray>
+                          </Stack>
+                          <Stack sx={{ mt: 0.5 }}>
+                            <LabelStyleGray>{address?.address}</LabelStyleGray>
+                            <LabelStyleGray>{address?.provinceId}, {address?.districtId}, {address?.wardCode}</LabelStyleGray>
+                          </Stack>
+                          {address?.isDefault === AddressDefault.IS_DEFAULT &&
+                            <Label
+                              color='error'
+                              variant="ghost"
+                              sx={{ width: 70 }}
+                            >
+                              Mặc định
+                            </Label>
+                          }
+                        </div>
+
+                        <Stack direction="row" spacing={1.5}>
+                          <Button
+                            type="submit"
+                            color="primary"
+                            variant="outlined"
+                          >
+                            Chỉnh sửa
+                          </Button>
+                          <Button
+                            type="submit"
+                            variant="outlined"
+                            color="error"
+                          >
+                            Đặt làm mặc định
+                          </Button>
+                        </Stack>
+
                       </Stack>
-                      <Stack sx={{ mt: 0.5 }}>
-                        <LabelStyleGray>12 Ngõ 40 Phú Kiều</LabelStyleGray>
-                        <LabelStyleGray>Phường Phúc Diễn, Quận Bắc Từ Liêm, Hà Nội</LabelStyleGray>
-                      </Stack>
-                      <Label
-                        color='error'
-                        variant="ghost"
-                        sx={{ width: 70 }}
-                      >
-                        Mặc định
-                      </Label>
-                    </div>
 
-                    <Stack direction="row" spacing={1.5}>
-                      <Button
-                        type="submit"
-                        color="primary"
-                        variant="outlined"
-                      >
-                        Chỉnh sửa
-                      </Button>
-                      <Button
-                        type="submit"
-                        variant="outlined"
-                        color="error"
-                      >
-                        Đặt làm mặc định
-                      </Button>
-                    </Stack>
-
+                    </Card>
                   </Stack>
-
-                </Card>
-              </Stack>
+                );
+              })}
 
               <Stack direction="row" justifyContent="center" sx={{ mt: 3, sm: { display: 'none' } }}>
 
@@ -114,7 +135,7 @@ export default function CustomerNewEditListAddress({ isEdit }) {
                   Thêm địa chỉ mới
                 </Button>
 
-                <CustomerAddressNewDialog open={open} onClose={() => setOpen(false)} isEdit={isEdit} />
+                <CustomerAddressNewDialog open={open} onClose={() => setOpen(false)} isEdit={isEdit} updateAddresses={handleUpdateAddresses} />
               </Stack>
 
             </Card>

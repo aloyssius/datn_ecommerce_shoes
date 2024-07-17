@@ -1,24 +1,37 @@
 import PropTypes from 'prop-types';
 import axios from 'axios';
 import { useEffect, useMemo, useState } from 'react';
+
 import * as Yup from 'yup';
 import Swal from 'sweetalert2'
 // form
 import { useForm, Controller } from 'react-hook-form';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
 import { MenuItem, Grid, Box, Dialog, Stack, Typography, Button, TextField, Autocomplete } from '@mui/material';
 import { styled } from '@mui/material/styles';
 // components
+import { isPastOrPresentDate, isVietnamesePhoneNumberValid } from '../../../../utils/validate';
 import { FormProvider, RHFCheckbox, RHFTextField } from '../../../../components/hook-form';
+import useFetch from '../../../../hooks/useFetch';
+import { AddressDefault } from '../../../../constants/enum';
+
 // hooks
 import useDeliveryApi from '../../../../hooks/useDeliveryApi';
+import useConfirm from '../../../../hooks/useConfirm'
+import useNotification from '../../../../hooks/useNotification';
+import { ADMIN_API } from '../../../../api/apiConfig';
+// routes
+import { PATH_DASHBOARD } from '../../../../routes/paths';
 
 // ----------------------------------------------------------------------
 
 CustomerAddressNewDialog.propTypes = {
   onClose: PropTypes.func,
   open: PropTypes.bool,
+  currentAddress: PropTypes.object,
+  isEdit: PropTypes.bool,
 };
 
 const LabelStyle = styled(Typography)(({ theme }) => ({
@@ -27,11 +40,22 @@ const LabelStyle = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }));
 
-export default function CustomerAddressNewDialog({ open, onClose, isEdit, currentAddress }) {
+export default function CustomerAddressNewDialog({ open, onClose, isEdit, currentAddress, updateAddresses }) {
+
+  const navigate = useNavigate();
+
+  const { id } = useParams();
+  const { data } = useFetch(ADMIN_API.customer.address.details(id), { fetch: isEdit })
 
   const NewAddressSchema = Yup.object().shape({
-    fullName: Yup.string().required('Tên không được để trống'),
-    phoneNumber: Yup.string().required('SĐT không được để trống'),
+    fullName: Yup.string().test(
+      'max',
+      'Họ và tên quá dài (tối đa 50 ký tự)',
+      value => value.trim().length <= 50
+    ).required('Họ và tên không được để trống'),
+    phoneNumber: Yup.string().test('is-vietnamese-phone-number', 'SĐT không hợp lệ', (value) => {
+      return isVietnamesePhoneNumberValid(value);
+    }).required('SĐT không được để trống'),
     district: Yup.object().nullable().required('Bạn chưa chọn Quận/Huyện'),
     ward: Yup.object().nullable().required('Bạn chưa chọn Xã/Phường'),
     province: Yup.object().nullable().required('Bạn chưa chọn Tỉnh/Thành'),
@@ -133,15 +157,30 @@ export default function CustomerAddressNewDialog({ open, onClose, isEdit, curren
       });
   }
 
-  const onSubmit = async () => {
-    try {
-      await fetch();
-      reset();
-      // enqueueSnackbar(!isEdit ? 'Create success!' : 'Update success!');
-      // navigate(PATH_DASHBOARD.eCommerce.list);
-    } catch (error) {
-      console.error(error);
+  const { post } = useFetch(null, { fetch: false });
+  const { showConfirm } = useConfirm();
+  const { onOpenSuccessNotify, onOpenErrorNotify } = useNotification();
+
+  const onFinish = (data) => {
+    updateAddresses(data);
+    console.log(data);
+    onOpenSuccessNotify('Thêm mới địa chỉ thành công!')
+    onClose();
+    reset();
+  }
+
+  const onSubmit = async (data) => {
+    const body = {
+      ...data,
+      districtId: data?.district?.DistrictID,
+      provinceId: data?.province?.ProvinceID,
+      wardCode: data?.ward?.WardCode,
+      accountId: id,
     }
+
+    const { district, province, ward, ...cleanedBody } = body;
+    console.log(cleanedBody);
+    showConfirm("Xác nhận thêm mới địa chỉ?", () => post(ADMIN_API.customer.address.post, body, (response) => onFinish(response)));
   };
 
   return (
@@ -150,7 +189,7 @@ export default function CustomerAddressNewDialog({ open, onClose, isEdit, curren
         <Typography variant="h6"> Thêm mới địa chỉ </Typography>
       </Stack>
       <Stack spacing={3} sx={{ px: 3, maxHeight: 600, mt: 1 }}>
-        <FormProvider methods={methods} onSubmit={handleSubmit()}>
+        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Box
             sx={{
               p: 1,
@@ -348,7 +387,7 @@ export default function CustomerAddressNewDialog({ open, onClose, isEdit, curren
 
             <RHFTextField name="address" topLabel="Địa chỉ cụ thể" placeholder="Nhập Tên đường, Tòa nhà, Số nhà" isRequired />
             <div>
-              <RHFCheckbox name="isDefault" label="Đặt làm địa chỉ mặc định" size="small" />
+              <RHFCheckbox name="isDefault" label="Đặt làm địa chỉ mặc định" option={AddressDefault.IS_DEFAULT} size="small" />
             </div>
           </Box>
           <Stack direction="row" justifyContent="flex-end" spacing={1.5} sx={{ py: 3, px: 1 }}>

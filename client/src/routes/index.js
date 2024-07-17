@@ -150,8 +150,8 @@ export default function Router() {
               children: [
                 { element: <Navigate to="/dashboard/account/employee/list" replace />, index: true },
                 { path: 'list', element: <EmployeeList /> },
-                // { path: ':id', element: <InvoiceDetails /> },
-                // { path: ':id/edit', element: <InvoiceEdit /> },
+                { path: ':id', element: <EmployeeNewEdit /> },
+                { path: ':id/edit', element: <EmployeeNewEdit /> },
                 // { path: 'new', element: <InvoiceCreate /> },
               ],
             },
@@ -294,6 +294,7 @@ const CustomerList = Loadable(lazy(() => import('../pages/dashboard/customer/lis
 const CustomerNewEdit = Loadable(lazy(() => import('../pages/dashboard/customer/new-edit/CustomerNewEdit')))
 // Employee
 const EmployeeList = Loadable(lazy(() => import('../pages/dashboard/employee/list/EmployeeList')))
+const EmployeeNewEdit = Loadable(lazy(() => import('../pages/dashboard/employee/new-edit/EmployeeNewEdit')))
 // PROMOTION
 // PRODUCT
 const ProductList = Loadable(lazy(() => import('../pages/dashboard/product/list/ProductList')))
