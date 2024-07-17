@@ -24,6 +24,63 @@
   border-radius: 15px !important;
 }
 
+.card-product-variant {
+  box-shadow: 0px 1px 2px 0px rgba(60, 64, 67, 0.3), 0px 1px 3px 1px rgba(60, 64, 67, 0.15) !important;
+  border-radius: 6px !important;
+}
+
 .custom-grid .MuiStack-root {
   padding-top: 0px !important;
+}
+
+.MuiTableBody-root tr {
+  border-bottom: 1px solid #dcdcdc !important;
+}
+
+.MuiTableBody-root tr:last-child {
+  border-bottom: none !important;
+}
+
+.MuiTableHead-root th {
+  border-radius: 0 !important;
+  /* background-color: whitesmoke; */
+  /* color: black; */
+}
+
+.MuiTableCell-root:last-of-type {
+  box-shadow: none !important;
+  /* border-top-right-radius: 8px !important; */
+  /* border-bottom-right-radius: 8px !important; */
+  /* padding-right: 24px !important; */
+  /* box-shadow: inset -8px 0 0 #fff !important; */
+}
+
+.MuiTableCell-root:first-of-type {
+  box-shadow: none !important;
+  /* padding-left: 24px !important; */
+  /* border-top-left-radius: 8px !important; */
+  /* border-bottom-left-radius: 8px !important; */
+  /* box-shadow: inset 8px 0 0 #fff !important; */
+}
+
+.table-product .MuiTableCell-root {
+  padding: 10px 20px !important;
+}
+
+.table-product-bill-details .MuiTableBody-root tr:last-child {
+  border-bottom: 1px solid #dcdcdc !important;
+}
+
+.table-product .MuiTableBody-root tr:last-child {
+  border-bottom: 1px solid #dcdcdc !important;
+}
+
+.table-row {
+  border-top: 1px solid #dcdcdc !important;
+}
+
+.table-product .css-168oh4s-MuiStack-root {
+  right: 0 !important;
+  border-radius: 0px !important;
+  width: calc(100% - 0px);
 }

@@ -1,4 +1,18 @@
-import { All, AccountStatusTab, DiscountStatusTab, BillStatusTab, VoucherTypeOption, ProductStockOption, ProductStatusTab, AccountGenderOption } from '../constants/enum'
+import { All, AccountStatusTab, DiscountStatusTab, BillStatusTab, VoucherTypeOption, ProductStockOption, ProductStatusTab, AccountGenderOption, AttributeStatus } from '../constants/enum'
+
+export const convertAttributeStatus = (status) => {
+  let statusConverted = "";
+  switch (status) {
+    case AttributeStatus.en.IS_ACTIVE:
+      statusConverted = AttributeStatus.vi.IS_ACTIVE;
+      break;
+    default:
+      statusConverted = AttributeStatus.vi.UN_ACTIVE;
+      break;
+  }
+
+  return statusConverted;
+}
 
 export const convertProductStatus = (status) => {
   let statusConverted = "";

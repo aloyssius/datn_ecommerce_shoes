@@ -37,14 +37,32 @@ export const PATH_DASHBOARD = {
   bill: {
     root: path(ROOTS_DASHBOARD, '/bill'),
     list: path(ROOTS_DASHBOARD, '/bill/list'),
-    new: path(ROOTS_DASHBOARD, '/bill/new'),
-    edit: (id) => path(ROOTS_DASHBOARD, `/bill/${id}/edit`),
+    details: (id) => path(ROOTS_DASHBOARD, `/bill/${id}/edit`),
   },
   product: {
     root: path(ROOTS_DASHBOARD, '/product'),
     list: path(ROOTS_DASHBOARD, '/product/list'),
     new: path(ROOTS_DASHBOARD, '/product/new'),
     edit: (id) => path(ROOTS_DASHBOARD, `/product/${id}/edit`),
+  },
+  attribute: {
+    root: path(ROOTS_DASHBOARD, '/attribute'),
+    color: {
+      root: path(ROOTS_DASHBOARD, '/attribute/color'),
+      list: path(ROOTS_DASHBOARD, '/attribute/color/list'),
+    },
+    category: {
+      root: path(ROOTS_DASHBOARD, '/attribute/category'),
+      list: path(ROOTS_DASHBOARD, '/attribute/category/list'),
+    },
+    size: {
+      root: path(ROOTS_DASHBOARD, '/attribute/size'),
+      list: path(ROOTS_DASHBOARD, '/attribute/size/list'),
+    },
+    brand: {
+      root: path(ROOTS_DASHBOARD, '/attribute/brand'),
+      list: path(ROOTS_DASHBOARD, '/attribute/brand/list'),
+    }
   },
   account: {
     root: path(ROOTS_DASHBOARD, '/account'),

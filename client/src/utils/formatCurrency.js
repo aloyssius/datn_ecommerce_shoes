@@ -13,7 +13,20 @@ export const formatCurrencyVnd = (data) => {
   return ""
 };
 
+export const formatNumberString = (data) => {
+  const hasNonZeroNumber = /\d*[1-9]\d*/.test(data);
+
+  if (hasNonZeroNumber) {
+    return data
+      .replace(/[^0-9]+/g, "");
+  }
+  return ""
+};
+
 export const formatNumber = (data) => {
-  return data
-    .replace(/[^0-9]+/g, "");
+
+  if (!data) {
+    return null;
+  }
+  return parseFloat(data.replace(/[^0-9.-]+/g, ""));
 };

@@ -66,20 +66,22 @@ export default function Router() {
 
 
         // { element: <Navigate to={PATH_AFTER_LOGIN} replace />, index: true },
-        // { path: 'app', element: <GeneralApp /> },
-        // { path: 'ecommerce', element: <GeneralEcommerce /> },
-        // { path: 'analytics', element: <GeneralAnalytics /> },
-        // { path: 'banking', element: <GeneralBanking /> },
-        // { path: 'booking', element: <GeneralBooking /> },
+        { path: 'app', element: <GeneralApp /> },
+        { path: 'ecommerce', element: <GeneralEcommerce /> },
+        { path: 'analytics', element: <GeneralAnalytics /> },
+        { path: 'banking', element: <GeneralBanking /> },
+        { path: 'booking', element: <GeneralBooking /> },
 
         {
           path: 'bill',
           children: [
             { element: <Navigate to="/dashboard/bill/list" replace />, index: true },
             { path: 'list', element: <BillList /> },
+            { path: ':id/edit', element: <BillDetails /> },
             // { path: 'product/:id/edit', element: <EcommerceProductCreate /> },
           ],
         },
+
         {
           path: 'product',
           children: [
@@ -87,10 +89,48 @@ export default function Router() {
             { path: 'list', element: <ProductList /> },
             { path: 'new', element: <ProductCreateEdit /> },
             { path: ':id/edit', element: <ProductCreateEdit /> },
+
           ],
         },
 
-        // { path: 'point-of-sale', element: <Kanban /> },
+
+        {
+          path: 'attribute',
+          children: [
+            {
+              path: 'color',
+              children: [
+                { element: <Navigate to="/dashboard/attribute/color/list" replace />, index: true },
+                { path: 'list', element: <ColorList /> },
+              ]
+            },
+
+            {
+              path: 'category',
+              children: [
+                { element: <Navigate to="/dashboard/attribute/category/list" replace />, index: true },
+                { path: 'list', element: <CategoryList /> },
+              ]
+            },
+
+            {
+              path: 'brand',
+              children: [
+                { element: <Navigate to="/dashboard/attribute/brand/list" replace />, index: true },
+                { path: 'list', element: <BrandList /> },
+              ]
+            },
+
+            {
+              path: 'size',
+              children: [
+                { element: <Navigate to="/dashboard/attribute/size/list" replace />, index: true },
+                { path: 'list', element: <SizeList /> },
+              ]
+            },
+          ],
+        },
+
 
         {
           path: 'account',
@@ -258,8 +298,15 @@ const EmployeeList = Loadable(lazy(() => import('../pages/dashboard/employee/lis
 // PRODUCT
 const ProductList = Loadable(lazy(() => import('../pages/dashboard/product/list/ProductList')))
 const ProductCreateEdit = Loadable(lazy(() => import('../pages/dashboard/product/new-edit/ProductNewEdit')))
+
+// ATTRIBUTE
+const ColorList = Loadable(lazy(() => import('../pages/dashboard/attributes/color/list/ColorList')))
+const CategoryList = Loadable(lazy(() => import('../pages/dashboard/attributes/category/list/CategoryList')))
+const BrandList = Loadable(lazy(() => import('../pages/dashboard/attributes/brand/list/BrandList')))
+const SizeList = Loadable(lazy(() => import('../pages/dashboard/attributes/size/list/SizeList')))
 // BILL
 const BillList = Loadable(lazy(() => import('../pages/dashboard/order/list/BillList')))
+const BillDetails = Loadable(lazy(() => import('../pages/dashboard/order/details/BillDetails')))
 
 
 

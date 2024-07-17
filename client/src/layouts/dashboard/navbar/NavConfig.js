@@ -22,20 +22,18 @@ const navConfig = [
   {
     items: [
       { title: 'Thống kê', path: PATH_DASHBOARD.general.app, icon: ICONS.dashboard },
-      { title: 'Quản Lý Đơn Hàng', path: PATH_DASHBOARD.bill.list, icon: ICONS.order },
+      { title: 'Quản Lý Đơn Hàng', path: PATH_DASHBOARD.bill.root, icon: ICONS.order },
       {
         title: 'Quản Lý Sản Phẩm',
-        path: PATH_DASHBOARD.eCommerce.root,
+        path: PATH_DASHBOARD.product.root,
+        noRoot: true,
         icon: ICONS.product,
         children: [
-          { title: 'Sản Phẩm', path: PATH_DASHBOARD.product.list },
-          // { title: 'Danh Mục', path: PATH_DASHBOARD.product.shop },
-          // { title: 'Màu Sắc', path: PATH_DASHBOARD.eCommerce.shop },
-          // { title: 'Chất Liệu', path: PATH_DASHBOARD.eCommerce.shop },
-          // { title: 'product', path: PATH_DASHBOARD.eCommerce.demoView },
-          // { title: 'create', path: PATH_DASHBOARD.eCommerce.new },
-          // { title: 'edit', path: PATH_DASHBOARD.eCommerce.demoEdit },
-          // { title: 'checkout', path: PATH_DASHBOARD.eCommerce.checkout },
+          { title: 'Sản Phẩm', path: PATH_DASHBOARD.product.list, root: PATH_DASHBOARD.product.root },
+          { title: 'Danh Mục', path: PATH_DASHBOARD.attribute.category.list, root: PATH_DASHBOARD.attribute.category.root },
+          { title: 'Thương Hiệu', path: PATH_DASHBOARD.attribute.brand.list, root: PATH_DASHBOARD.attribute.brand.root },
+          { title: 'Màu Sắc', path: PATH_DASHBOARD.attribute.color.list, root: PATH_DASHBOARD.attribute.color.root },
+          { title: 'Kích cỡ', path: PATH_DASHBOARD.attribute.size.list, root: PATH_DASHBOARD.attribute.size.root },
         ],
       },
       {
@@ -45,9 +43,8 @@ const navConfig = [
         children: [
           // { title: 'profile', path: PATH_DASHBOARD.user.profile },
           // { title: 'cards', path: PATH_DASHBOARD.user.cards },
-          { title: 'Khách Hàng', path: PATH_DASHBOARD.account.customer.list },
-          { title: 'Nhân Viên', path: PATH_DASHBOARD.account.employee.list },
-          // { title: 'create', path: PATH_DASHBOARD.user.new },
+          { title: 'Khách Hàng', path: PATH_DASHBOARD.account.customer.list, root: PATH_DASHBOARD.account.customer.root },
+          { title: 'Nhân Viên', path: PATH_DASHBOARD.account.employee.list, root: PATH_DASHBOARD.account.employee.root },
           // { title: 'edit', path: PATH_DASHBOARD.user.demoEdit },
           // { title: 'account', path: PATH_DASHBOARD.user.account },
         ],
@@ -59,7 +56,7 @@ const navConfig = [
         children: [
           // { title: 'posts', path: PATH_DASHBOARD.blog.posts },
           // { title: 'post', path: PATH_DASHBOARD.blog.demoView },
-          { title: 'Mã Giảm Giá', path: PATH_DASHBOARD.discount.voucher.list },
+          { title: 'Mã Giảm Giá', path: PATH_DASHBOARD.discount.voucher.list, root: PATH_DASHBOARD.discount.voucher.root },
           // { title: 'Đợt Giảm Giá', path: PATH_DASHBOARD.discount.promotion.list },
         ],
       },

@@ -1,5 +1,6 @@
 // css
-import style from './app.css';
+import './app.css';
+import './assets/style.scss';
 // routes
 import Router from './routes';
 // theme

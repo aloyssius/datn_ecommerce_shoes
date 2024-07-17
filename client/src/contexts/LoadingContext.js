@@ -1,11 +1,7 @@
 import PropTypes from 'prop-types';
 import { createContext, useState } from 'react';
-import { m } from 'framer-motion';
 // @mui
-import { alpha, styled } from '@mui/material/styles';
-import { Box } from '@mui/material';
-//
-import Logo from '../components/Logo';
+import { styled } from '@mui/material/styles';
 import ProgressBar from '../components/ProgressBar';
 
 const initialState = {
@@ -29,19 +25,27 @@ const RootStyle = styled('div')(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  // backgroundColor: theme.palette.background.default,
-  backgroundColor: "rgba(0, 0, 0, 0.7)",
+  backgroundColor: "rgba(0, 0, 0, 0.2)",
 }));
 
 function LoadingProvider({ children }) {
   const [isLoading, setIsLoading] = useState(false);
+  const [typeLoading, setTypeLoading] = useState('bar');
 
-  const handleOpenLoading = () => {
+  const handleOpenLoading = (type) => {
     setIsLoading(true);
+
+    if (type) {
+      setTypeLoading(type);
+    }
   }
 
   const handleCloseLoading = () => {
     setIsLoading(false);
+  }
+
+  const handleResetType = () => {
+    setTypeLoading("bar");
   }
 
   return (
@@ -49,10 +53,23 @@ function LoadingProvider({ children }) {
       value={{
         onOpenLoading: handleOpenLoading,
         onCloseLoading: handleCloseLoading,
+        onResetLoading: handleResetType,
       }}
     >
       <>
-        {isLoading &&
+        {isLoading && typeLoading === "backdrop" &&
+          <RootStyle>
+            <div className="loader">
+              <div />
+              <div />
+              <div />
+              <div />
+              <div />
+            </div>
+          </RootStyle>
+        }
+
+        {isLoading && typeLoading === "bar" &&
           <ProgressBar />
         }
       </>
