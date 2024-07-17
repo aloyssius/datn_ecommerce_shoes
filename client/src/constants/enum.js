@@ -56,6 +56,17 @@ export const ProductStatusTab = {
   },
 };
 
+export const AttributeStatus = {
+  en: {
+    IS_ACTIVE: 'is_active',
+    UN_ACTIVE: 'un_active',
+  },
+  vi: {
+    IS_ACTIVE: 'Hoạt động',
+    UN_ACTIVE: 'Ngừng hoạt động',
+  },
+};
+
 export const DiscountStatusTab = {
   en: {
     ON_GOING: 'on_going',
