@@ -15,9 +15,9 @@ class ConvertHelper
             $convertedKey = Str::snake($key);
             $convertedValue = $value;
 
-            // if (DateTime::createFromFormat('d-m-Y', $value)) {
-            //     $convertedValue = date('Y-m-d', strtotime($value));
-            // }
+            if (DateTime::createFromFormat('d-m-Y', $value)) {
+                $convertedValue = date('Y-m-d', strtotime($value));
+            }
 
             $convertedData[$convertedKey] = $convertedValue;
         }
