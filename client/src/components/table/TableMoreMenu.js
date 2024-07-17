@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types';
+import { useState } from 'react';
 // @mui
 import { IconButton } from '@mui/material';
 //
@@ -15,16 +16,26 @@ TableMoreMenu.propTypes = {
 };
 
 export default function TableMoreMenu({ actions, open, onClose, onOpen }) {
+
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const handleOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
   return (
     <>
-      <IconButton onClick={onOpen}>
+      <IconButton onClick={handleOpen}>
         <Iconify icon={'eva:more-vertical-fill'} width={20} height={20} />
       </IconButton>
 
       <MenuPopover
-        open={Boolean(open)}
-        anchorEl={open}
-        onClose={onClose}
+        open={Boolean(anchorEl)}
+        anchorEl={anchorEl}
+        onClose={handleClose}
         anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
         arrow="right-top"

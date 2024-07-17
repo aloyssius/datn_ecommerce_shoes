@@ -12,7 +12,7 @@ import MultiFilePreview from './MultiFilePreview';
 
 const DropZoneStyle = styled('div')(({ theme }) => ({
   outline: 'none',
-  padding: theme.spacing(5, 1),
+  padding: theme.spacing(3, 1),
   borderRadius: theme.shape.borderRadius,
   backgroundColor: theme.palette.background.neutral,
   border: `1px dashed ${theme.palette.grey[500_32]}`,
@@ -47,21 +47,21 @@ export default function UploadMultiFile({
 
   return (
     <Box sx={{ width: '100%', ...sx }}>
-      <DropZoneStyle
-        {...getRootProps()}
-        sx={{
-          ...(isDragActive && { opacity: 0.72 }),
-          ...((isDragReject || error) && {
-            color: 'error.main',
-            borderColor: 'error.light',
-            bgcolor: 'error.lighter',
-          }),
-        }}
-      >
-        <input {...getInputProps()} />
+        <DropZoneStyle
+          {...getRootProps()}
+          sx={{
+            ...(isDragActive && { opacity: 0.72 }),
+            ...((isDragReject || error) && {
+              color: 'error.main',
+              borderColor: 'error.light',
+              bgcolor: 'error.lighter',
+            }),
+          }}
+        >
+          <input {...getInputProps()} />
 
-        <BlockContent />
-      </DropZoneStyle>
+          <BlockContent />
+        </DropZoneStyle>
 
       {fileRejections.length > 0 && <RejectionFiles fileRejections={fileRejections} />}
 

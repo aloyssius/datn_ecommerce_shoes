@@ -12,7 +12,7 @@ TableSelectedActions.propTypes = {
   onSelectAllRows: PropTypes.func,
 };
 
-export default function TableSelectedActions({ dense, actions, rowCount, numSelected, onSelectAllRows }) {
+export default function TableSelectedActions({ dense, actions, rowCount, numSelected, onSelectAllRows, checkBoxAllSmall }) {
   return (
     <Stack
       direction="row"
@@ -37,6 +37,8 @@ export default function TableSelectedActions({ dense, actions, rowCount, numSele
         indeterminate={numSelected > 0 && numSelected < rowCount}
         checked={rowCount > 0 && numSelected === rowCount}
         onChange={(event) => onSelectAllRows(event.target.checked)}
+        size={checkBoxAllSmall && 'small'}
+        sx={{ml: 0.5}}
       />
 
       <Typography
@@ -50,7 +52,7 @@ export default function TableSelectedActions({ dense, actions, rowCount, numSele
           }),
         }}
       >
-        {numSelected} selected
+        {numSelected} lựa chọn
       </Typography>
 
       {actions && actions}

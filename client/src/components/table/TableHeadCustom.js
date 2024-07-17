@@ -13,6 +13,7 @@ TableHeadCustom.propTypes = {
   onSelectAllRows: PropTypes.func,
   order: PropTypes.oneOf(['asc', 'desc']),
   sx: PropTypes.object,
+  checkBoxAllSize: PropTypes.bool,
 };
 
 export default function TableHeadCustom({
@@ -24,6 +25,7 @@ export default function TableHeadCustom({
   onSort,
   onSelectAllRows,
   sx,
+  checkBoxAllSmall,
 }) {
   return (
     <TableHead sx={sx}>
@@ -34,6 +36,7 @@ export default function TableHeadCustom({
               indeterminate={numSelected > 0 && numSelected < rowCount}
               checked={rowCount > 0 && numSelected === rowCount}
               onChange={(event) => onSelectAllRows(event.target.checked)}
+              size={checkBoxAllSmall && 'small'}
             />
           </TableCell>
         )}
@@ -45,7 +48,7 @@ export default function TableHeadCustom({
             sortDirection={orderBy === headCell.id ? order : false}
             sx={{ width: headCell.width, minWidth: headCell.minWidth }}
           >
-            {onSort ? (
+            {onSort && !headCell.disableSort ? (
               <TableSortLabel
                 active={orderBy === headCell.id}
                 direction={orderBy === headCell.id ? order : 'asc'}

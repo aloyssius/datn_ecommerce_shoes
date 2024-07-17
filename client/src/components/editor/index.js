@@ -38,6 +38,7 @@ Editor.propTypes = {
   value: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
   error: PropTypes.bool,
+  placeholder: PropTypes.string,
   helperText: PropTypes.node,
   simple: PropTypes.bool,
   sx: PropTypes.object,
@@ -47,6 +48,7 @@ export default function Editor({
   id = 'minimal-quill',
   error,
   value,
+  placeholder,
   onChange,
   simple = false,
   helperText,
@@ -88,7 +90,7 @@ export default function Editor({
           onChange={onChange}
           modules={modules}
           formats={formats}
-          placeholder="Write something awesome..."
+          placeholder={placeholder}
           {...other}
         />
       </RootStyle>

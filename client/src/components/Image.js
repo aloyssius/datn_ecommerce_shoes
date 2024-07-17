@@ -1,7 +1,8 @@
 import PropTypes from 'prop-types';
+import { useState } from 'react';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 // @mui
-import { Box } from '@mui/material';
+import { Modal, Box, Fade, Backdrop } from '@mui/material';
 
 // ----------------------------------------------------------------------
 
@@ -13,38 +14,71 @@ Image.propTypes = {
 };
 
 export default function Image({ ratio, disabledEffect = false, effect = 'blur', sx, ...other }) {
+
+  const [open, setOpen] = useState(false);
+
+  const handleOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
   if (ratio) {
     return (
-      <Box
-        component="span"
-        sx={{
-          width: 1,
-          lineHeight: 0,
-          display: 'block',
-          overflow: 'hidden',
-          position: 'relative',
-          pt: getRatio(ratio),
-          '& .wrapper': {
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            lineHeight: 0,
-            position: 'absolute',
-            backgroundSize: 'cover !important',
-          },
-          ...sx,
-        }}
-      >
+      <>
         <Box
-          component={LazyLoadImage}
-          wrapperClassName="wrapper"
-          effect={disabledEffect ? undefined : effect}
-          // placeholderSrc="https://zone-assets-api.vercel.app/assets/img_placeholder.svg"
-          sx={{ width: 1, height: 1, objectFit: 'cover' }}
-          {...other}
-        />
-      </Box>
+          component="span"
+          sx={{
+            width: 1,
+            lineHeight: 0,
+            display: 'block',
+            overflow: 'hidden',
+            position: 'relative',
+            pt: getRatio(ratio),
+            '& .wrapper': {
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              lineHeight: 0,
+              position: 'absolute',
+              backgroundSize: 'cover !important',
+              cursor: 'pointer',
+            },
+            transition: 'opacity 0.3s ease',
+            '&:hover': {
+              opacity: 0.6,
+            },
+            ...sx,
+          }}
+        >
+          <Box
+            onClick={handleOpen}
+            component={LazyLoadImage}
+            wrapperClassName="wrapper"
+            effect={disabledEffect ? undefined : effect}
+            sx={{ width: 1, height: 1, objectFit: 'cover' }}
+            {...other}
+          />
+        </Box>
+        <Modal
+          sx={{ display: "flex", alignItems: "center", justifyContent: "center", }}
+          open={open}
+          onClose={handleClose}
+          closeAfterTransition
+          disableRestoreFocus
+        >
+          <Fade in={open} timeout={300} sx={{ outline: "none" }}>
+            <img
+              {...other}
+              alt="asd"
+              style={{ maxHeight: "90%", maxWidth: "90%", outline: "none" }}
+            />
+          </Fade>
+        </Modal>
+      </>
     );
   }
 

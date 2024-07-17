@@ -2,6 +2,7 @@
 import { Box, Typography, Stack } from '@mui/material';
 // assets
 import { UploadIllustration } from '../../assets';
+import Iconify from '../Iconify';
 
 // ----------------------------------------------------------------------
 
@@ -34,5 +35,7 @@ export default function BlockContent() {
         </Typography>
       </Box>
     </Stack>
+
   );
 }
+

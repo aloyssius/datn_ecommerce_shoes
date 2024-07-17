@@ -1,5 +1,7 @@
 import PropTypes from 'prop-types';
 import { alpha, styled } from '@mui/material/styles';
+import { IconButton } from '@mui/material';
+import Iconify from './Iconify';
 
 // ----------------------------------------------------------------------
 
@@ -30,7 +32,7 @@ const RootStyle = styled('span')(({ theme, ownerState }) => {
   });
 
   return {
-    height: 22,
+    height: 25,
     minWidth: 22,
     lineHeight: 0,
     borderRadius: 8,
@@ -64,6 +66,7 @@ const RootStyle = styled('span')(({ theme, ownerState }) => {
         }),
       }),
   };
+
 });
 
 // ----------------------------------------------------------------------
@@ -84,3 +87,4 @@ export default function Label({ color = 'default', variant = 'ghost', children, 
     </RootStyle>
   );
 }
+

@@ -12,7 +12,7 @@ RHFEditor.propTypes = {
   name: PropTypes.string,
 };
 
-export default function RHFEditor({ name, ...other }) {
+export default function RHFEditor({ name, placeholder, ...other }) {
   const { control } = useFormContext();
 
   return (
@@ -23,6 +23,7 @@ export default function RHFEditor({ name, ...other }) {
         <Editor
           id={name}
           value={field.value}
+          placeholder={placeholder}
           onChange={field.onChange}
           error={!!error}
           helperText={
