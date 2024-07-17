@@ -7,20 +7,21 @@ import * as Yup from 'yup';
 // @mui
 import { Dialog, Stack, Typography, Button, Box } from '@mui/material';
 // components
-import { isValidColorHex } from '../../../../utils/validate';
-import Label from '../../../../components/Label';
-import { FormProvider, RHFTextField } from '../../../../components/hook-form';
+import { isValidColorHex } from '../../../../../utils/validate';
+import Label from '../../../../../components/Label';
+import { FormProvider, RHFTextField } from '../../../../../components/hook-form';
 
 // ----------------------------------------------------------------------
 
-ProductColorNewDialog.propTypes = {
+ColorNewEditFormDialog.propTypes = {
   onClose: PropTypes.func,
   open: PropTypes.bool,
+  isEdit: PropTypes.bool,
+  currentColor: PropTypes.object,
   onSave: PropTypes.func,
-  colorName: PropTypes.string,
 };
 
-export default function ProductColorNewDialog({ open, onClose, onSave, colorName }) {
+export default function ColorNewEditFormDialog({ open, onClose, onSave, currentColor, isEdit }) {
 
   const NewColorSchema = Yup.object().shape({
     name: Yup.string().test(
@@ -37,11 +38,11 @@ export default function ProductColorNewDialog({ open, onClose, onSave, colorName
 
   const defaultValues = useMemo(
     () => ({
-      code: isValidColorHex(colorName) ? colorName : '',
-      name: !isValidColorHex(colorName) ? colorName : '',
+      code: currentColor?.code || '',
+      name: currentColor?.name || '',
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [colorName]
+    [currentColor]
   );
 
   const methods = useForm({
@@ -59,18 +60,32 @@ export default function ProductColorNewDialog({ open, onClose, onSave, colorName
 
   useEffect(() => {
     reset(defaultValues);
-  }, [colorName, open]);
+  }, [currentColor, open]);
 
   const onSubmit = async (data) => {
-    onSave(data);
+    const body = {
+      ...data,
+      id: currentColor?.id,
+    }
+    onSave(isEdit ? body : data, isEdit ? "update" : "create");
   };
+
+  const isAllowUpdate = () => {
+
+    if (values.code?.trim() !== defaultValues?.code || values.name?.trim() !== defaultValues?.name) {
+      return true;
+    }
+
+    return false;
+
+  }
 
   return (
     <Dialog fullWidth maxWidth="xs" open={open} onClose={onClose} sx={{ bottom: 200 }}>
-      <FormProvider methods={methods} >
+      <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
         <Box sx={{ py: 2 }}>
           <Stack sx={{ px: 3, py: 2 }}>
-            <Typography variant="h6"> Thêm mới màu sắc </Typography>
+            <Typography variant="h6"> {isEdit ? "Cập nhật" : "Thêm mới"} màu sắc </Typography>
           </Stack>
           <Stack spacing={3} sx={{ px: 3, height: 'auto' }}>
             <RHFTextField
@@ -100,8 +115,8 @@ export default function ProductColorNewDialog({ open, onClose, onSave, colorName
               <Button color="inherit" onClick={onClose}>
                 Hủy bỏ
               </Button>
-              <Button variant="contained" type="submit" onClick={handleSubmit(onSubmit)}>
-                Thêm mới
+              <Button variant="contained" type="submit" disabled={isEdit && !isAllowUpdate()}>
+                {isEdit ? "Cập nhật" : "Thêm mới"}
               </Button>
             </Stack>
 

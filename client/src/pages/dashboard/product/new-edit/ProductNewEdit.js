@@ -1,4 +1,5 @@
 import { useParams, useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 // @mui
 import { Container } from '@mui/material';
 // routes
@@ -9,15 +10,17 @@ import useSettings from '../../../../hooks/useSettings';
 import Page from '../../../../components/Page';
 import HeaderBreadcrumbs from '../../../../components/HeaderBreadcrumbs';
 import ProductNewEditForm from './ProductNewEditForm';
+import useFetch from '../../../../hooks/useFetch';
+import { ADMIN_API } from '../../../../api/apiConfig';
 
 // ----------------------------------------------------------------------
 
 export default function ProductNewEdit() {
   const { themeStretch } = useSettings();
-  const { pathname } = useLocation();
   const { id } = useParams();
-  const isEdit = pathname.includes('edit');
-  const currentProduct = {};
+  const location = useLocation();
+  const isEdit = location.pathname.includes('edit');
+  const { data } = useFetch(ADMIN_API.product.details(id), { fetch: isEdit })
 
   return (
 
@@ -30,7 +33,7 @@ export default function ProductNewEdit() {
             { name: !isEdit ? 'Tạo sản phẩm' : 'Product-name' },
           ]}
         />
-        <ProductNewEditForm isEdit={isEdit} currentProduct={currentProduct} />
+        <ProductNewEditForm isEdit={isEdit} currentProduct={data} />
       </Container>
     </Page>
   );

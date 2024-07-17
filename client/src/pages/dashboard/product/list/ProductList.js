@@ -53,9 +53,10 @@ const STOCK_OPTIONS = [
 ]
 
 const TABLE_HEAD = [
-  { id: 'sku', label: 'Mã SKU', align: 'left' },
-  { id: 'name', label: 'Sản phẩm', align: 'left' },
+  { id: 'code', label: 'Mã sản phẩm', align: 'left' },
+  { id: 'name', label: 'Tên sản phẩm', align: 'left' },
   { id: 'createdAt', label: 'Ngày tạo', align: 'left' },
+  { id: 'brand', label: 'Thương hiệu', align: 'left' },
   { id: 'totalQuantity', label: 'Số lượng tồn', align: 'left' },
   { id: 'status', label: 'Trạng thái', align: 'left' },
   { id: 'action', label: '', align: 'left' },
@@ -76,7 +77,7 @@ export default function ProductList() {
     page,
     onChangePage,
     onChangeRowsPerPage,
-  } = useTable({});
+  } = useTable({ defaultOrderBy: "createdAt", defaultOrder: "desc" });
 
   const [tabs, setTabs] = useState(
     [
@@ -128,7 +129,7 @@ export default function ProductList() {
   };
 
   const handleEditRow = (id) => {
-    navigate(PATH_DASHBOARD.discount.voucher.edit(id));
+    navigate(PATH_DASHBOARD.product.edit(id));
   };
 
   const isDefault =
@@ -375,49 +376,3 @@ function applySortFilter({
 
   return data;
 }
-
-// ----------------------------------------------------------------------
-
-// const dataFiltered = applySortFilter({
-//   tableData,
-//   comparator: getComparator(order, orderBy),
-//   filterSearch,
-//   filterStatus,
-//   filterStartDate,
-//   filterEndDate,
-//   filterDiscountValue,
-//   filterQuantity,
-//   filterType,
-//   filterTypeDiscount,
-// });
-
-// ----------------------------------------------------------------------
-
-// function useDebounce(cb, delay) {
-//   const [debounceValue, setDebounceValue] = useState(cb);
-//   useEffect(() => {
-//     const handler = setTimeout(() => {
-//       setDebounceValue(cb);
-//     }, delay);
-//
-//     return () => {
-//       clearTimeout(handler);
-//     };
-//   }, [cb, delay]);
-//   return debounceValue;
-// }
-//
-// const debounceValue = useDebounce(filterSearch, 300);
-//
-// useEffect(() => {
-//   const dataFiltered = applySortFilter({
-//     tableData,
-//     comparator: getComparator(order, orderBy),
-//     filterSearch,
-//   });
-//   setTableFiltered(dataFiltered);
-// }, [debounceValue]);
-//
-// const handleFilterType = (event) => {
-//   setFilterType(event.target.value);
-// };

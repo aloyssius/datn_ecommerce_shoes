@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import PropTypes from 'prop-types';
 import { Stack, FormControlLabel, InputAdornment, TextField, MenuItem, Button, FormControl, InputLabel, Select, Checkbox, ListItemText, OutlinedInput, Chip } from '@mui/material';
-import DatePicker from '@mui/lab/DatePicker';
 // components
+import { IconArrowDown, IconArrowUp } from "../../../../components/IconArrow";
 import Iconify from '../../../../components/Iconify';
+import useDebounce from "../../../../hooks/useDebounce";
 // ----------------------------------------------------------------------
 
 const INPUT_WIDTH = 300;
@@ -45,12 +46,18 @@ export default function ProductTableToolbar({
   return (
     <Stack spacing={2} direction={{ xs: 'column', md: 'row' }} sx={{ py: 2.5, px: 2 }}>
       <FormControl sx={{ m: MIN_FORM_CONTROL_WIDTH, width: FORM_CONTROL_WIDTH }}>
-        <InputLabel>Số lượng tồn</InputLabel>
+        <InputLabel>Tình trạng</InputLabel>
         <Select
           multiple
           value={filterStock}
           onChange={onFilterStock}
-          input={<OutlinedInput label="Số lượng tồn" />}
+          input={<OutlinedInput label="Tình trạng" />}
+          IconComponent={(props) => {
+            if (props.className.includes('MuiSelect-iconOpen')) {
+              return <IconArrowUp />;
+            }
+            return <IconArrowDown />;
+          }}
           renderValue={(selected) => selected.join(', ')}
           sx={{
             maxWidth: { md: INPUT_WIDTH },
@@ -84,6 +91,12 @@ export default function ProductTableToolbar({
           value={filterCategory}
           onChange={onFilterCategory}
           input={<OutlinedInput label="Danh mục" />}
+          IconComponent={(props) => {
+            if (props.className.includes('MuiSelect-iconOpen')) {
+              return <IconArrowUp />;
+            }
+            return <IconArrowDown />;
+          }}
           renderValue={(selected) => {
             const selectedCategory = optionsCategory.filter(c => selected.includes(c.id));
             return selectedCategory.map(c => c.name).join(', ');
@@ -120,6 +133,12 @@ export default function ProductTableToolbar({
           value={filterBrand}
           onChange={onFilterBrand}
           input={<OutlinedInput label="Thương hiệu" />}
+          IconComponent={(props) => {
+            if (props.className.includes('MuiSelect-iconOpen')) {
+              return <IconArrowUp />;
+            }
+            return <IconArrowDown />;
+          }}
           renderValue={(selected) => {
             const selectedBrands = optionsBrand.filter(brand => selected.includes(brand.id));
             return selectedBrands.map(brand => brand.name).join(', ');
@@ -164,17 +183,4 @@ export default function ProductTableToolbar({
       />
     </Stack>
   );
-}
-function useDebounce(cb, delay) {
-  const [debounceValue, setDebounceValue] = useState(cb);
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebounceValue(cb);
-    }, delay);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [cb, delay]);
-  return debounceValue;
 }

@@ -104,7 +104,7 @@ export default function BillTableRow({ row, onEditRow }) {
 
       <TableCell align="left">
 
-        <Tooltip title='Xem chi tiết'>
+        <Tooltip title='Chỉnh sửa'>
           <IconButton onClick={onEditRow}>
             <Iconify
               icon={'eva:edit-2-fill'}

@@ -103,7 +103,7 @@ export default function BillList() {
   };
 
   const handleEditRow = (id) => {
-    navigate(PATH_DASHBOARD.discount.voucher.edit(id));
+    navigate(PATH_DASHBOARD.bill.details(id));
   };
 
   const { data, totalPages, setParams, firstFetch, statusCounts } = useFetch(ADMIN_API.bill.all);

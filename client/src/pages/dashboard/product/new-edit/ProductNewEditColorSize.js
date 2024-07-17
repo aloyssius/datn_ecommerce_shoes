@@ -1,349 +1,331 @@
 import PropTypes from 'prop-types';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useSnackbar } from 'notistack';
-import { useNavigate } from 'react-router-dom';
-import * as Yup from 'yup';
+import React, { useEffect, useState, useMemo } from 'react';
+import axios from 'axios';
 // form
-import { yupResolver } from '@hookform/resolvers/yup';
-import { useForm, Controller } from 'react-hook-form';
+import { useFormContext, Controller } from 'react-hook-form';
 // @mui
 import { styled } from '@mui/material/styles';
-import { LoadingButton } from '@mui/lab';
-import { Card, Chip, Checkbox, Grid, Stack, TextField, Typography, InputAdornment, MenuItem } from '@mui/material';
+import { Box, Chip, Checkbox, Button, Grid, Stack, TextField, Typography, InputAdornment, MenuItem } from '@mui/material';
 import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete';
 import Swal from 'sweetalert2'
-import axios from 'axios';
-// routes
-import { PATH_DASHBOARD } from '../../../../routes/paths';
 // hooks
 import useConfirm from '../../../../hooks/useConfirm'
 import useNotification from '../../../../hooks/useNotification';
 // components
-import {
-  FormProvider,
-  RHFSwitch,
-  RHFEditor,
-  RHFTextField,
-  RHFRadioGroup,
-  RHFUploadMultiFile,
-} from '../../../../components/hook-form';
-import ColorSquare from './ColorSquare';
 import ProductColorNewDialog from './ProductColorNewDialog';
 import Label from '../../../../components/Label';
-import { formatCurrencyVnd } from '../../../../utils/formatCurrency';
-import { ProductStatusTab } from '../../../../constants/enum';
+import Iconify from '../../../../components/Iconify';
+import { IconArrowDownAutocomplete } from '../../../../components/IconArrow';
 
 // ----------------------------------------------------------------------
-
-ProductNewEditColorSize.propTypes = {
-  // isEdit: PropTypes.bool,
-  // currentProduct: PropTypes.object,
-};
 
 const LabelStyle = styled(Typography)(({ theme }) => ({
   ...theme.typography.subtitle2,
   color: theme.palette.text.secondary,
-  marginBottom: theme.spacing(1),
+  marginBottom: theme.spacing(0.5),
 }));
 
 const filter = createFilterOptions();
 
-export default function ProductNewEditColorSize({ methods }) {
-
-  const fetch = (color, hex) => {
-    axios.get("https://64aae1d60c6d844abedef185.mockapi.io/api/v1/todos/10")
-      .then(response => {
-        setTimeout(() => {
-          Swal.close();
-
-          setOpenColorDialog(false);
-          console.log(color);
-          console.log(hex);
-
-          onOpenSuccessNotify('Thêm mới danh mục thành công!')
-          handleChangeColorName('');
-        }, 3000);
-      })
-      .catch(error => {
-        Swal.close();
-      });
-  }
-
-  const fetch1 = () => {
-    axios.get("https://64aae1d60c6d844abedef185.mockapi.io/api/v1/todos/1")
-      .then(response => {
-        // setValue('brand', { id: response.data.id, name: response.data.ma });
-        // top100Films.push({ id: response.data.id, name: response.data.ma });
-        Swal.close();
-        onOpenSuccessNotify('Thêm mới danh mục thành công!')
-      })
-      .catch(error => {
-        Swal.close();
-      });
-  }
-
-  const handleAddColor = (color, hex) => {
-    showConfirm("Xác nhận thêm mới màu sắc?", () => fetch(color, hex));
-  }
+export default function ProductNewEditColorSize({ data, onCreateAttribute }) {
 
   const [openColorDialog, setOpenColorDialog] = useState(false);
   const [colorName, setColorName] = useState('');
 
   const handleOpenFormColorDialog = (colorName) => {
     setOpenColorDialog(true);
-    handleChangeColorName(colorName);
+    setColorName(colorName);
   }
 
-  const handleChangeColorName = (name) => {
-    setColorName(name);
+  const handleClose = () => {
+    setOpenColorDialog(false);
+    setColorName('');
   }
 
-  const { onOpenSuccessNotify, onOpenErrorNotify } = useNotification();
-
-  const { showConfirm } = useConfirm();
-
-  const onConfirm = (field, newValue) => {
-    field.onChange({ id: 1, name: newValue.inputValue });
+  const handleCreateColor = (data) => {
+    onCreateAttribute(data, "color", "Xác nhận thêm mới màu sắc?", () => setOpenColorDialog(false));
   }
 
-  const onCancel = (field) => {
-    field.onChange(field.value);
+  const addValueToArrayIfNotExits = (data, type, titleConfirm) => {
+    onCreateAttribute(data, type, titleConfirm)
+  }
+
+  const addValueStrToArray = (list, value, currentArr, field, titleConfirm, type) => {
+    if (list.some((item) => item.name === value)) {
+      const obj = list.find((item) => item.name === value);
+      const newArr = [...currentArr, obj];
+      field.onChange(newArr);
+    }
+    else {
+      addValueToArrayIfNotExits(value, type, titleConfirm);
+    }
   }
 
   const {
-    reset,
-    watch,
     control,
-    setValue,
     getValues,
-    handleSubmit,
-    formState: { isSubmitting },
-  } = methods;
+  } = useFormContext();
 
   return (
     <>
-      <LabelStyle>Màu sắc & Kích cỡ</LabelStyle>
-      <div style={{ display: 'flex' }}>
+      <Box
+        sx={{
+          display: 'grid',
+          columnGap: 3,
+          rowGap: 2.5,
+          gridTemplateColumns: { xs: 'repeat(1, 1fr)', sm: 'repeat(1, 1fr)' },
+        }}
+      >
         <Controller
           name='colors'
           control={control}
           render={({ field, fieldState: { error } }) => (
-            <Autocomplete
-              {...field}
-              multiple
-              selectOnFocus
-              disableCloseOnSelect
-              clearOnBlur
-              handleHomeEndKeys
-              fullWidth
-              sx={{ marginRight: '20px' }}
-              isOptionEqualToValue={(option, value) => option.id === value.id}
-              freeSolo
-              forcePopupIcon
-              getOptionLabel={(option) => {
-                if (typeof option === 'string') {
-                  return option;
-                }
-                if (option.inputValue) {
-                  return option.inputValue;
-                }
-                return option.name;
-              }}
-              filterOptions={(options, params) => {
-                const filtered = filter(options, params);
-
-                const { inputValue } = params;
-                const isExisting = options.some((option) => inputValue === option.name || inputValue === option.code);
-                if (inputValue?.trim() !== '' && !isExisting) {
-                  filtered.push({
-                    inputValue,
-                  });
-                }
-
-                return filtered;
-              }}
-              onChange={(event, newValue) => {
-                if (newValue.some((item) => typeof item === 'string')) {
-                  const str = newValue.find((item) => typeof item === 'string');
-                  if (top100Films.some((item) => item.name === str)) {
-                    const obj = top100Films.find((item) => item.name === str);
-                    const newArr = [...getValues('colors'), obj];
-                    field.onChange(newArr);
+            <Grid>
+              <LabelStyle>
+                Màu sắc <span className="required">*</span>
+              </LabelStyle>
+              <Autocomplete
+                {...field}
+                multiple
+                selectOnFocus
+                disableCloseOnSelect
+                clearOnBlur
+                handleHomeEndKeys
+                fullWidth
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                size='small'
+                popupIcon={<IconArrowDownAutocomplete />}
+                freeSolo
+                forcePopupIcon
+                getOptionLabel={(option) => {
+                  if (typeof option === 'string') {
+                    return option;
                   }
-                  else {
-                    handleOpenFormColorDialog(str);
+                  if (option.inputValue) {
+                    return option.inputValue;
                   }
-                } else if (newValue && newValue?.some((item) => item?.inputValue)) {
-                  const value = newValue?.find((item) => item?.inputValue)?.inputValue;
-                  handleOpenFormColorDialog(value);
-                } else {
-                  field.onChange(newValue);
+                  return option.name;
+                }}
+                filterOptions={(options, params) => {
+                  const filtered = filter(options, params);
+
+                  const { inputValue } = params;
+                  const isExisting = options.some((option) => inputValue === option.name || inputValue === option.code);
+                  if (inputValue?.trim() !== '' && !isExisting) {
+                    filtered.push({
+                      inputValue,
+                    });
+                  }
+
+                  return filtered;
+                }}
+                onChange={(event, newValue) => {
+                  if (newValue.some((item) => typeof item === 'string')) {
+                    const str = newValue.find((item) => typeof item === 'string');
+                    if (data?.colors?.some((item) => item.name === str)) {
+                      const obj = data?.colors?.find((item) => item.name === str);
+                      const newArr = [...getValues('colors'), obj];
+                      field.onChange(newArr);
+                    }
+                    else {
+                      handleOpenFormColorDialog(str);
+                    }
+                  } else if (newValue && newValue?.some((item) => item?.inputValue)) {
+                    const value = newValue?.find((item) => item?.inputValue)?.inputValue;
+                    handleOpenFormColorDialog(value);
+                  } else {
+                    field.onChange(newValue);
+                  }
+                }}
+                options={data?.colors || []}
+                renderOption={(props, option, { selected }) => (
+                  <MenuItem
+                    {...props}
+                    key={option.id}
+                    value={option.id}
+                    sx={{
+                      typography: 'body2',
+                      height: 36,
+                    }}
+                  >
+                    {option.inputValue ? (
+                      <Stack spacing={1} direction="row">
+                        <Iconify icon={'eva:plus-circle-outline'} sx={{ color: 'primary.main', width: 22, height: 22 }} />
+                        <Typography color='primary' sx={{ fontWeight: 'bold' }}>{`Thêm mới màu sắc: "${option.inputValue}"`}</Typography>
+                      </Stack>
+                    ) : (
+                      <>
+                        <Label
+                          variant={'filled'}
+                          color={option?.code}
+                        >
+                          {option?.name}
+                        </Label>
+                        <Checkbox size='small' checked={selected} sx={{ marginLeft: 'auto' }} />
+                      </>
+                    )}
+                  </MenuItem>
+                )}
+                renderTags={(value, getTagProps) =>
+                  value.map((option, index) => (
+                    <span key={index} {...getTagProps({ index })}>
+                      <>
+                        <Label
+                          variant={'filled'}
+                          color={option?.code}
+                        >
+                          {option?.name}
+                        </Label>
+                      </>
+                    </span>
+                  ))
                 }
-              }}
-              options={top100Films}
-              renderOption={(props, option, { selected }) => (
-                <MenuItem
-                  {...props}
-                  key={option.id}
-                  value={option.id}
+                renderInput={(params) => <TextField
+                  {...params}
+                  error={!!error}
+                  helperText={error?.message}
+                  placeholder={getValues('colors')?.length === 0 ? "Chọn màu sắc" : ""}
                   sx={{
-                    typography: 'body2',
-                    height: 38,
+                    '& fieldset': {
+                      borderRadius: '6px',
+                    },
+                    "& .Mui-error": {
+                      marginLeft: 0,
+                    },
                   }}
-                >
-                  {option.inputValue ? (
-                    <Typography color='primary' sx={{ fontWeight: 'bold' }}>{`Thêm mới màu sắc: "${option.inputValue}"`}</Typography>
-                  ) : (
-                    <>
-                      <ColorSquare color={option.code} name={option.name} />
-                      <Checkbox size='small' checked={selected} sx={{ marginLeft: 'auto' }} />
-                    </>
-                  )}
-                </MenuItem>
-              )}
-              renderTags={(value, getTagProps) =>
-                value.map((option, index) => (
-                  <span key={index} {...getTagProps({ index })}>
-                    <>
-                      <ColorSquare color={option?.code} name={option?.name} />
-                    </>
-                  </span>
-                ))
-              }
-              renderInput={(params) => <TextField
-                label='Màu sắc'
-                {...params}
-                error={!!error}
-                helperText={error?.message}
-              />}
-            />
+                />}
+              />
+            </Grid>
           )}
         />
 
         <ProductColorNewDialog
           open={openColorDialog}
-          onClose={() => setOpenColorDialog(false)}
+          onClose={handleClose}
           colorName={colorName}
-          onColorName={handleChangeColorName}
-          onAddColor={handleAddColor}
+          onSave={handleCreateColor}
         />
 
         <Controller
           name='sizes'
           control={control}
           render={({ field, fieldState: { error } }) => (
-            <Autocomplete
-              {...field}
-              freeSolo
-              forcePopupIcon
-              multiple
-              selectOnFocus
-              disableCloseOnSelect
-              clearOnBlur
-              handleHomeEndKeys
-              fullWidth
-              isOptionEqualToValue={(option, value) => option.id === value.id}
-              getOptionLabel={(option) => {
-                if (typeof option === 'string') {
-                  return option;
-                }
-                if (option.inputValue) {
-                  return option.inputValue;
-                }
-                return option.name;
-              }}
-              filterOptions={(options, params) => {
-                const filtered = filter(options, params);
-
-                const { inputValue } = params;
-                const isExisting = options.some((option) => inputValue === option.name);
-                if (inputValue?.trim() !== '' && !isExisting) {
-                  filtered.push({
-                    inputValue,
-                  });
-                }
-
-                return filtered;
-              }}
-              onChange={(event, newValue) => {
-                if (newValue.some((item) => typeof item === 'string')) {
-                  const str = newValue.find((item) => typeof item === 'string');
-                  if (top100Films1.some((item) => item.name === str)) {
-                    const obj = top100Films1.find((item) => item.name === str);
-                    const newArr = [...getValues('sizes'), obj];
-                    field.onChange(newArr);
+            <Grid>
+              <LabelStyle>
+                Kích cỡ <span className="required">*</span>
+              </LabelStyle>
+              <Autocomplete
+                {...field}
+                freeSolo
+                // ListboxProps={{style: { maxHeight: "25rem" }}}
+                forcePopupIcon
+                multiple
+                selectOnFocus
+                disableCloseOnSelect
+                clearOnBlur
+                popupIcon={<IconArrowDownAutocomplete />}
+                handleHomeEndKeys
+                fullWidth
+                size='small'
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                getOptionLabel={(option) => {
+                  if (typeof option === 'string') {
+                    return option;
                   }
-                  else {
-                    const obj = { name: str };
-                    const newArr = [...getValues('sizes'), obj];
-                    field.onChange(newArr);
-                    showConfirm("Xác nhận thêm mới kích cỡ?", () => fetch(), () => onCancel(field));
+                  if (option.inputValue) {
+                    return option.inputValue;
                   }
-                } else if (newValue && newValue?.some((item) => item?.inputValue)) {
-                  const value = newValue?.find((item) => item?.inputValue)?.inputValue;
-                  const obj = { name: value };
-                  const newArr = [...getValues('sizes'), obj];
-                  field.onChange(newArr);
-                  showConfirm("Xác nhận thêm mới kích cỡ?", () => fetch(), () => onCancel(field));
-                } else {
-                  field.onChange(newValue);
+                  return option.name;
+                }}
+                filterOptions={(options, params) => {
+                  const filtered = filter(options, params);
+
+                  const { inputValue } = params;
+                  const isExisting = options.some((option) => inputValue === option.name);
+                  if (inputValue?.trim() !== '' && !isExisting) {
+                    filtered.push({
+                      inputValue,
+                    });
+                  }
+
+                  return filtered;
+                }}
+                onChange={(event, newValue) => {
+                  const currentArr = getValues('sizes');
+                  if (newValue.some((item) => typeof item === 'string')) {
+                    const valueStr = newValue.find((item) => typeof item === 'string');
+                    const titleConfirm = `${`Xác nhận thêm mới kích cỡ`} '${valueStr}'?`;
+                    addValueStrToArray(data?.sizes, valueStr, currentArr, field, titleConfirm, "size");
+                  } else if (newValue && newValue?.some((item) => item?.inputValue)) {
+                    const value = newValue?.find((item) => item?.inputValue)?.inputValue;
+                    const titleConfirm = `${`Xác nhận thêm mới kích cỡ`} '${value}'?`;
+                    addValueToArrayIfNotExits(value, "size", titleConfirm)
+                  } else {
+                    field.onChange(newValue);
+                  }
+                }}
+                options={data?.sizes || []}
+                renderOption={(props, option, { selected }) => (
+                  <MenuItem
+                    {...props}
+                    key={option.id}
+                    value={option.id}
+                    sx={{
+                      typography: 'body2',
+                      height: 36,
+                    }}
+                  >
+                    {option.inputValue ? (
+                      <>
+                        <Stack spacing={1} direction="row">
+                          <Iconify icon={'eva:plus-circle-outline'} sx={{ color: 'primary.main', width: 22, height: 22 }} />
+                          <Typography color='primary' sx={{ fontWeight: 'bold' }}>
+                            {`Thêm mới kích cỡ: "${option.inputValue}"`}
+                          </Typography>
+                        </Stack>
+                      </>
+                    ) : (
+                      <>
+                        {option.name}
+                        <Checkbox size='small' checked={selected} sx={{ marginLeft: 'auto' }} />
+                      </>
+                    )}
+                  </MenuItem>
+                )}
+                renderTags={(value, getTagProps) =>
+                  value.map((option, index) => (
+                    <span key={index} {...getTagProps({ index })}>
+                      <>
+                        <Label
+                          variant={'filled'}
+                          color={'primary'}
+                        >
+                          {option?.name}
+                        </Label>
+                      </>
+                    </span>
+                  ))
                 }
-              }}
-              options={top100Films1}
-              renderOption={(props, option, { selected }) => (
-                <MenuItem
-                  {...props}
-                  key={option.id}
-                  value={option.id}
+                renderInput={(params) => <TextField
+                  {...params}
+                  placeholder={getValues('sizes')?.length === 0 ? "Chọn kích cỡ" : ""}
                   sx={{
-                    typography: 'body2',
-                    height: 38,
+                    '& fieldset': {
+                      borderRadius: '6px',
+                    },
+                    "& .Mui-error": {
+                      marginLeft: 0,
+                    },
                   }}
-                >
-                  {option.inputValue ? (
-                    <Typography color='primary' sx={{ fontWeight: 'bold' }}>{`Thêm mới kích cỡ: "${option.inputValue}"`}</Typography>
-                  ) : (
-                    <>
-                      {option.name}
-                      <Checkbox size='small' checked={selected} sx={{ marginLeft: 'auto' }} />
-                    </>
-                  )}
-                </MenuItem>
-              )}
-              renderTags={(value, getTagProps) =>
-                value.map((option, index) => (
-                  <span key={index} {...getTagProps({ index })}>
-                    <>
-                      <Label
-                        variant={'filled'}
-                        color={option?.id ? 'primary' : 'default'}
-                      >
-                        {option?.name}
-                      </Label>
-                    </>
-                  </span>
-                ))
-              }
-              renderInput={(params) => <TextField
-                label='Kích cỡ'
-                {...params}
-                error={!!error}
-                helperText={error?.message}
-              />}
-            />
+                  error={!!error}
+                  helperText={error?.message}
+                />}
+              />
+            </Grid>
           )}
         />
-      </div>
+      </Box>
     </>
   )
 
 }
-const top100Films = [
-  { id: 'uuid1', code: '#313131', name: 'Blue' },
-  { id: 'uuid2', code: '#d1d1d1', name: 'White' },
-];
-
-const top100Films1 = [
-  { id: 'uuid1', name: '40' },
-  { id: 'uuid2', name: '41' },
-];
