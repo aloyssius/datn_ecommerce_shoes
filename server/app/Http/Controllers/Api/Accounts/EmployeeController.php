@@ -5,32 +5,31 @@ namespace App\Http\Controllers\Api\Accounts;
 use App\Helpers\ApiResponse;
 use App\Helpers\QueryHelper;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\Accounts\AccountResource;
 use App\Http\Resources\Accounts\AddressResource;
+use App\Http\Resources\Accounts\AccountResource;
 use App\Models\Account;
 use Illuminate\Support\Facades\DB;
 use App\Constants\Role as RoleEnum;
 use App\Exceptions\NotFoundException;
 use App\Helpers\ConvertHelper;
-use App\Helpers\CustomCodeHelper;
+use App\Helpers\EmployeeCodeHelper;
 use App\Http\Requests\Account\AccountRequest;
 use App\Http\Requests\Account\AccountRequestBody;
 use App\Http\Requests\Address\AddressRequestBody;
 use App\Models\Role;
-use App\Constants\AddressDefault as AddressDefault;
 use App\Models\Address;
 use Carbon\Carbon;
 use DateTime;
 
-class CustomerController extends Controller
+class EmployeeController extends Controller
 {
 
     public function index(AccountRequest $req)
     {
 
-        $accounts = Account::join('roles', 'accounts.role_id', '=' ,'roles.id')
-            ->select('accounts.id', 'accounts.full_name', 'accounts.code', 'accounts.email', 'accounts.avatar_url', 'accounts.phone_number', 'accounts.birth_date', 'accounts.gender', 'accounts.status', 'accounts.created_at')
-            ->where('roles.code', '=', RoleEnum::CUSTOMER);
+        $accounts = Account::join('roles', 'accounts.role_id', 'roles.id')
+            ->select('accounts.id', 'accounts.full_name', 'accounts.email', 'accounts.avatar_url', 'accounts.code', 'accounts.phone_number', 'accounts.identity_card', 'accounts.birth_date', 'accounts.gender', 'accounts.status')
+            ->where('roles.code', '=', RoleEnum::EMPLOYEE);
 
         if ($req->filled('search')) {
             $search = $req->search;
@@ -39,7 +38,7 @@ class CustomerController extends Controller
         }
 
         if ($req->filled('status')) {
-            QueryHelper::buildQueryEquals($accounts, 'accounts.status', $req->status);
+            QueryHelper::buildQueryEquals($accounts, 'account.status', $req->status);
         }
 
         if ($req->filled('gender')) {
@@ -61,10 +60,10 @@ class CustomerController extends Controller
 
         $account = Account::join('roles', 'accounts.role_id', 'roles.id')
             ->select('accounts.id', 'accounts.full_name', 'accounts.code', 'accounts.email', 'accounts.avatar_url', 'accounts.phone_number', 'accounts.birth_date', 'accounts.gender', 'accounts.status', 'accounts.created_at')
-            ->where('roles.code', '=', RoleEnum::CUSTOMER)->find($id);
+            ->where('roles.code', '=', RoleEnum::EMPLOYEE)->find($id);
 
         if (!$account) {
-            throw new NotFoundException("Không tìm thấy khách hàng có id là " . $id);
+            throw new NotFoundException("Không tìm thấy nhân viên có id là " . $id);
         }
 
         $addresses = Address::select(AddressResource::fields())
@@ -79,14 +78,14 @@ class CustomerController extends Controller
     public function store(AccountRequestBody $req)
     {
         $account = Account::query(); // tạo instance query
-        $prefix = 'KH'; // mã bắt đầu với 'KH'
+        $prefix = 'NV'; // mã bắt đầu với 'KH'
 
-        // tìm role customer
-        $roleCustomer = Role::where('code', RoleEnum::CUSTOMER)->first();
+        // tìm role employee
+        $roleEmployee = Role::where('code', RoleEnum::EMPLOYEE)->first();
 
         $moreColumns = [
-            'code' => CustomCodeHelper::generateCode($account, $prefix), // tạo code tự tăng
-            'roleId' => $roleCustomer->id, // lấy id của role customer
+            'code' => EmployeeCodeHelper::generateCode($account, $prefix), // tạo code tự tăng
+            'roleId' => $roleEmployee->id, // lấy id của role employee
         ];
 
         // convert req
@@ -109,32 +108,5 @@ class CustomerController extends Controller
          
         return ApiResponse::responseObject(AddressResource::collection($addresses));
     }
-
-    public function storeAddressDefault(AddressRequestBody $req)
-    {
-        $address = Address::where('id', '=', $req->id)->first();
-
-        if (!$address) {
-            throw new NotFoundException("Không tìm thấy khách hàng có id là " . $id);
-        }
-
-        $addressDefault = Address::where('account_id', '=' , $req->accountId)
-        ->where('is_default', '=', AddressDefault::IS_DEFAULT)
-        ->first();
-
-        if($addressDefault) {
-            $addressDefault['is_default'] = AddressDefault::UN_DEFAULT;
-            $addressDefault->save();
-        }
-
-        $address['is_default'] = AddressDefault::IS_DEFAULT;
-        $address->save();
-
-        $addresses = Address::select(AddressResource::fields())
-        ->where('account_id', '=', $req->accountId)
-        ->orderBy('created_at', 'desc')
-        ->get();
-         
-        return ApiResponse::responseObject(AddressResource::collection($addresses));
-    }
 }
+

@@ -352,7 +352,7 @@ export default function CustomerNewEditForm({ isEdit, currentCustomer, isLoading
           </Grid>
         </Grid >
       </FormProvider >
-      <CustomerNewEditListAddress isEdit={isEdit} />
+      <CustomerNewEditListAddress isEdit={isEdit} listAddress={currentCustomer?.addresses} />
     </>
   );
 }

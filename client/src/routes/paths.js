@@ -52,7 +52,7 @@ export const PATH_DASHBOARD = {
       root: path(ROOTS_DASHBOARD, '/account/customer'),
       list: path(ROOTS_DASHBOARD, '/account/customer/list'),
       new: path(ROOTS_DASHBOARD, '/account/customer/new'),
-      edit: (id) => path(ROOTS_DASHBOARD, `/account/customer/${id}/edit`),
+      edit: (id) => path(ROOTS_DASHBOARD, `/account/customer/${id}/edit`)
     },
     employee: {
       root: path(ROOTS_DASHBOARD, '/account/employee'),

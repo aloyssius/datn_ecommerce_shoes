@@ -4,9 +4,12 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\Address;
+
 
 class Account extends BaseModel
 {
+    // use HasFactory;
     use SoftDeletes;
 
     protected $fillable = [
@@ -39,5 +42,10 @@ class Account extends BaseModel
             return Carbon::parse($value)->format('d-m-Y');
         }
         return null;
+    }
+
+    public function addresses()
+    {
+        return $this->hasMany(Address::class);
     }
 }

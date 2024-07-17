@@ -100,5 +100,11 @@ export const AccountGenderOption = {
     MEN: 'Nam',
     WOMEN: 'Nữ',
   },
+
+};
+
+export const AddressDefault = {
+  IS_DEFAULT: 0,
+  UN_DEFAULT: 1,
 };
 

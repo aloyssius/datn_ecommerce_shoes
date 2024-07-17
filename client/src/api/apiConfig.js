@@ -33,6 +33,12 @@ export const ADMIN_API = {
     post: path(ROOTS_API, '/customers'),
     put: (id) => path(ROOTS_API, `/customers/${id}`),
     // details: (id) => path(ROOTS_API, `/bills/${id}`),
+    address: {
+      all: (id) => path(ROOTS_API, `/customers/${id}/address`),
+      details: (id) => path(ROOTS_API, `/customers/address/${id}`),
+      post: path(ROOTS_API, '/customers/address'),
+      put: (id) => path(ROOTS_API, `/customers/address/${id}`),
+    }
   },
 
   voucher: {
@@ -41,8 +47,14 @@ export const ADMIN_API = {
 
   employee: {
     all: path(ROOTS_API, '/employees'),
-    // post: path(ROOTS_API, '/bills'),
-    // put: (id) => path(ROOTS_API, `/bills/${id}`),
-    // details: (id) => path(ROOTS_API, `/bills/${id}`),
+    details: (id) => path(ROOTS_API, `/employees/${id}`),
+    post: path(ROOTS_API, '/employees'),
+    put: (id) => path(ROOTS_API, `/employees/${id}`),
+    address: {
+      all: (id) => path(ROOTS_API, `/employees/${id}/address`),
+      details: (id) => path(ROOTS_API, `/employees/address/${id}`),
+      post: path(ROOTS_API, '/employees/address'),
+      put: (id) => path(ROOTS_API, `/employees/address/${id}`),
+    }
   },
 };
