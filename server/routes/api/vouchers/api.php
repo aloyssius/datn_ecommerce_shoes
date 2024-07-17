@@ -16,3 +16,6 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/vouchers', [VoucherController::class, 'index']);
+Route::post('/vouchers', [VoucherController::class, 'store']);
+Route::put('/vouchers/{id}', [VoucherController::class, 'update']);
+Route::get('/vouchers/{id}', [VoucherController::class, 'show']);

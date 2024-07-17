@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Voucher;
 
 use App\Constants\VoucherStatus;
+use App\Http\Requests\BaseRequest;
 use Illuminate\Validation\Rule;
 use App\Constants\VoucherType;
 

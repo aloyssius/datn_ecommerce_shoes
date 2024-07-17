@@ -33,6 +33,7 @@ class VoucherResource extends JsonResource
     public static function fields()
     {
         return [
+            'id',
             'code',
             'name',
             'value',

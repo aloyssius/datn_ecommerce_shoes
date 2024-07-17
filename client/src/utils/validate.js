@@ -27,3 +27,11 @@ export const isPastOrPresentDate = (value) => {
 
   return true;
 };
+
+export const isNumber = (value) => {
+  return /^\d+$/.test(value);
+};
+
+export const isDateNotPast = (value) => {
+  return dayjs(value).isSameOrAfter(dayjs(), 'day');
+}

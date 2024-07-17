@@ -11,6 +11,10 @@ export const convertDateParam = (value) => {
   return value ? dayjs(value).format('DD-MM-YYYY') : null
 }
 
+export const convertDateTimeParam = (value) => {
+  return value ? dayjs(value).format('DD-MM-YYYY HH:mm') : null;
+}
+
 export const convertDatePicker = (value) => {
   if (!value) {
     return null;

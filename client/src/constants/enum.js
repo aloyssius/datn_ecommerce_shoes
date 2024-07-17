@@ -80,6 +80,17 @@ export const VoucherTypeOption = {
   },
 };
 
+export const VoucherTypeDiscount = {
+  en: {
+    VND: 'vnd',
+    PERCENT: 'percent',
+  },
+  vi: {
+    VND: 'Số tiền',
+    PERCENT: 'Phần trăm',
+  },
+};
+
 export const AccountStatusTab = {
   en: {
     IS_ACTIVE: 'is_active',
