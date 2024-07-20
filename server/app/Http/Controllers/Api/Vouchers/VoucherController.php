@@ -2,14 +2,18 @@
 
 namespace App\Http\Controllers\Api\Vouchers;
 
+use App\Exceptions\NotFoundException;
 use App\Helpers\ApiResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Vouchers\VoucherResource;
 use App\Models\Voucher;
 use Illuminate\Http\Request\Page;
-use App\Http\Requests\VoucherRequest;
+use App\Http\Requests\Voucher\VoucherRequest;
+use App\Http\Requests\Voucher\VoucherRequestBody;
+use App\Helpers\ConvertHelper;
 use Illuminate\Support\Facades\DB;
 use App\Helpers\QueryHelper;
+use Carbon\Carbon;
 
 class VoucherController extends Controller
 {
@@ -28,10 +32,6 @@ class VoucherController extends Controller
 
         if ($req->filled('status')) {
             QueryHelper::buildQueryEquals($vouchers, 'status', $req->status);
-        }
-
-        if ($req->filled('type')) {
-            QueryHelper::buildQueryEquals($vouchers, 'type', $req->type);
         }
 
         $vouchers->when($req->filled('startDate') && $req->filled('endDate'), function ($query) use ($req) {
@@ -55,9 +55,32 @@ class VoucherController extends Controller
         QueryHelper::buildOrderBy($vouchers, 'created_at', 'desc');
         $vouchers = QueryHelper::buildPagination($vouchers, $req);
 
-            // ->orderBy('created_at', 'desc')
-            // ->paginate($req->pageSize, ['*'], 'page', $req->currentPage);
+        // ->orderBy('created_at', 'desc')
+        // ->paginate($req->pageSize, ['*'], 'page', $req->currentPage);
 
-        return ApiResponse::responsePage(VoucherResource::collection($vouchers), $statusCounts,NULL);
+        return ApiResponse::responsePage(VoucherResource::collection($vouchers), $statusCounts, NULL);
+    }
+
+    public function show($id)
+    {
+
+        $voucher = Voucher::select(VoucherResource::fields())
+            ->where('id', '=', $id);
+
+        if (!$voucher) {
+            throw new NotFoundException("Không tìm thấy voucher có id là " . $id);
+        }
+
+        return ApiResponse::responseObject(new VoucherResource($voucher));
+    }
+
+    public function store(VoucherRequestBody $req)
+    {
+        // convert req
+        $voucherConverted = ConvertHelper::convertColumnsToSnakeCase($req->all());
+
+        // save
+        $voucherCreated = Voucher::create($voucherConverted);
+        return ApiResponse::responseObject(new VoucherResource($voucherCreated));
     }
 }

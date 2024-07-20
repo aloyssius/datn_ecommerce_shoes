@@ -14,6 +14,7 @@ class Product extends BaseModel
         'code',
         'status',
         'description',
+        'brand_id'
     ];
 
     public static function getProducts($req)
@@ -25,11 +26,25 @@ class Product extends BaseModel
               SELECT PRODUCT_ID, SUM(QUANTITY) AS totalQuantity
               FROM PRODUCT_DETAILS
               GROUP BY PRODUCT_ID
+            ),
+            PRODUCT_DEFAULT_IMAGE AS (
+              SELECT  PRODUCT_ID, PATH_URL,
+              ROW_NUMBER() OVER (PARTITION BY PRODUCT_ID ORDER BY PATH_URL) AS image_rank
+              FROM IMAGES
+              WHERE IS_DEFAULT = 1
             )
-            SELECT P.id, P.code, P.name, B.name as brand, P.created_at, PQ.totalQuantity, P.status, CASE WHEN PQ.totalQuantity <= 0 THEN 'Hết hàng' WHEN PQ.totalQuantity <= 10
-            THEN 'Sắp hết' ELSE 'Còn hàng' END AS stockStatus
+            SELECT P.id, P.code, P.name, B.name as brand, P.created_at, PQ.totalQuantity, P.status, PDI.path_url as imageUrl,
+              CASE
+                 WHEN PQ.totalQuantity <= 0 THEN 'Hết hàng'
+                 WHEN PQ.totalQuantity <= 10 THEN 'Sắp hết hàng'
+                 ELSE 'Còn hàng' END AS stockStatus
             FROM PRODUCTS P
             JOIN PRODUCT_QUANTITY PQ ON P.ID = PQ.PRODUCT_ID
+            JOIN (
+            SELECT PRODUCT_ID, PATH_URL
+            FROM PRODUCT_DEFAULT_IMAGE
+            WHERE image_rank = 1
+            ) PDI ON P.ID = PDI.PRODUCT_ID
             JOIN BRANDS B ON P.BRAND_ID = B.ID
             JOIN PRODUCT_CATEGORIES PC ON P.ID = PC.PRODUCT_ID
             JOIN CATEGORIES C on PC.CATEGORY_ID = C.ID
@@ -76,7 +91,7 @@ class Product extends BaseModel
         }
 
         $query .= "
-        GROUP BY P.ID, P.CODE, P.NAME, B.NAME, P.CREATED_AT, PQ.totalQuantity, P.STATUS
+        GROUP BY P.ID, P.CODE, P.NAME, B.NAME, P.CREATED_AT, PQ.totalQuantity, P.STATUS, PDI.PATH_URL
         ";
 
         if ($req->filled('quantityConditions')) {

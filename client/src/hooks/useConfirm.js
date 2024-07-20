@@ -33,10 +33,11 @@ const useConfirm = () => {
     });
   };
 
-  const showConfirmCancel = (title, onConfirm) => {
+  const showConfirmCancel = (title, text, onConfirm) => {
 
     Swal.fire({
       title: title || "Xác nhận?",
+      text: text || "",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#3085d6",

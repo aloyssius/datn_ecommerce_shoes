@@ -10,6 +10,7 @@ class Voucher extends BaseModel
     use SoftDeletes;
 
     protected $fillable = [
+        'id',
         'code',
         'name',
         'value',

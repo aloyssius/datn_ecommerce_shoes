@@ -37,7 +37,7 @@ return new class extends Migration
 
         // Account
         $schema->create('accounts', function (BaseBlueprint $table) {
-            $table->baseColumn()->addColumnCode()->addSoftDeletes();
+            $table->baseColumn()->addColumnCode();
             $table->string('full_name', ConstantSystem::FULL_NAME_MAX_LENGTH);
             $table->dateTime('birth_date')->nullable();
             $table->string('phone_number', ConstantSystem::PHONE_NUMBER_MAX_LENGTH)->unique()->nullable();
@@ -214,8 +214,10 @@ return new class extends Migration
             $table->string('path_url', ConstantSystem::URL_MAX_LENGTH);
             $table->string('public_id', ConstantSystem::URL_MAX_LENGTH);
             $table->boolean('is_default')->default(false);
-            $table->foreignUuid('product_color_id')->references('color_id')->on('product_details');
-            $table->foreignUuid('product_id')->references('product_id')->on('product_details');
+            // $table->foreignUuid('product_color_id')->references('color_id')->on('product_details');
+            // $table->foreignUuid('product_id')->references('product_id')->on('product_details');
+            $table->uuid('product_color_id');
+            $table->uuid('product_id');
         });
     }
 

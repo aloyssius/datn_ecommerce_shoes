@@ -10,7 +10,6 @@ use App\Models\Address;
 class Account extends BaseModel
 {
     // use HasFactory;
-    use SoftDeletes;
 
     protected $fillable = [
         'code',

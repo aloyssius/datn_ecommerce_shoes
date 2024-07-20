@@ -10,7 +10,8 @@ class Image extends BaseModel
         'path_url',
         'product_color_id',
         'public_id',
-        'is_default'
+        'is_default',
+        'product_id',
     ];
 
     public function __construct(array $attributes = [])

@@ -28,6 +28,7 @@ import { PATH_DASHBOARD } from '../../../../routes/paths';
 import useTabs from '../../../../hooks/useTabs';
 import useSettings from '../../../../hooks/useSettings';
 import useTable, { getComparator, emptyRows } from '../../../../hooks/useTable';
+import useNotification from '../../../../hooks/useNotification';
 // _mock_
 import { _vouchers } from '../../../../_mock';
 // components
@@ -66,6 +67,8 @@ const TABLE_HEAD = [
 
 export default function ProductList() {
   const { themeStretch } = useSettings();
+
+  const { onOpenSuccessNotify } = useNotification();
 
   const navigate = useNavigate();
 
@@ -138,7 +141,28 @@ export default function ProductList() {
     brandSelecteds.length === 0 &&
     filterStatus === All.EN;
 
-  const { data, totalPages, setParams, firstFetch, statusCounts, otherData } = useFetch(ADMIN_API.product.all);
+  const { data, put, setData, setStatusCounts, setTotalPages, totalPages, setParams, firstFetch, statusCounts, otherData } = useFetch(ADMIN_API.product.all);
+
+  const onFinishUpdateStatus = (data) => {
+    onOpenSuccessNotify('Cập nhật trạng thái thành công!')
+    setStatusCounts(data?.statusCounts);
+    setData(data?.products);
+    setTotalPages(data?.totalPages);
+  }
+
+  const handleUpdateStatus = (data) => {
+    const body = {
+      ...data,
+      currentPage: page,
+      pageSize: rowsPerPage,
+      search: filterSearch || null,
+      status: filterStatus !== All.EN ? filterStatus : null,
+      brandIds: brandSelecteds.length === 0 ? null : convertedtArr(brandSelecteds),
+      categoryIds: categorySelecteds.length === 0 ? null : convertedtArr(categorySelecteds),
+      quantityConditions: stockSelecteds.length === 0 ? null : convertedtArr(convertedStockSelected(stockSelecteds)),
+    }
+    put(ADMIN_API.product.putStatus, body, (res) => onFinishUpdateStatus(res));
+  }
 
   const convertedStockSelected = (stocks) => {
     const converted = stocks.map(item => {
@@ -319,6 +343,7 @@ export default function ProductList() {
                       key={row.id}
                       row={row}
                       onEditRow={() => handleEditRow(row.id)}
+                      onUpdateRow={handleUpdateStatus}
                     />
                   ))}
                   {/*

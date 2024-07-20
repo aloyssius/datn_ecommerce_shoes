@@ -1,17 +1,14 @@
 import PropTypes from 'prop-types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import * as Yup from 'yup';
-import axios from 'axios';
 // form
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, Controller } from 'react-hook-form';
 // @mui
 import { styled } from '@mui/material/styles';
-import { LoadingButton } from '@mui/lab';
 import { Button, Box, Divider, Card, Checkbox, Grid, Stack, TextField, Typography, MenuItem } from '@mui/material';
 import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete';
-import Swal from 'sweetalert2'
 import useFetch from '../../../../hooks/useFetch';
 import { ADMIN_API } from '../../../../api/apiConfig';
 // routes
@@ -29,13 +26,15 @@ import {
 } from '../../../../components/hook-form';
 import Label from '../../../../components/Label';
 import { ProductStatusTab, AttributeStatus } from '../../../../constants/enum';
+import { convertProductStatusBoolean } from '../../../../utils/ConvertEnum';
 import ProductNewEditColorSize from './ProductNewEditColorSize';
 import { IconArrowDownAutocomplete } from '../../../../components/IconArrow';
 import ProductNewEditVariant from './ProductNewEditVariant';
 import { formatNumber } from '../../../../utils/formatCurrency';
-import { generateSku } from '../../../../utils/generate';
 
 // ----------------------------------------------------------------------
+
+const IMAGE_MIN_LENGTH = 4;
 
 const LabelStyleDescription = styled(Typography)(({ theme }) => ({
   ...theme.typography.subtitle2,
@@ -62,11 +61,15 @@ ProductNewEditForm.propTypes = {
   currentProduct: PropTypes.object,
 };
 
-export default function ProductNewEditForm({ isEdit, currentProduct }) {
-  console.log(currentProduct?.variants);
+export default function ProductNewEditForm({ isEdit, currentProduct, onUpdateData }) {
+
+  console.log(currentProduct);
+
   const [variants, setVariants] = useState([]);
 
   const { onOpenSuccessNotify } = useNotification();
+
+  const { id } = useParams();
 
   const { showConfirm, showConfirmCancel } = useConfirm();
 
@@ -139,7 +142,7 @@ export default function ProductNewEditForm({ isEdit, currentProduct }) {
       description: currentProduct?.description || '',
       categorys: currentProduct?.categories || [],
       brand: data.brands ? data.brands.find(item => item.id === currentProduct?.brandId) : null,
-      status: currentProduct?.status === ProductStatusTab.en.IS_ACTIVE || true,
+      status: convertProductStatusBoolean(currentProduct?.status),
       colors: currentProduct?.colors || [],
       sizes: currentProduct?.sizes || [],
     }),
@@ -164,7 +167,7 @@ export default function ProductNewEditForm({ isEdit, currentProduct }) {
 
   const values = watch();
 
-  const { colors, sizes, name, code, brand, categorys, description } = values;
+  const { colors, sizes, name, code, brand, categorys, description, status } = values;
 
   useEffect(() => {
     if (isEdit && currentProduct) {
@@ -181,12 +184,53 @@ export default function ProductNewEditForm({ isEdit, currentProduct }) {
     code === "" &&
     description === "" &&
     brand === null &&
+    status === true &&
     categorys.length === 0 &&
     variants?.length === 0;
 
+  const currentVariantImages = variants?.flatMap(variant => variant.images.map(image => {
+    return { ...image };
+  }));
+
+  const currentProductImages = currentProduct?.variants?.flatMap(variant => variant.images.map(image => {
+    return { ...image };
+  }));
+
+  const oldProductItems = currentProduct?.variants?.flatMap(variant => variant.variantItems.map(variantItem => {
+    return {
+      ...variantItem,
+    };
+  }));
+
+  const newProductItems = variants?.flatMap(variant => variant.variantItems.map(variantItem => {
+    return {
+      ...variantItem,
+    };
+  }));
+
+  const isNotDefaultEdit =
+    name?.trim() !== currentProduct?.name ||
+    code?.trim() !== currentProduct?.code ||
+    description?.trim() !== currentProduct?.description ||
+    brand?.id !== currentProduct?.brandId ||
+    status !== (currentProduct?.status === ProductStatusTab.en.IS_ACTIVE) ||
+    compareArrays(currentProduct?.categories, categorys, "id") ||
+    compareArrays(currentProduct?.colors, colors, "id") ||
+    compareArrays(currentProduct?.sizes, sizes, "id") ||
+    compareArrayValues(oldProductItems, newProductItems, "quantity") ||
+    compareArrayValues(oldProductItems, newProductItems, "status") ||
+    compareArrayValues(oldProductItems, newProductItems, "price") ||
+    compareArrayValues(currentProductImages, currentVariantImages, "isDefault") ||
+    compareArrays(oldProductItems, newProductItems, "id") ||
+    compareArrays(currentProductImages, currentVariantImages, "path");
+
   const handleCancel = () => {
-    if (!isDefault) {
-      showConfirmCancel("Xác nhận hủy bỏ?", () => navigate(PATH_DASHBOARD.product.list))
+    if (!isDefault && !isEdit) {
+      showConfirmCancel(`Xác nhận hủy bỏ thêm mới"?`, "Tất cả thay đổi của bạn sẽ không được lưu!", () => navigate(PATH_DASHBOARD.product.list))
+      return;
+    }
+    if (isNotDefaultEdit && isEdit) {
+      showConfirmCancel(`Xác nhận hủy bỏ cập nhật?`, "Tất cả thay đổi của bạn sẽ không được lưu!", () => navigate(PATH_DASHBOARD.product.list))
       return;
     }
     navigate(PATH_DASHBOARD.product.list)
@@ -194,8 +238,14 @@ export default function ProductNewEditForm({ isEdit, currentProduct }) {
 
   const onFinishSaveProduct = (data) => {
     console.log(data);
-    onOpenSuccessNotify(`Thêm mới sản phẩm thành công!`)
-    navigate(PATH_DASHBOARD.product.edit(data?.id))
+    onOpenSuccessNotify(`${!isEdit ? "Thêm mới " : "Cập nhật "} sản phẩm thành công!`)
+    if (!isEdit) {
+      navigate(PATH_DASHBOARD.product.edit(data?.id))
+    }
+    else {
+      onUpdateData(data);
+      setFirstFill(false);
+    }
   }
 
   const onSubmit = async (data) => {
@@ -205,46 +255,80 @@ export default function ProductNewEditForm({ isEdit, currentProduct }) {
 
     const { colors, sizes, brand, categorys, ...newData } = data;
 
-    const skuMap = {};
-
     const productItems = variants.flatMap(variant => variant.variantItems.map(variantItem => {
       const { sizeName, ...rest } = variantItem;
 
-      if (!skuMap[rest.colorId]) {
-        skuMap[rest.colorId] = generateSku(code);
-      }
-
-      return { ...rest, price: formatNumber(rest.price), quantity: Number(rest.quantity), sku: skuMap[rest.colorId] };
+      return {
+        ...rest,
+        price: formatNumber(variant.price),
+        quantity: Number(rest.quantity),
+        sku: `${code}-${variant?.colorName?.toUpperCase()}`
+      };
     }));
+
+    const productItemsNeedRemove = oldProductItems?.filter((item) => {
+      return !productItems?.some((productItem) => productItem?.id === item.id);
+    }).map((item) => item.id);
+
+    const imagesNeedRemove = currentProductImages?.filter((item) => {
+      return !currentVariantImages?.some((image) => image?.id === item.id);
+    }).map((item) => item.id);
+
+    const imagesCloudNeedRemove = currentProductImages?.filter((item) => {
+      return !currentVariantImages?.some((image) => image?.id === item.id);
+    }).map((item) => item.publicId);
 
     const images = variants.flatMap((variant) =>
       variant.images.map((image) => image)
     );
 
-    const imageFiles = variants.flatMap((variant) =>
-      variant.imageFiles.map((image) => image)
+    const imageFiles = variants?.flatMap((variant) =>
+      variant?.imageFiles?.map((image) => image)
     );
 
-    const isErrorValidateProductItems = productItems.some((item) => !item.price || variants.some((variant) => variant.images.length <= 3)) || variants.every((variant) => variant.images.every((image) => !image?.isDefault));
+    const imagesNeedCreate = images.filter((item) => !item?.id);
+
+    const isErrorValidateProductItems = productItems.some((item) => !item.price) || variants.some((variant) =>
+      variant.images.length < IMAGE_MIN_LENGTH) || variants.some((variant) => variant.images.every((image) => !image?.isDefault));
+
     if (!isErrorValidateProductItems) {
       const body = {
         ...newData,
+        productItemsNeedRemove,
+        imagesNeedRemove,
+        imagesNeedCreate,
+        imagesCloudNeedRemove,
         categoryIds,
         brandId,
+        id,
         images,
         productItems,
         status: newData.status ? ProductStatusTab.en.IS_ACTIVE : ProductStatusTab.en.UN_ACTIVE,
       }
       console.log(body)
-      console.log(imageFiles)
-      const formData = new FormData();
-      imageFiles.forEach((file) => {
-        const blobWithCustomFileName = new Blob([file], { type: 'application/octet-stream' });
-        formData.append('files[]', blobWithCustomFileName, file.name);
-      });
-      formData.append('data', JSON.stringify(body));
 
-      showConfirm("Xác nhận thêm mới sản phẩm?", () => formDataFile(ADMIN_API.product.post, formData, (res) => onFinishSaveProduct(res)));
+      if (!isEdit) {
+        const formData = new FormData();
+        imageFiles.forEach((file) => {
+          const blobWithCustomFileName = new Blob([file], { type: 'application/octet-stream' });
+          formData.append('files[]', blobWithCustomFileName, file.name);
+        });
+        formData.append('data', JSON.stringify(body));
+
+        showConfirm("Xác nhận thêm mới sản phẩm?", () => formDataFile(ADMIN_API.product.post, formData, (res) => onFinishSaveProduct(res)));
+      }
+      else {
+        const formData = new FormData();
+        const imageFilesFiltered = imageFiles.filter((item) => !item?.id);
+        imageFilesFiltered.forEach((file) => {
+          const blobWithCustomFileName = new Blob([file], { type: 'application/octet-stream' });
+          formData.append('files[]', blobWithCustomFileName, file.name);
+        });
+        formData.append('data', JSON.stringify(body));
+        formData.append('_method', 'PUT');
+        showConfirm("Xác nhận cập nhật sản phẩm?", () => formDataFile(ADMIN_API.product.put, formData, (res) => onFinishSaveProduct(res)));
+      }
+
     }
   };
 
@@ -458,12 +542,11 @@ export default function ProductNewEditForm({ isEdit, currentProduct }) {
             }
 
             return {
-...item,
-                isDefault: false,
-                colorId: variant.colorId,
+              ...item,
+              isDefault: false,
+              colorId: variant.colorId,
             };
           })
-
 
           return {
             ...variant,
@@ -510,7 +593,8 @@ export default function ProductNewEditForm({ isEdit, currentProduct }) {
     }
 
     if (isEdit && currentProduct?.variants?.length !== 0 && !firstFill) {
-      setVariants(currentProduct?.variants);
+      // setVariants(currentProduct?.variants);
+      setVariants(JSON.parse(JSON.stringify(currentProduct?.variants))); // ??
       setFirstFill(true);
       return;
     }
@@ -869,7 +953,7 @@ export default function ProductNewEditForm({ isEdit, currentProduct }) {
 
             <Stack spacing={2} direction="row" >
               <Button onClick={handleCancel} size="medium" sx={{ width: "100%" }} color="inherit" variant="contained">Hủy</Button>
-              <Button type="submit" sx={{ width: "100%" }} size="medium" variant="contained">Lưu</Button>
+              <Button type="submit" sx={{ width: "100%" }} size="medium" variant="contained" disabled={isEdit && !isNotDefaultEdit}>Lưu</Button>
             </Stack>
 
           </Stack>
@@ -881,9 +965,40 @@ export default function ProductNewEditForm({ isEdit, currentProduct }) {
         <Divider />
         <Stack spacing={2} direction="row" display="flex" justifyContent="flex-end" sx={{ mt: 2 }}>
           <Button onClick={handleCancel} size="medium" color="inherit" variant="contained">Hủy</Button>
-          <Button type="submit" size="medium" variant="contained">Lưu</Button>
+          <Button type="submit" size="medium" variant="contained" disabled={!isNotDefaultEdit && isEdit}>Lưu</Button>
         </Stack>
       </Stack>
     </FormProvider>
   );
+}
+
+function compareArrays(oldArray, newArray, property) {
+  const newSet = new Set(newArray.map(item => item[property]));
+
+  for (let i = 0; i < oldArray.length; i += 1) {
+    if (!newSet.has(oldArray[i][property])) {
+      return true; // Một hoặc nhiều phần tử đã bị xóa
+    }
+  }
+
+  for (let i = 0; i < newArray.length; i += 1) {
+    if (!oldArray.some(item => item[property] === newArray[i][property])) {
+      return true; // Một hoặc nhiều phần tử đã được thêm
+    }
+  }
+
+  return false;
+}
+
+function compareArrayValues(oldArray, newArray, property) {
+  for (let i = 0; i < oldArray.length; i += 1) {
+    const oldItem = oldArray[i];
+    const newItem = newArray.find(item => item.id === oldItem.id);
+
+    if (newItem && newItem[property] !== oldItem[property]) {
+      return true;
+    }
+  }
+
+  return false;
 }

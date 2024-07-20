@@ -46,7 +46,6 @@ export default function ProductMultiFilePreview({ showPreview = false, files, on
           {files?.map((file) => {
             const { preview } = getFileData(file);
 
-            if (!isEdit) {
               return (
                 <ListItem
                   key={file?.path}
@@ -64,7 +63,7 @@ export default function ProductMultiFilePreview({ showPreview = false, files, on
                     border: (theme) => `solid 1px ${theme.palette.divider}`,
                   }}
                 >
-                  <Image alt="preview" src={isString(file) ? file : preview} ratio="1/1" />
+                  <Image alt="preview" src={file?.preview ? preview : file?.path } ratio="1/1" />
                   <IconButton
                     size="small"
                     onClick={() => onUpdateImageDefault(file?.path)}
@@ -101,62 +100,6 @@ export default function ProductMultiFilePreview({ showPreview = false, files, on
                   </IconButton>
                 </ListItem>
               );
-            }
-
-            return (
-              <ListItem
-                key={file?.id}
-                component={m.div}
-                {...varFade().inRight}
-                sx={{
-                  p: 0,
-                  m: 0.5,
-                  width: 80,
-                  height: 80,
-                  borderRadius: 1.25,
-                  overflow: 'hidden',
-                  position: 'relative',
-                  display: 'inline-flex',
-                  border: (theme) => `solid 1px ${theme.palette.divider}`,
-                }}
-              >
-                <Image alt="preview" src={file?.path} ratio="1/1" />
-                <IconButton
-                  size="small"
-                  onClick={() => onUpdateImageDefault(file?.path)}
-                  sx={{
-                    top: 6,
-                    p: '2px',
-                    left: 6,
-                    position: 'absolute',
-                    color: file?.isDefault ? 'yellow' : 'common.white',
-                    bgcolor: (theme) => alpha(theme.palette.grey[900], 0.72),
-                    '&:hover': {
-                      bgcolor: (theme) => alpha(theme.palette.grey[900], 0.48),
-                    },
-                  }}
-                >
-                  <Iconify icon={'eva:star-outline'} />
-                </IconButton>
-                <IconButton
-                  size="small"
-                  onClick={() => onRemove(file)}
-                  sx={{
-                    top: 6,
-                    p: '2px',
-                    right: 6,
-                    position: 'absolute',
-                    color: 'common.white',
-                    bgcolor: (theme) => alpha(theme.palette.grey[900], 0.72),
-                    '&:hover': {
-                      bgcolor: (theme) => alpha(theme.palette.grey[900], 0.48),
-                    },
-                  }}
-                >
-                  <Iconify icon={'eva:close-fill'} />
-                </IconButton>
-              </ListItem>
-            );
 
           })}
 

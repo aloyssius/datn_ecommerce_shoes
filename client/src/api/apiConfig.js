@@ -19,6 +19,7 @@ export const ADMIN_API = {
     attributes: path(ROOTS_API, '/products/attributes/all'),
     postAttributes: path(ROOTS_API, '/products/attributes'),
     put: path(ROOTS_API, `/products`),
+    putStatus: path(ROOTS_API, `/products/status`),
     details: (id) => path(ROOTS_API, `/products/${id}`),
   },
 
@@ -77,6 +78,7 @@ export const ADMIN_API = {
 
   voucher: {
     all: path(ROOTS_API, '/vouchers'),
+    post: path(ROOTS_API, '/vouchers'),
   },
 
   employee: {

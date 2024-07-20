@@ -22,25 +22,25 @@ class ProductDetailsTableSeeder extends Seeder
         $sizes = Size::all();
         $productIndex = 0;
 
-        foreach (range(1, 8) as $index) {
-            if ($index % 5 == 0) {
-                $productIndex++;
-            }
-
-            $currentProduct = $products[$productIndex];
-            $currentColor = $colors[$productIndex];
-            $currentSize = $sizes[$productIndex];
-
-            DB::table('product_details')->insert([
-                'id' => $faker->uuid,
-                'sku' => "SUBSKU{$index}",
-                'quantity' => $faker->numberBetween(1000, 2000),
-                'price' => $faker->numberBetween(350000, 5000000),
-                'status' => $faker->randomElement(ProductStatus::toArray()),
-                'product_id' => $currentProduct->id,
-                'size_id' => $currentSize->id,
-                'color_id' => $currentColor->id,
-            ]);
-        }
+        // foreach (range(1, 8) as $index) {
+        //     if ($index % 5 == 0) {
+        //         $productIndex++;
+        //     }
+        //
+        //     $currentProduct = $products[$productIndex];
+        //     $currentColor = $colors[$productIndex];
+        //     $currentSize = $sizes[$productIndex];
+        //
+        //     DB::table('product_details')->insert([
+        //         'id' => $faker->uuid,
+        //         'sku' => "SUBSKU{$index}",
+        //         'quantity' => $faker->numberBetween(1000, 2000),
+        //         'price' => $faker->numberBetween(350000, 5000000),
+        //         'status' => $faker->randomElement(ProductStatus::toArray()),
+        //         'product_id' => $currentProduct->id,
+        //         'size_id' => $currentSize->id,
+        //         'color_id' => $currentColor->id,
+        //     ]);
+        // }
     }
 }
