@@ -33,7 +33,7 @@ export default function NavSectionVertical({ navConfig, isCollapse = false, ...o
   return (
     <Box {...other}>
       {navConfig.map((group) => (
-        <List key={group.subheader} disablePadding sx={{ px: 2 }}>
+        <List key={Math.random()} disablePadding sx={{ px: 2 }}>
           {/*
           <ListSubheaderStyle
             sx={{

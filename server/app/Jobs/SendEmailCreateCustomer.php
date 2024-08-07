@@ -15,17 +15,19 @@ class SendEmailCreateCustomer implements ShouldQueue
 {
     protected $account;
     protected $pass;
+    protected $type;
 
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public function __construct($account, $pass)
+    public function __construct($account, $pass, $type = 'create')
     {
         $this->account = $account;
         $this->pass = $pass;
+        $this->type = $type;
     }
 
     public function handle(): void
     {
-        Mail::to($this->account->email)->send(new CreateCustomerEmail($this->account, $this->pass));
+        Mail::to($this->account->email)->send(new CreateCustomerEmail($this->account, $this->pass, $this->type));
     }
 }

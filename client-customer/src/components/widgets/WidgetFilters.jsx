@@ -25,9 +25,19 @@ function WidgetFilters(props) {
     onChangePrice,
     isLoading,
     dataPage,
+    gender,
   } = props;
 
-  const filtersList = filters.map((filter) => {
+  console.log(gender);
+
+  const filtersList = filters.filter(item => {
+    if (gender === null) {
+      return true;
+    }
+    else if (gender !== null) {
+      return item.attribute !== 'categories';
+    }
+  }).map((filter) => {
     let filterView;
     let items;
     let attribute = filter?.attribute;
@@ -36,21 +46,24 @@ function WidgetFilters(props) {
     }
 
     if (filter.type === 'categories') {
-      filterView = <FilterCategories categories={filter.options.items} />;
+      filterView = <FilterCategories key={gender} categories={filter.options.items} />;
     } else if (filter.type === 'checkbox') {
-      filterView = <FilterCheckbox
-        onSelectAttributeIds={onSelectAttributeIds}
-        attribute={attribute || ""}
-        items={items || []}
-      />;
-    } else if (['checkbox', 'radio'].includes(filter.type)) {
-      filterView = (
-        <FilterRadio
-          items={filter.options.items}
-          name={filter.options.name}
-        />
-      );
-    } else if (filter.type === 'color') {
+      filterView =
+        <FilterCheckbox
+          onSelectAttributeIds={onSelectAttributeIds}
+          attribute={attribute || ""}
+          items={items || []}
+        />;
+    }
+    // else if (['checkbox', 'radio'].includes(filter.type)) {
+    //   filterView = (
+    //     <FilterRadio
+    //       items={filter.options.items}
+    //       name={filter.options.name}
+    //     />
+    //   );
+    // } 
+    else if (filter.type === 'color') {
       filterView = <FilterColor
         items={items || []}
         attribute={attribute || ""}

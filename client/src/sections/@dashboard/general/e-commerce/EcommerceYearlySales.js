@@ -2,9 +2,10 @@ import merge from 'lodash/merge';
 import { useState } from 'react';
 import ReactApexChart from 'react-apexcharts';
 // @mui
-import { Card, CardHeader, Box, TextField } from '@mui/material';
+import { Card, Typography, CardHeader, Box, TextField } from '@mui/material';
 //
 import { BaseOptionChart } from '../../../../components/chart';
+import { formatCurrencyVnd } from '../../../../utils/formatCurrency';
 
 // ----------------------------------------------------------------------
 
@@ -25,8 +26,31 @@ const CHART_DATA = [
   },
 ];
 
-export default function EcommerceYearlySales({ years, month }) {
-  const [seriesData, setSeriesData] = useState(2019);
+export default function EcommerceYearlySales({ month = [] }) {
+
+  const data = month?.reduce((acc, item) => {
+    let yearIndex = acc.findIndex((i) => i.year === item.year);
+    if (yearIndex === -1) {
+      acc.push({
+        year: item.year,
+        data: [
+          {
+            name: 'Tổng doanh thu',
+            data: Array(12).fill(0),
+          },
+        ],
+      });
+      yearIndex = acc.length - 1;
+    }
+
+    acc[yearIndex].data[0].data[parseInt(item.month, 10) - 1] += item.totalRevenue;
+
+    return acc;
+  }, []);
+
+  console.log(data);
+
+  const [seriesData, setSeriesData] = useState(Math.max(...data.map(item => item.year)));
 
   const handleChangeSeriesData = (event) => {
     setSeriesData(Number(event.target.value));
@@ -39,7 +63,7 @@ export default function EcommerceYearlySales({ years, month }) {
     },
     yaxis: {
       labels: {
-        formatter: (value) => `${value}tr`,
+        formatter: (value) => `${formatCurrency(String(value))}`,
       },
     },
   });
@@ -50,6 +74,7 @@ export default function EcommerceYearlySales({ years, month }) {
         title="Biểu đồ thống kê doanh thu"
         // subheader="(+43%) than last year"
         action={
+          month?.length > 0 &&
           <TextField
             select
             fullWidth
@@ -63,7 +88,7 @@ export default function EcommerceYearlySales({ years, month }) {
               '& .MuiNativeSelect-icon': { top: 4, right: 0, width: 20, height: 20 },
             }}
           >
-            {years?.map((option) => (
+            {data?.map((option) => (
               <option key={option.year} value={option.year}>
                 {option.year}
               </option>
@@ -71,14 +96,28 @@ export default function EcommerceYearlySales({ years, month }) {
           </TextField>
         }
       />
+      {data?.length <= 0 ?
+        <Typography variant='h5' sx={{ p: 5, textAlign: 'center' }}>
+          Chưa có dữ liệu
+        </Typography> :
+        <>
+          {data?.map((item) => (
+            <Box key={item.year} sx={{ mt: 3, mx: 3 }} dir="ltr">
+              {item.year === seriesData && (
+                <ReactApexChart type="area" series={item.data} options={chartOptions} height={364} />
+              )}
+            </Box>
+          ))}
+        </>
+      }
 
-      {years?.map((item) => (
-        <Box key={item.year} sx={{ mt: 3, mx: 3 }} dir="ltr">
-          {item.year === seriesData && (
-            <ReactApexChart type="area" series={item.data} options={chartOptions} height={364} />
-          )}
-        </Box>
-      ))}
     </Card>
   );
+}
+
+const formatCurrency = (data) => {
+  if (data === 0 || data === "0" || data === "" || !data || data === null || data === undefined) {
+    return "0đ";
+  }
+  return `${formatCurrencyVnd(data)} đ`;
 }

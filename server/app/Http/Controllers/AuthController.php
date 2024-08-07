@@ -15,12 +15,14 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Account\AccountRequestBody;
 use App\Http\Resources\Accounts\AccountResource;
 use App\Http\Resources\Accounts\AddressResource;
+use App\Jobs\SendEmailCreateCustomer;
 use App\Jobs\SendEmailVerification;
 use App\Mail\VerifyEmail;
 use App\Models\Account;
 use App\Models\Address;
 use App\Models\Cart;
 use App\Models\CartDetails;
+use App\Models\Notification;
 use App\Models\ProductDetails;
 use App\Models\Role;
 use App\Models\User;
@@ -31,6 +33,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -190,6 +193,31 @@ class AuthController extends Controller
         return ApiResponse::responseObject($user, "Đăng ký thành công!", ConstantSystem::SUCCESS_CODE);
     }
 
+    public function resetPasswordAdmin(Request $req)
+    {
+        $account = Account::where('email', $req->email)->first();
+        if (!$account) {
+            throw new RestApiException("Email không tồn tại");
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $length = 12;
+            $pass = Str::random($length, 'aA0');
+            $account->password = bcrypt($pass);
+            $account->save();
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollback();
+            // throw new RestApiException("Đổi mật khẩu không thành công");
+            throw new RestApiException($e->getMessage());
+        }
+        SendEmailCreateCustomer::dispatch($account, $pass, "reset");
+
+        return ApiResponse::responseObject(new AccountResource($account));
+    }
+
     public function changePasswordAdmin(Request $req)
     {
         $account = Account::find($req->id);
@@ -266,7 +294,28 @@ class AuthController extends Controller
         $response = Auth::user();
         $role = Role::find(Auth::user()->role_id)->code;
         $response['role'] = $role;
+
+        $notifies = Notification::where('account_id', Auth::user()->id)->where('is_seen', 0)->orderBy('created_at', 'desc')->get();
+        $response['notifies'] = $notifies;
         return ApiResponse::responseObject(new AccountResource($response));
+    }
+
+    public function updateNotifies($id)
+    {
+        $notifies = Notification::where('url', $id)->get();
+        try {
+            DB::beginTransaction();
+            foreach ($notifies as $notify) {
+                $notify->is_seen = 1;
+                $notify->save();
+                DB::commit();
+            }
+        } catch (\Exception $e) {
+            throw new RestApiException($e->getMessage());
+        }
+
+        $notifiesNew = Notification::where('account_id', Auth::user()->id)->where('is_seen', 0)->orderBy('created_at', 'desc')->get();
+        return ApiResponse::responseObject($notifiesNew);
     }
 
     public function getAddressDefault()
@@ -539,10 +588,12 @@ class AuthController extends Controller
     protected function createNewTokenAdmin($token)
     {
         $role = Role::find(Auth::user()->role_id)->code;
+        $notifies = Notification::where('account_id', Auth::user()->id)->where('is_seen', 0)->orderBy('created_at', 'desc')->get();
 
         $response['accessToken'] = $token;
         $response['user'] = new AccountResource(auth()->user());
         $response['user']['role'] = $role;
+        $response['user']['notifies'] = $notifies;
 
         // $response['expires_in'] = auth()->factory()->getTTL() * 60;
         // $response = new Response();

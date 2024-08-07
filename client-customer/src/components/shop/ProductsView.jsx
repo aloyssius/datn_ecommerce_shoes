@@ -58,7 +58,7 @@ class ProductsView extends Component {
       { value: 'isDefault', label: 'Mặc định' },
       { value: 'lowToHigh', label: 'Giá thấp đến cao' },
       { value: 'highToLow', label: 'Giá cao xuống thấp' },
-      { value: 'nameAZ', label: 'Tên (A-Z)' }
+      // { value: 'nameAZ', label: 'Tên (A-Z)' }
     ];
 
     const { page, layout: stateLayout } = this.state;

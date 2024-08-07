@@ -25,7 +25,7 @@ class ProductDetails extends BaseModel
         'price' => 'float',
     ];
 
-    public static function getClientProducts($req)
+    public static function getClientProducts($req, $gender = null)
     {
         $offSet = ($req->currentPage - 1) * $req->pageSize;
         $productActiveStatus = ProductStatus::IS_ACTIVE;
@@ -49,10 +49,18 @@ class ProductDetails extends BaseModel
             WHERE P.status = '$productActiveStatus'
         ";
 
+        if ($gender === 'male') {
+            $query .= " AND CG.NAME = 'Nam' ";
+        }
+
+        if ($gender === 'female') {
+            $query .= " AND CG.NAME = 'Nữ' ";
+        }
+
         //where attribute active ??
 
         if ($req->filled('search')) {
-            $query .= " AND P.NAME LIKE '%" . $req->search . "%' OR P.CODE LIKE '%" . $req->search . "%' ";
+            $query .= " AND (CONCAT(P.NAME, ' ', C.NAME) LIKE '%" . $req->search . "%' OR PD.SKU LIKE '%" . $req->search . "%') ";
         }
 
         if ($req->filled('minPrice')) {
@@ -97,7 +105,17 @@ class ProductDetails extends BaseModel
         ";
 
         $query .= "
-        ORDER BY P.CREATED_AT DESC
+        ORDER BY P.CREATED_AT DESC";
+
+        if ($req->filled('sortType')) {
+            if ($req->sortType == 'lowToHigh') {
+                $query .= ", PD.price ASC";
+            } elseif ($req->sortType == 'highToLow') {
+                $query .= ", PD.price DESC";
+            }
+        }
+
+        $query .= "
         LIMIT $req->pageSize
         OFFSET $offSet
         ";
@@ -185,6 +203,38 @@ class ProductDetails extends BaseModel
                 ->get();
             $product->sizes = $sizes;
         }
+
+        return $convertedProducts;
+    }
+
+    public static function getClientProductTopSold()
+    {
+        $productActiveStatus = ProductStatus::IS_ACTIVE;
+
+        $query = "
+            WITH PRODUCT_DEFAULT_IMAGE AS (
+              SELECT PRODUCT_ID, path_url, PRODUCT_COLOR_ID
+              FROM IMAGES
+              WHERE IS_DEFAULT = 1
+            )
+            SELECT PD.sku, P.name, PD.price, C.name as colorName, PDI.path_url as pathUrl, SUM(BD.quantity) as totalSold
+            FROM BILL_DETAILS BD
+            JOIN BILLS B ON BD.BILL_ID = B.ID
+			JOIN PRODUCT_DETAILS PD ON PD.ID = BD.PRODUCT_DETAILS_ID
+            JOIN PRODUCTS P ON PD.PRODUCT_ID = P.ID
+            JOIN COLORS C ON PD.COLOR_ID = C.ID
+            JOIN PRODUCT_DEFAULT_IMAGE PDI ON PD.PRODUCT_ID = PDI.PRODUCT_ID
+            AND PD.COLOR_ID = PDI.PRODUCT_COLOR_ID
+            WHERE P.STATUS = '$productActiveStatus'
+            AND PD.STATUS = '$productActiveStatus'
+            AND B.STATUS = 'completed'
+            GROUP BY PD.SKU, P.NAME, PD.PRICE, C.NAME, PDI.PATH_URL
+			ORDER BY SUM(BD.quantity) DESC
+            LIMIT 8
+        ";
+
+        $productDetails = DB::select($query);
+        $convertedProducts = ProductDetails::hydrate($productDetails);
 
         return $convertedProducts;
     }

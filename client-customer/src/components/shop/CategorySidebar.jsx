@@ -29,6 +29,7 @@ function CategorySidebar(props) {
     otherData,
     isLoading,
     dataPage,
+    gender
   } = props;
 
   const classes = classNames('block block-sidebar', {
@@ -112,6 +113,7 @@ function CategorySidebar(props) {
         </div>
         <div className="block-sidebar__item">
           <WidgetFilters
+            gender={gender}
             title="Bộ lọc"
             filters={filters}
             dataPage={dataPage}

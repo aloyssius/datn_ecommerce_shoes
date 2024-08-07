@@ -1,5 +1,6 @@
 // react
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
 // third-party
 import PropTypes from 'prop-types';
@@ -27,7 +28,21 @@ const SORT_TYPE_DEFAULT = "isDefault";
 
 function ShopPageCategory(props) {
 
-  const { data, page, setParams, firstFetch, otherData, isLoading } = useFetch(CLIENT_API.product.all);
+  const {
+    columns,
+    viewMode,
+    sidebarPosition,
+    gender
+  } = props;
+
+  const location = useLocation();
+
+  const searchParams = new URLSearchParams(location.search);
+  const search = searchParams.get("search") || null;
+
+  const api = gender === null ? CLIENT_API.product.all : gender === 'male' ? CLIENT_API.product.male : CLIENT_API.product.female;
+
+  const { data, page, setParams, firstFetch, otherData, isLoading, fetch } = useFetch(search === null ? api : `${CLIENT_API.product.all}?search=${search}`);
 
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -102,12 +117,6 @@ function ShopPageCategory(props) {
     console.log(sort);
   }, [currentPage, categorySelecteds, sizeSelecteds, colorSelecteds, brandSelecteds, minPrice, maxPrice, sort])
 
-  const {
-    columns,
-    viewMode,
-    sidebarPosition,
-  } = props;
-
   const breadcrumb = [
     { title: 'Trang chủ', url: '/' },
     { title: 'Sản phẩm', url: '' },
@@ -136,6 +145,7 @@ function ShopPageCategory(props) {
       <div className="shop-layout__sidebar">
         {
           <CategorySidebar
+            gender={gender}
             otherData={otherData}
             offcanvas={offcanvas}
             onSelectAttributeIds={handleSelecteAttributeIds}

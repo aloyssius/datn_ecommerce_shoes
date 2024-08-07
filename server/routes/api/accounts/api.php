@@ -53,6 +53,7 @@ Route::group([
 
     Route::get('/my-account', [AuthController::class, 'showAdmin']);
     Route::put('/change-password', [AuthController::class, 'changePasswordAdmin']);
+    Route::put('/notifies/{id}', [AuthController::class, 'updateNotifies']);
 });
 
 // client
@@ -62,6 +63,7 @@ Route::group(['prefix' => 'auth'], function ($router) {
     Route::post('/account/verify/{id}', [AuthController::class, 'verify']);
     Route::get('/account/register-success/{id}', [AuthController::class, 'showAccountRegister']);
     Route::post('/account/reset-password/{id}', [AuthController::class, 'resetPassword']);
+    Route::get('/forgot-password', [AuthController::class, 'resetPasswordAdmin']);
 });
 
 Route::group([

@@ -17,6 +17,7 @@ import LoadingScreen from './shared/LoadingScreen';
 
 // pages
 import SitePageAboutUs from './site/SitePageAboutUs';
+import SitePolicy from './site/SitePolicy';
 import SitePageComponents from './site/SitePageComponents';
 import SitePageContactUs from './site/SitePageContactUs';
 import SitePageContactUsAlt from './site/SitePageContactUsAlt';
@@ -39,6 +40,7 @@ const Loadable = (Component) => (props) => {
 };
 
 const AccountLogin = Loadable(lazy(() => import('./account/AccountPageLogin')));
+const ForgotPass = Loadable(lazy(() => import('./account/AccountForgotPassword')));
 const MyCart = Loadable(lazy(() => import('./shop/ShopPageCart')));
 const Checkout = Loadable(lazy(() => import('./shop/ShopPageCheckout')));
 const TrackOrder = Loadable(lazy(() => import('./shop/ShopPageTrackOrder')));
@@ -94,7 +96,7 @@ function Layout(props) {
               exact
               path="/product-list"
               render={(props) => (
-                <ProductList {...props} columns={3} viewMode="grid" sidebarPosition="start" />
+                <ProductList {...props} columns={3} viewMode="grid" sidebarPosition="start" gender={null} />
               )}
             />
             <Route
@@ -144,6 +146,11 @@ function Layout(props) {
                 <AccountLogin />
               </GuestGuard>
             )} />
+            <Route path="/forgot-password" render={() => (
+              <GuestGuard>
+                <ForgotPass />
+              </GuestGuard>
+            )} />
 
             <Route path="/account" render={(props) => (
               <AuthGuard>
@@ -159,6 +166,7 @@ function Layout(props) {
 
             <Redirect exact from="/site" to="/site/about-us" />
             <Route exact path="/site/about-us" component={SitePageAboutUs} />
+            <Route exact path="/site/policy" component={SitePolicy} />
             <Route exact path="/site/components" component={SitePageComponents} />
             <Route exact path="/site/contact-us" component={SitePageContactUs} />
             <Route exact path="/site/contact-us-alt" component={SitePageContactUsAlt} />

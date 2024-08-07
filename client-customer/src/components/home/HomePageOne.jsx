@@ -1,5 +1,6 @@
 // react
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 // third-party
 import { Helmet } from 'react-helmet';
@@ -15,18 +16,27 @@ import ProductCard from '../shared/ProductCard';
 
 import useFetch from '../../hooks/useFetch';
 import { CLIENT_API } from '../../api/apiConfig';
-
+import { PATH_PAGE } from '../../routes/path';
 
 function HomePageOne() {
 
   const { data } = useFetch(CLIENT_API.product.home);
 
-  const productsList = data?.new?.map((product) => (
+  const productsListNew = data?.new?.map((product) => (
     <div
       key={product.id}
       className="products-list__item"
     >
-      <ProductCard product={product} />
+      <ProductCard latest product={product} />
+    </div>
+  ));
+
+  const productsListTop = data?.topSold?.map((product) => (
+    <div
+      key={product.id}
+      className="products-list__item"
+    >
+      <ProductCard latest product={product} />
     </div>
   ));
 
@@ -42,7 +52,7 @@ function HomePageOne() {
 
       <HeaderProductList title="SẢN PHẨM MỚI NHẤT" />
 
-      <ProductList style={{ marginBottom: 30 }} data={productsList} />
+      <ProductList style={{ marginBottom: 30 }} data={productsListNew} />
 
       <ButtonViewMore />
 
@@ -50,7 +60,7 @@ function HomePageOne() {
 
       <HeaderProductList title="SẢN PHẨM BÁN CHẠY" />
 
-      <ProductList style={{ marginBottom: 30 }} data={productsList} />
+      <ProductList style={{ marginBottom: 30 }} data={productsListTop} />
 
       <ButtonViewMore />
 
@@ -76,7 +86,9 @@ const ProductList = ({ data, ...other }) => {
 const ButtonViewMore = () => {
   return (
     <div className='d-flex justify-content-center' style={{ marginBottom: 35 }}>
-      <button className='btn btn-primary'>Xem thêm</button>
+      <Link to={PATH_PAGE.product.product_list}>
+        <button className='btn btn-primary'>Xem thêm</button>
+      </Link>
     </div>
   )
 }

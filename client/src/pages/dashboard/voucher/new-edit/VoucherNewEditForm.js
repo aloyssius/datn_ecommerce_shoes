@@ -507,7 +507,7 @@ export default function VoucherNewEditForm({ isEdit, currentVoucher, onUpdateDat
             <Card sx={{ p: 3 }}>
               <LabelStyleHeader sx={{ ml: 0.8 }}>Tổng quan mã giảm giá</LabelStyleHeader>
 
-              <Stack spacing={1}>
+              <Stack spacing={1} sx={{p: 1}}>
                 <Stack spacing={1}>
                   <Stack direction="row" justifyContent="space-between">
                     <LabelStyleGray>Mã khuyến mãi</LabelStyleGray>

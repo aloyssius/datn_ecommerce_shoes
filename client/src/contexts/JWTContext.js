@@ -1,4 +1,4 @@
-import { createContext, useEffect, useReducer } from 'react';
+import { createContext, useEffect, useReducer, useState } from 'react';
 import PropTypes from 'prop-types';
 // utils
 import { apiGet, apiPost } from '../utils/axios';
@@ -11,6 +11,8 @@ const initialState = {
   isAuthenticated: false,
   isInitialized: false,
   user: null,
+  notifies: [],
+  onNotifies: () => {},
 };
 
 const handlers = {
@@ -66,6 +68,7 @@ AuthProvider.propTypes = {
 
 function AuthProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const [notifies, setNotifies] = useState([]);
 
   useEffect(() => {
     const initialize = async () => {
@@ -79,6 +82,7 @@ function AuthProvider({ children }) {
           const user = response.data?.data;
 
           console.log(user);
+          setNotifies(user?.notifies);
 
           dispatch({
             type: 'INITIALIZE',
@@ -120,6 +124,7 @@ function AuthProvider({ children }) {
 
     console.log(accessToken);
     console.log(user);
+          setNotifies(user?.notifies);
 
     setSession(accessToken);
     dispatch({
@@ -168,6 +173,8 @@ function AuthProvider({ children }) {
         login,
         logout,
         register,
+        notifies,
+        onNotifies: (data) => setNotifies(data),
       }}
     >
       {children}

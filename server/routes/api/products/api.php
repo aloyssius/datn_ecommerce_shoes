@@ -22,6 +22,8 @@ use Illuminate\Support\Facades\Route;
 
 // product client
 Route::get('/product-list', [ProductController::class, 'clientIndex']);
+Route::get('/product-list/male', [ProductController::class, 'clientIndexMale']);
+Route::get('/product-list/female', [ProductController::class, 'clientIndexFemale']);
 Route::get('/product-details/{sku}', [ProductController::class, 'findBySkuClient']);
 Route::get('/product-detail/{id}', [ProductController::class, 'findByClientId']);
 Route::get('/product-home', [ProductController::class, 'indexHomeClient']);

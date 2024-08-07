@@ -19,6 +19,8 @@ class AccountTableSeeder extends Seeder
         $created_at2 = Carbon::parse($created_at1)->addMinutes(1);
         $created_at3 = Carbon::parse($created_at2)->addMinutes(1);
         $created_at4 = Carbon::parse($created_at3)->addMinutes(1);
+        $created_at5 = Carbon::parse($created_at4)->addMinutes(1);
+        $created_at6 = Carbon::parse($created_at5)->addMinutes(1);
 
         $role = Role::where('code', ConstantsRole::ADMIN)->first();
         $role1 = Role::where('code', ConstantsRole::EMPLOYEE)->first();
@@ -61,6 +63,19 @@ class AccountTableSeeder extends Seeder
             'status' => CommonStatus::IS_ACTIVE,
             'role_id' => $role ? $role->id : null,
             'created_at' => $created_at3,
+        ]);
+
+        DB::table('accounts')->insert([
+            'id' => $faker->uuid,
+            'code' => "AD0004",
+            'full_name' => "Đỗ Dương",
+            'email_verified_at' => null,
+            'password' => bcrypt("123456"),
+            'email' => 'hagolive2003@gmail.com',
+            'gender' => 0,
+            'status' => CommonStatus::IS_ACTIVE,
+            'role_id' => $role ? $role->id : null,
+            'created_at' => $created_at4,
         ]);
     }
 }

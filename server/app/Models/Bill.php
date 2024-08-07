@@ -38,6 +38,14 @@ class Bill extends BaseModel
         parent::__construct($attributes);
     }
 
+    public function getCancellationDateAttribute($value)
+    {
+        if ($value !== null) {
+            return Carbon::parse($value)->format('H:i:s d/m/Y');
+        }
+        return null;
+    }
+
     public function getConfirmationDateAttribute($value)
     {
         if ($value !== null) {

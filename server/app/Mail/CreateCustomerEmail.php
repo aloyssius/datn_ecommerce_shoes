@@ -20,20 +20,25 @@ class CreateCustomerEmail extends Mailable
 
     protected $account;
     protected $pass;
+    protected $type;
+    public $subject;
 
-    public function __construct(Account $account, $pass)
+    public function __construct(Account $account, $pass, $type)
     {
         $this->account = $account;
         $this->pass = $pass;
+        $this->type = $type;
+        $this->subject = $type === 'reset' ? "Đặt lại mật khẩu của bạn" : "Tài khoản mới tại ĐKN Shop";
     }
 
     public function build()
     {
-        return $this->subject('Tài khoản mới tại ĐKN Shop')
+        return $this->subject($this->subject)
             ->view('emails.emailCreateCustomer')
             ->with([
                 'user' => $this->account,
                 'pass' => $this->pass,
+                'type' => $this->type,
             ]);
     }
 }
