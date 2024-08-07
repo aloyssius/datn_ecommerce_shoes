@@ -49,6 +49,7 @@ class ApiResponse
             'page' => [
                 'currentPage' => $data['currentPage'],
                 'totalPages' => $data['totalPages'],
+                'totalElements' => $data['totalElements'] ?? null,
                 'pageSize' => $data['pageSize'],
             ],
             'sql' => $showSql,
@@ -98,6 +99,16 @@ class ApiResponse
             $response['otherData'] = $otherData;
         }
 
+        return response()->json($response, $code);
+    }
+
+    public static function responseErrorObject($code = 500, $error = [], $message = '')
+    {
+        $response = [
+            'status' => $code,
+            'error' => $error,
+            'message'    => $message,
+        ];
         return response()->json($response, $code);
     }
 
