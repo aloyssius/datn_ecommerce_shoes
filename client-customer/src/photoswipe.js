@@ -19,7 +19,7 @@ const template = `
                 <div class="pswp__counter"></div>
                 <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
                 <!--<button class="pswp__button pswp__button&#45;&#45;share" title="Share"></button>-->
-                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+                <!--<button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>-->
                 <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
                 <div class="pswp__preloader">
                     <div class="pswp__preloader__icn">
@@ -53,5 +53,5 @@ document.body.appendChild(element);
 
 // eslint-disable-next-line import/prefer-default-export
 export function createGallery(images, options) {
-    return new _PhotoSwipe(element, _PhotoSwipeUIDefault, images, options);
+  return new _PhotoSwipe(element, _PhotoSwipeUIDefault, images, options);
 }
