@@ -4,7 +4,7 @@ namespace App\Constants;
 
 class OrderStatus
 {
-    const PENDING_COMFIRN = 'pending_confirm';
+    const PENDING_COMFIRM = 'pending_confirm';
     const WAITTING_DELIVERY = 'waitting_delivery';
     const DELIVERING = 'delivering';
     const COMPLETED = 'completed';
@@ -13,7 +13,7 @@ class OrderStatus
     public static function toArray(): array
     {
         return [
-            self::PENDING_COMFIRN,
+            self::PENDING_COMFIRM,
             self::WAITTING_DELIVERY,
             self::DELIVERING,
             self::COMPLETED,
