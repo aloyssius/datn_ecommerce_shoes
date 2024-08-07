@@ -7,44 +7,44 @@ import { Link } from 'react-router-dom';
 
 
 function AppLink(props) {
-    const { external, children, ...otherProps } = props;
-    let link;
+  const { external, children, ...otherProps } = props;
+  let link;
 
-    if (external) {
-        const {
-            to,
-            replace,
-            innerRef,
-            ...linkProps
-        } = otherProps;
+  if (external) {
+    const {
+      to,
+      replace,
+      innerRef,
+      ...linkProps
+    } = otherProps;
 
-        link = <a href={to} {...linkProps}>{children}</a>;
-    } else {
-        link = <Link {...otherProps}>{children}</Link>;
-    }
+    link = <a href={to} {...linkProps}>{children}</a>;
+  } else {
+    link = <Link {...otherProps}>{children}</Link>;
+  }
 
-    return link;
+  return link;
 }
 
 AppLink.propTypes = {
-    to: PropTypes.oneOfType([
-        PropTypes.string,
-        PropTypes.shape({
-            pathname: PropTypes.string,
-            search: PropTypes.string,
-            hash: PropTypes.string,
-            state: PropTypes.any,
-        }),
-    ]).isRequired,
-    replace: PropTypes.bool,
-    innerRef: PropTypes.oneOfType([
-        PropTypes.func,
-        PropTypes.object,
-    ]),
-    external: PropTypes.bool,
+  to: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.shape({
+      pathname: PropTypes.string,
+      search: PropTypes.string,
+      hash: PropTypes.string,
+      state: PropTypes.any,
+    }),
+  ]).isRequired,
+  replace: PropTypes.bool,
+  innerRef: PropTypes.oneOfType([
+    PropTypes.func,
+    PropTypes.object,
+  ]),
+  external: PropTypes.bool,
 };
 AppLink.defaultProps = {
-    external: false,
+  external: false,
 };
 
 export default AppLink;

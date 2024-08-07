@@ -11,251 +11,258 @@ import SlickWithPreventSwipeClick from './SlickWithPreventSwipeClick';
 
 
 const slickSettingsFeatured = {
+  dots: false,
+  arrows: false,
+  infinite: false,
+  speed: 300,
+  slidesToShow: 1,
+  slidesToScroll: 1,
+};
+const slickSettingsThumbnails = {
+  standard: {
     dots: false,
     arrows: false,
     infinite: false,
     speed: 400,
-    slidesToShow: 1,
+    slidesToShow: 8,
     slidesToScroll: 1,
-};
-const slickSettingsThumbnails = {
-    standard: {
-        dots: false,
-        arrows: false,
-        infinite: false,
-        speed: 400,
-        slidesToShow: 5,
-        slidesToScroll: 1,
-        responsive: [
-            { breakpoint: 1199, settings: { slidesToShow: 4 } },
-            { breakpoint: 991, settings: { slidesToShow: 3 } },
-            { breakpoint: 767, settings: { slidesToShow: 5 } },
-            { breakpoint: 479, settings: { slidesToShow: 4 } },
-            { breakpoint: 379, settings: { slidesToShow: 3 } },
-        ],
-    },
-    sidebar: {
-        dots: false,
-        arrows: false,
-        infinite: false,
-        speed: 400,
-        slidesToShow: 4,
-        slidesToScroll: 1,
-        responsive: [
-            { breakpoint: 1199, settings: { slidesToShow: 3 } },
-            { breakpoint: 767, settings: { slidesToShow: 5 } },
-            { breakpoint: 479, settings: { slidesToShow: 4 } },
-            { breakpoint: 379, settings: { slidesToShow: 3 } },
-        ],
-    },
-    columnar: {
-        dots: false,
-        arrows: false,
-        infinite: false,
-        speed: 400,
-        slidesToShow: 4,
-        slidesToScroll: 1,
-        responsive: [
-            { breakpoint: 1199, settings: { slidesToShow: 3 } },
-            { breakpoint: 767, settings: { slidesToShow: 5 } },
-            { breakpoint: 479, settings: { slidesToShow: 4 } },
-            { breakpoint: 379, settings: { slidesToShow: 3 } },
-        ],
-    },
-    quickview: {
-        dots: false,
-        arrows: false,
-        infinite: false,
-        speed: 400,
-        slidesToShow: 5,
-        slidesToScroll: 1,
-        responsive: [
-            { breakpoint: 1199, settings: { slidesToShow: 4 } },
-            { breakpoint: 767, settings: { slidesToShow: 5 } },
-            { breakpoint: 479, settings: { slidesToShow: 4 } },
-            { breakpoint: 379, settings: { slidesToShow: 3 } },
-        ],
-    },
+    responsive: [
+      { breakpoint: 1199, settings: { slidesToShow: 8 } },
+      { breakpoint: 991, settings: { slidesToShow: 5 } },
+      { breakpoint: 767, settings: { slidesToShow: 5 } },
+      { breakpoint: 479, settings: { slidesToShow: 4 } },
+      { breakpoint: 379, settings: { slidesToShow: 3 } },
+    ],
+  },
+  sidebar: {
+    dots: false,
+    arrows: false,
+    infinite: false,
+    speed: 400,
+    slidesToShow: 4,
+    slidesToScroll: 1,
+    responsive: [
+      { breakpoint: 1199, settings: { slidesToShow: 3 } },
+      { breakpoint: 767, settings: { slidesToShow: 5 } },
+      { breakpoint: 479, settings: { slidesToShow: 4 } },
+      { breakpoint: 379, settings: { slidesToShow: 3 } },
+    ],
+  },
+  columnar: {
+    dots: false,
+    arrows: false,
+    infinite: false,
+    speed: 400,
+    slidesToShow: 4,
+    slidesToScroll: 1,
+    responsive: [
+      { breakpoint: 1199, settings: { slidesToShow: 3 } },
+      { breakpoint: 767, settings: { slidesToShow: 5 } },
+      { breakpoint: 479, settings: { slidesToShow: 4 } },
+      { breakpoint: 379, settings: { slidesToShow: 3 } },
+    ],
+  },
+  quickview: {
+    dots: false,
+    arrows: false,
+    infinite: false,
+    speed: 400,
+    slidesToShow: 5,
+    slidesToScroll: 1,
+    responsive: [
+      { breakpoint: 1199, settings: { slidesToShow: 4 } },
+      { breakpoint: 767, settings: { slidesToShow: 5 } },
+      { breakpoint: 479, settings: { slidesToShow: 4 } },
+      { breakpoint: 379, settings: { slidesToShow: 3 } },
+    ],
+  },
 };
 
 class ProductGallery extends Component {
-    gallery;
+  gallery;
 
-    /** @var {Promise} */
-    createGallery = null;
+  /** @var {Promise} */
+  createGallery = null;
 
-    imagesRefs = [];
+  imagesRefs = [];
 
-    unmounted = false;
+  unmounted = false;
 
-    constructor(props) {
-        super(props);
+  constructor(props) {
+    super(props);
 
-        this.state = {
-            currentIndex: 0,
-            transition: false,
+    this.state = {
+      currentIndex: 0,
+      transition: false,
+    };
+  }
+
+  componentDidMount() {
+    this.createGallery = import('../../photoswipe').then((module) => module.createGallery);
+  }
+
+  componentWillUnmount() {
+    if (this.gallery) {
+      this.gallery.destroy();
+    }
+
+    this.unmounted = true;
+  }
+
+  handleFeaturedClick = (event, index) => {
+    if (!this.createGallery) {
+      return;
+    }
+
+    event.preventDefault();
+
+    const { images } = this.props;
+    const items = images?.map((image) => ({
+      src: image.pathUrl,
+      msrc: image.pathUrl,
+      w: 700,
+      h: 700,
+    }));
+
+    const options = {
+      getThumbBoundsFn: (index) => {
+        if (!this.imagesRefs[index]) {
+          return null;
+        }
+
+        const imageElement = this.imagesRefs[index];
+        const pageYScroll = window.pageYOffset || document.documentElement.scrollTop;
+        const rect = imageElement.getBoundingClientRect();
+
+        return {
+          x: rect.left,
+          y: rect.top + pageYScroll,
+          w: rect.width,
         };
+      },
+      index,
+      bgOpacity: 0.9,
+      history: false,
+    };
+
+    this.createGallery.then((createGallery) => {
+      if (this.unmounted) {
+        return;
+      }
+
+      this.gallery = createGallery(items, options);
+
+      this.gallery.listen('beforeChange', () => {
+        if (this.gallery && this.slickFeaturedRef) {
+          this.slickFeaturedRef.slickGoTo(this.gallery.getCurrentIndex(), true);
+        }
+      });
+      this.gallery.listen('destroy', () => {
+        this.gallery = null;
+      });
+
+      this.gallery.init();
+    });
+  };
+
+  handleThumbnailClick = (index) => {
+    const { transition } = this.state;
+
+    if (transition) {
+      return;
     }
 
-    componentDidMount() {
-        this.createGallery = import('../../photoswipe').then((module) => module.createGallery);
+    this.setState(() => ({ currentIndex: index }));
+
+    if (this.slickFeaturedRef) {
+      this.slickFeaturedRef.slickGoTo(index);
     }
+  };
 
-    componentWillUnmount() {
-        if (this.gallery) {
-            this.gallery.destroy();
-        }
+  handleFeaturedBeforeChange = (oldIndex, newIndex) => {
+    this.setState(() => ({
+      currentIndex: newIndex,
+      transition: true,
+    }));
+  };
 
-        this.unmounted = true;
-    }
+  handleFeaturedAfterChange = (index) => {
+    this.setState(() => ({
+      currentIndex: index,
+      transition: false,
+    }));
+  };
 
-    handleFeaturedClick = (event, index) => {
-        if (!this.createGallery) {
-            return;
-        }
+  setSlickFeaturedRef = (ref) => {
+    this.slickFeaturedRef = ref;
+  };
 
-        event.preventDefault();
+  render() {
+    const { layout, images } = this.props;
+    const { currentIndex } = this.state;
 
-        const { images } = this.props;
-        const items = images.map((image) => ({
-            src: image,
-            msrc: image,
-            w: 700,
-            h: 700,
-        }));
+    images?.sort((a, b) => {
+      if (a.isDefault === 1) return -1;
+      if (b.isDefault === 0) return 1;
+      return 0;
+    });
 
-        const options = {
-            getThumbBoundsFn: (index) => {
-                if (!this.imagesRefs[index]) {
-                    return null;
-                }
+    const featured = images.map((image, index) => (
 
-                const imageElement = this.imagesRefs[index];
-                const pageYScroll = window.pageYOffset || document.documentElement.scrollTop;
-                const rect = imageElement.getBoundingClientRect();
+      <Link key={index} onClick={(event) => this.handleFeaturedClick(event, index)} target="_blank">
+        <img src={image?.pathUrl} alt="" ref={(element) => { this.imagesRefs[index] = element; }} />
+      </Link>
+    ));
 
-                return {
-                    x: rect.left,
-                    y: rect.top + pageYScroll,
-                    w: rect.width,
-                };
-            },
-            index,
-            bgOpacity: 0.9,
-            history: false,
-        };
+    const thumbnails = images?.map((image, index) => {
+      const classes = classNames('product-gallery__carousel-item', {
+        'product-gallery__carousel-item--active': index === currentIndex,
+      });
 
-        this.createGallery.then((createGallery) => {
-            if (this.unmounted) {
-                return;
-            }
+      return (
+        <button
+          type="button"
+          key={index}
+          onClick={() => this.handleThumbnailClick(index)}
+          className={classes}
+        >
+          <img className="product-gallery__carousel-image" src={image?.pathUrl} alt="" />
+        </button>
+      );
+    });
 
-            this.gallery = createGallery(items, options);
-
-            this.gallery.listen('beforeChange', () => {
-                if (this.gallery && this.slickFeaturedRef) {
-                    this.slickFeaturedRef.slickGoTo(this.gallery.getCurrentIndex(), true);
-                }
-            });
-            this.gallery.listen('destroy', () => {
-                this.gallery = null;
-            });
-
-            this.gallery.init();
-        });
-    };
-
-    handleThumbnailClick = (index) => {
-        const { transition } = this.state;
-
-        if (transition) {
-            return;
-        }
-
-        this.setState(() => ({ currentIndex: index }));
-
-        if (this.slickFeaturedRef) {
-            this.slickFeaturedRef.slickGoTo(index);
-        }
-    };
-
-    handleFeaturedBeforeChange = (oldIndex, newIndex) => {
-        this.setState(() => ({
-            currentIndex: newIndex,
-            transition: true,
-        }));
-    };
-
-    handleFeaturedAfterChange = (index) => {
-        this.setState(() => ({
-            currentIndex: index,
-            transition: false,
-        }));
-    };
-
-    setSlickFeaturedRef = (ref) => {
-        this.slickFeaturedRef = ref;
-    };
-
-    render() {
-        const { layout, images } = this.props;
-        const { currentIndex } = this.state;
-
-        const featured = images.map((image, index) => (
-            <Link key={index} to={`/${image}`} onClick={(event) => this.handleFeaturedClick(event, index)} target="_blank">
-                <img src={image} alt="" ref={(element) => { this.imagesRefs[index] = element; }} />
-            </Link>
-        ));
-
-        const thumbnails = images.map((image, index) => {
-            const classes = classNames('product-gallery__carousel-item', {
-                'product-gallery__carousel-item--active': index === currentIndex,
-            });
-
-            return (
-                <button
-                    type="button"
-                    key={index}
-                    onClick={() => this.handleThumbnailClick(index)}
-                    className={classes}
-                >
-                    <img className="product-gallery__carousel-image" src={image} alt="" />
-                </button>
-            );
-        });
-
-        return (
-            <div className="product__gallery">
-                <div className="product-gallery">
-                    <div className="product-gallery__featured">
-                        <SlickWithPreventSwipeClick
-                            ref={this.setSlickFeaturedRef}
-                            {...slickSettingsFeatured}
-                            beforeChange={this.handleFeaturedBeforeChange}
-                            afterChange={this.handleFeaturedAfterChange}
-                        >
-                            {featured}
-                        </SlickWithPreventSwipeClick>
-                    </div>
-                    <div className="product-gallery__carousel">
-                        <SlickWithPreventSwipeClick {...slickSettingsThumbnails[layout]}>
-                            {thumbnails}
-                        </SlickWithPreventSwipeClick>
-                    </div>
-                </div>
-            </div>
-        );
-    }
+    return (
+      <div className="product__gallery">
+        <div className="product-gallery">
+          <div className="product-gallery__featured">
+            <SlickWithPreventSwipeClick
+              ref={this.setSlickFeaturedRef}
+              {...slickSettingsFeatured}
+              beforeChange={this.handleFeaturedBeforeChange}
+              afterChange={this.handleFeaturedAfterChange}
+            >
+              {featured}
+            </SlickWithPreventSwipeClick>
+          </div>
+          <div className="product-gallery__carousel">
+            <SlickWithPreventSwipeClick {...slickSettingsThumbnails[layout]}>
+              {thumbnails}
+            </SlickWithPreventSwipeClick>
+          </div>
+        </div>
+      </div>
+    );
+  }
 }
 
 ProductGallery.propTypes = {
-    images: PropTypes.array,
-    layout: PropTypes.oneOf(['standard', 'sidebar', 'columnar', 'quickview']),
+  images: PropTypes.array,
+  layout: PropTypes.oneOf(['standard', 'sidebar', 'columnar', 'quickview']),
 };
 
 ProductGallery.defaultProps = {
-    images: [],
-    layout: 'standard',
+  images: [],
+  layout: 'standard',
 };
 
 export default ProductGallery;
