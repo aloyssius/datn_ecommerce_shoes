@@ -18,39 +18,39 @@ import messages from '../i18n';
 // pages
 import Layout from './Layout';
 import HomePageOne from './home/HomePageOne';
+import { LoadingProvider } from '../context/LoadingContext';
+import { AuthProvider } from '../context/JWTContext';
+import { NofiticationProvider } from '../context/NotificationContext';
+import { UserProvider } from '../context/UserContext';
 
 
 class Root extends Component {
-  componentDidMount() {
-    setTimeout(() => {
-      const preloader = document.querySelector('.site-preloader');
-
-      preloader.addEventListener('transitionend', (event) => {
-        if (event.propertyName === 'opacity') {
-          preloader.parentNode.removeChild(preloader);
-        }
-      });
-      preloader.classList.add('site-preloader__fade');
-    }, 500);
-  }
 
   render() {
     const { locale } = this.props;
 
     return (
-      <IntlProvider locale={locale} messages={messages[locale]}>
-        <BrowserRouter basename={process.env.PUBLIC_URL || '/'}>
-          <Switch>
-            <Route
-              path="/"
-              render={(props) => (
-                <Layout {...props} headerLayout="default" homeComponent={HomePageOne} />
-              )}
-            />
-            <Redirect to="/" />
-          </Switch>
-        </BrowserRouter>
-      </IntlProvider>
+      <LoadingProvider>
+        <NofiticationProvider>
+          <IntlProvider locale={locale} messages={messages[locale]}>
+            <BrowserRouter basename={process.env.PUBLIC_URL || '/'}>
+              <AuthProvider>
+                <UserProvider>
+                  <Switch>
+                    <Route
+                      path="/"
+                      render={(props) => (
+                        <Layout {...props} headerLayout="default" homeComponent={HomePageOne} />
+                      )}
+                    />
+                    <Redirect to="/" />
+                  </Switch>
+                </UserProvider>
+              </AuthProvider>
+            </BrowserRouter>
+          </IntlProvider>
+        </NofiticationProvider>
+      </LoadingProvider>
     );
   }
 }
