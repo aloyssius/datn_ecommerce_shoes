@@ -7,68 +7,86 @@ import { Helmet } from 'react-helmet';
 // blocks
 import BlockBanner from '../blocks/BlockBanner';
 import BlockBrands from '../blocks/BlockBrands';
-import BlockCategories from '../blocks/BlockCategories';
 import BlockFeatures from '../blocks/BlockFeatures';
-import BlockPosts from '../blocks/BlockPosts';
-import BlockProductColumns from '../blocks/BlockProductColumns';
-import BlockProducts from '../blocks/BlockProducts';
 import BlockSlideShow from '../blocks/BlockSlideShow';
-import BlockTabbedProductsCarousel from '../blocks/BlockTabbedProductsCarousel';
 
 // data stubs
-import categories from '../../data/shopBlockCategories';
-import posts from '../../data/blogPosts';
-import products from '../../data/shopProducts';
+import ProductCard from '../shared/ProductCard';
+
+import useFetch from '../../hooks/useFetch';
+import { CLIENT_API } from '../../api/apiConfig';
 
 
 function HomePageOne() {
-  const columns = [
-    {
-      title: 'Top Rated Products',
-      products: products.slice(0, 3),
-    },
-    {
-      title: 'Special Offers',
-      products: products.slice(3, 6),
-    },
-    {
-      title: 'Bestsellers',
-      products: products.slice(6, 9),
-    },
-  ];
+
+  const { data } = useFetch(CLIENT_API.product.home);
+
+  const productsList = data?.new?.map((product) => (
+    <div
+      key={product.id}
+      className="products-list__item"
+    >
+      <ProductCard product={product} />
+    </div>
+  ));
 
   return (
     <React.Fragment>
       <Helmet>
-        <title>{`BSMART1`}</title>
+        <title>{`Trang chủ - ĐKN Shop`}</title>
       </Helmet>
 
-      <BlockSlideShow withDepartments />
+      <BlockSlideShow />
 
       <BlockFeatures />
 
-      <BlockTabbedProductsCarousel title="Produits populaires" layout="grid-4" />
+      <HeaderProductList title="SẢN PHẨM MỚI NHẤT" />
+
+      <ProductList style={{ marginBottom: 30 }} data={productsList} />
+
+      <ButtonViewMore />
 
       <BlockBanner />
 
-      <BlockProducts
-        title="Bestsellers"
-        layout="large-first"
-        featuredProduct={products[0]}
-        products={products.slice(1, 7)}
-      />
+      <HeaderProductList title="SẢN PHẨM BÁN CHẠY" />
 
-      <BlockCategories title="Popular Categories" layout="classic" categories={categories} />
+      <ProductList style={{ marginBottom: 30 }} data={productsList} />
 
-      <BlockTabbedProductsCarousel title="New Arrivals" layout="horizontal" rows={2} />
-
-      <BlockPosts title="Latest News" layout="list-sm" posts={posts} />
+      <ButtonViewMore />
 
       <BlockBrands />
-
-      <BlockProductColumns columns={columns} />
     </React.Fragment>
   );
+}
+
+const ProductList = ({ data, ...other }) => {
+  return (
+    <div
+      className="products-view__list products-list container"
+      data-layout='grid-4-full'
+      {...other}
+    >
+      <div className="products-list__body">
+        {data?.slice(0, 8)}
+      </div>
+    </div>
+  )
+}
+
+const ButtonViewMore = () => {
+  return (
+    <div className='d-flex justify-content-center' style={{ marginBottom: 35 }}>
+      <button className='btn btn-primary'>Xem thêm</button>
+    </div>
+  )
+}
+
+const HeaderProductList = ({ title }) => {
+  return (
+    <div className='d-flex justify-content-center' style={{ marginBottom: 30 }}>
+      <span style={{ fontSize: '40px', fontWeight: 'bold', color: '#ff6700' }}>{title}</span>
+    </div>
+  )
 }
 
 export default HomePageOne;
