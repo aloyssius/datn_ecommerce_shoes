@@ -78,8 +78,8 @@ export default function BillList() {
     [
       { value: All.EN, label: All.VI, color: 'info', count: 0 },
       { value: BillStatusTab.en.PENDING_CONFIRM, label: BillStatusTab.vi.PENDING_CONFIRM, color: 'warning', count: 0 },
-      { value: BillStatusTab.en.WAITTING_DELIVERY, label: BillStatusTab.vi.WAITTING_DELIVERY, color: 'success', count: 0 },
-      { value: BillStatusTab.en.DELIVERING, label: BillStatusTab.vi.DELIVERING, color: 'info', count: 0 },
+      { value: BillStatusTab.en.WAITTING_DELIVERY, label: BillStatusTab.vi.WAITTING_DELIVERY, color: 'default', count: 0 },
+      { value: BillStatusTab.en.DELIVERING, label: BillStatusTab.vi.DELIVERING, color: 'primary', count: 0 },
       { value: BillStatusTab.en.COMPLETED, label: BillStatusTab.vi.COMPLETED, color: 'success', count: 0 },
       { value: BillStatusTab.en.CANCELED, label: BillStatusTab.vi.CANCELED, color: 'error', count: 0 },
     ]
