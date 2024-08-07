@@ -2,20 +2,17 @@
 
 namespace App\Http\Resources\Bills;
 
-use App\Models\Bill;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class BillResource extends JsonResource
+class BillDetailResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
      *
      * @return array<string, mixed>
      */
-
-
-
     public function toArray(Request $request): array
     {
         return [
@@ -23,10 +20,21 @@ class BillResource extends JsonResource
             'code' => $this->code,
             'fullName' => $this->full_name,
             'phoneNumber' => $this->phone_number,
+            'email' => $this->email,
+            'address' => $this->address,
+            'shipFee' => $this->money_ship,
+            'discount' => $this->discount_amount,
             'totalMoney' => $this->total_money,
             'status' => $this->status,
-            'totalPayment' => floatval($this->totalPayment),
-            'createdAt' => $this->created_at,
+            'note' => $this->note,
+            'createdAt' => Carbon::parse($this->created_at)->format('H:i:s d/m/Y'),
+            'comfirmationDate' => $this->confirmation_date,
+            'deliveryDate' => $this->delivery_date,
+            'completionDate' => $this->completion_date,
+            'customerId' => $this->customer_id,
+            'histories' => $this->histories,
+            'payment' => $this->payment,
+            'billItems' => $this->billItems,
         ];
     }
     /**
@@ -41,9 +49,17 @@ class BillResource extends JsonResource
             'code',
             'full_name',
             'phone_number',
+            'email',
+            'address',
+            'money_ship',
+            'discount_amount',
             'total_money',
             'status',
+            'note',
             'created_at',
+            'confirmation_date',
+            'delivery_date',
+            'completion_date',
         ];
     }
 }
