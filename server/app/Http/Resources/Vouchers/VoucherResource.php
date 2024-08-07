@@ -19,7 +19,6 @@ class VoucherResource extends JsonResource
             'code' => $this->code,
             'name' => $this->name,
             'value' => $this->value,
-            'type' => $this->type,
             'typeDiscount' => $this->type_discount,
             'maxDiscountValue' => $this->max_discount_value,
             'minOrderValue' => $this->min_order_value,
@@ -33,10 +32,10 @@ class VoucherResource extends JsonResource
     public static function fields()
     {
         return [
+            'id',
             'code',
             'name',
             'value',
-            'type',
             'quantity',
             'status',
             'start_time',

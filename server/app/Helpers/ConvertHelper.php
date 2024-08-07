@@ -19,6 +19,10 @@ class ConvertHelper
                 $convertedValue = date('Y-m-d', strtotime($value));
             }
 
+            if (DateTime::createFromFormat('d-m-Y H:i', $value)) {
+                $convertedValue = date('Y-m-d H:i', strtotime($value));
+            }
+
             $convertedData[$convertedKey] = $convertedValue;
         }
 

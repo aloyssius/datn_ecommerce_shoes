@@ -7,7 +7,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\Vouchers\VoucherResource;
 use App\Models\Voucher;
 use Illuminate\Http\Request\Page;
-use App\Http\Requests\VoucherRequest;
+use App\Http\Requests\Voucher\VoucherRequest;
+use App\Http\Requests\Voucher\VoucherRequestBody;
+use App\Helpers\ConvertHelper;
 use Illuminate\Support\Facades\DB;
 use App\Helpers\QueryHelper;
 
@@ -59,5 +61,28 @@ class VoucherController extends Controller
             // ->paginate($req->pageSize, ['*'], 'page', $req->currentPage);
 
         return ApiResponse::responsePage(VoucherResource::collection($vouchers), $statusCounts,NULL);
+    }
+
+    public function show($id)
+    {
+
+        $voucher = Voucher::select(VoucherResource::fields())
+            ->where('id','=',$id);
+
+        if (!$voucher) {
+            throw new NotFoundException("Không tìm thấy voucher có id là " . $id);
+        }
+
+        return ApiResponse::responseObject(new VoucherResource($voucher));
+    }
+    
+    public function store(VoucherRequestBody $req)
+    {
+        // convert req
+        $voucherConverted = ConvertHelper::convertColumnsToSnakeCase($req->all());
+
+        // save
+        $voucherCreated = Voucher::create($voucherConverted);
+        return ApiResponse::responseObject(new VoucherResource($voucherCreated));
     }
 }

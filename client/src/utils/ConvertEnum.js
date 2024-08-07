@@ -1,4 +1,5 @@
-import { All, AccountStatusTab, DiscountStatusTab, BillStatusTab, VoucherTypeOption, ProductStockOption, ProductStatusTab, AccountGenderOption, AttributeStatus } from '../constants/enum'
+
+import { All, AttributeStatus, AccountStatusTab, DiscountStatusTab, BillStatusTab, VoucherTypeOption, VoucherTypeDiscount, ProductStockOption, ProductStatusTab, AccountGenderOption } from '../constants/enum'
 
 export const convertAttributeStatus = (status) => {
   let statusConverted = "";
@@ -13,6 +14,8 @@ export const convertAttributeStatus = (status) => {
 
   return statusConverted;
 }
+
+
 
 export const convertProductStatus = (status) => {
   let statusConverted = "";
@@ -57,6 +60,37 @@ export const convertVoucherType = (type) => {
   }
 
   return typeConverted;
+}
+
+export const convertToEnumVoucherTypeDiscount = (typeDiscount) => {
+  let typeDiscountConverted = VoucherTypeDiscount.vi.VND;
+  switch (typeDiscount) {
+    case VoucherTypeDiscount.en.PERCENT:
+      typeDiscountConverted = VoucherTypeDiscount.vi.PERCENT;
+      break;
+    default:
+      typeDiscountConverted = VoucherTypeDiscount.vi.VND;
+      break;
+  }
+
+  return typeDiscountConverted;
+}
+
+export const convertVoucherTypeDiscount = (typeDiscount) => {
+  let typeDiscountConverted = null;
+  switch (typeDiscount) {
+    case VoucherTypeDiscount.vi.VND:
+      typeDiscountConverted = VoucherTypeDiscount.en.VND;
+      break;
+    case VoucherTypeDiscount.vi.PERCENT:
+      typeDiscountConverted = VoucherTypeDiscount.en.PERCENT;
+      break;
+    default:
+      typeDiscountConverted = null;
+      break;
+  }
+
+  return typeDiscountConverted;
 }
 
 export const convertToEnumAccountGender = (gender) => {

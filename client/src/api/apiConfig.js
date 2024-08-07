@@ -77,6 +77,7 @@ export const ADMIN_API = {
 
   voucher: {
     all: path(ROOTS_API, '/vouchers'),
+    post: path(ROOTS_API, '/vouchers'),
   },
 
   employee: {
