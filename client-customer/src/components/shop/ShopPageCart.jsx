@@ -1,302 +1,395 @@
 // react
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 
 // third-party
-import classNames from 'classnames';
-import { connect } from 'react-redux';
 import { Helmet } from 'react-helmet';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 
 // application
-import AsyncAction from '../shared/AsyncAction';
-import Currency from '../shared/Currency';
 import InputNumber from '../shared/InputNumber';
 import PageHeader from '../shared/PageHeader';
-import { cartRemoveItem, cartUpdateQuantities } from '../../store/cart';
 import { Cross12Svg } from '../../svg';
+import Logo from '../Logo'
 
 // data stubs
 import theme from '../../data/theme';
+import { PATH_PAGE } from '../../routes/path';
+import useUser from '../../hooks/useUser';
+import useAuth from '../../hooks/useAuth';
+import { formatCurrencyVnd } from '../../utils/formatNumber';
+import useFetch from '../../hooks/useFetch';
+import { CLIENT_API } from '../../api/apiConfig';
+import { parse, isBefore } from 'date-fns';
 
+const ARR_QUANTITY = [1, 2, 3];
 
-class ShopPageCart extends Component {
-    constructor(props) {
-        super(props);
+const CartItem = ({ item, onRemove, user, onUpdateCartSize, onUpdateCartQuantity, cartItems, onCheckVoucherIsValid }) => {
+  const [size, setSize] = useState(item?.id);
+  const [quantity, setQuantity] = useState(item?.quantity);
 
-        this.state = {
-            /** example: [{itemId: 8, value: 1}] */
-            quantities: [],
-        };
+  const existingSizes = cartItems?.filter((cartItem) => cartItem?.sku === item?.sku && cartItem?.id !== item.id)?.map(cartItem => cartItem?.id);
+
+  const totalPrice = item?.price * item?.quantity;
+  let image;
+
+  let sizes = item?.sizes;
+
+  const handleChangeSize = (e) => {
+    const value = e.target.value;
+    if (user) {
+      onUpdateCartSize(item?.cartDetailId, value);
     }
-
-    getItemQuantity(item) {
-        const { quantities } = this.state;
-        const quantity = quantities.find((x) => x.itemId === item.id);
-
-        return quantity ? quantity.value : item.quantity;
+    else {
+      onUpdateCartSize(item?.id, value);
     }
+    setSize(value);
+    console.log(value);
+  }
 
-    handleChangeQuantity = (item, quantity) => {
-        this.setState((state) => {
-            const stateQuantity = state.quantities.find((x) => x.itemId === item.id);
-
-            if (!stateQuantity) {
-                state.quantities.push({ itemId: item.id, value: quantity });
-            } else {
-                stateQuantity.value = quantity;
-            }
-
-            return {
-                quantities: state.quantities,
-            };
-        });
-    };
-
-    cartNeedUpdate() {
-        const { quantities } = this.state;
-        const { cart } = this.props;
-
-        return quantities.filter((x) => {
-            const item = cart.items.find((item) => item.id === x.itemId);
-
-            return item && item.quantity !== x.value;
-        }).length > 0;
+  const handleChangeQuantity = (e) => {
+    const value = e.target.value;
+    if (user) {
+      onUpdateCartQuantity(item?.cartDetailId, value, (res) => onCheckVoucherIsValid(res));
     }
-
-    renderItems() {
-        const { cart, cartRemoveItem } = this.props;
-
-        return cart.items.map((item) => {
-            let image;
-            let options;
-
-            if (item.product.images.length > 0) {
-                image = <Link to={`/shop/product/${item.product.id}`}><img src={item.product.images[0]} alt="" /></Link>;
-            }
-
-            if (item.options.length > 0) {
-                options = (
-                    <ul className="cart-table__options">
-                        {item.options.map((option, index) => (
-                            <li key={index}>{`${option.optionTitle}: ${option.valueTitle}`}</li>
-                        ))}
-                    </ul>
-                );
-            }
-
-            const removeButton = (
-                <AsyncAction
-                    action={() => cartRemoveItem(item.id)}
-                    render={({ run, loading }) => {
-                        const classes = classNames('btn btn-light btn-sm btn-svg-icon', {
-                            'btn-loading': loading,
-                        });
-
-                        return (
-                            <button type="button" onClick={run} className={classes}>
-                                <Cross12Svg />
-                            </button>
-                        );
-                    }}
-                />
-            );
-
-            return (
-                <tr key={item.id} className="cart-table__row">
-                    <td className="cart-table__column cart-table__column--image">
-                        {image}
-                    </td>
-                    <td className="cart-table__column cart-table__column--product">
-                        <Link to={`/shop/product/${item.product.id}`} className="cart-table__product-name">
-                            {item.product.name}
-                        </Link>
-                        {options}
-                    </td>
-                    <td className="cart-table__column cart-table__column--price" data-title="Price">
-                        <Currency value={item.price} />
-                    </td>
-                    <td className="cart-table__column cart-table__column--quantity" data-title="Quantity">
-                        <InputNumber
-                            onChange={(quantity) => this.handleChangeQuantity(item, quantity)}
-                            value={this.getItemQuantity(item)}
-                            min={1}
-                        />
-                    </td>
-                    <td className="cart-table__column cart-table__column--total" data-title="Total">
-                        <Currency value={item.total} />
-                    </td>
-                    <td className="cart-table__column cart-table__column--remove">
-                        {removeButton}
-                    </td>
-                </tr>
-            );
-        });
+    else {
+      onUpdateCartQuantity(item?.id, value, (res) => onCheckVoucherIsValid(res));
     }
+    setQuantity(value);
+    console.log(value);
+  }
 
-    renderTotals() {
-        const { cart } = this.props;
+  if (item.pathUrl) {
+    image = <Link to={`/product-detail/${item?.sku}`}><img src={item?.pathUrl} alt="" /></Link>;
+  }
 
-        if (cart.extraLines.length <= 0) {
-            return null;
-        }
+  const removeButton = (
+    <button type="button" onClick={() => onRemove(!user ? item?.id : item?.cartDetailId, (res) => onCheckVoucherIsValid(res))} className='btn btn-light btn-sm btn-svg-icon'>
+      <Cross12Svg />
+    </button>
+  );
 
-        const extraLines = cart.extraLines.map((extraLine, index) => {
-            let calcShippingLink;
-
-            if (extraLine.type === 'shipping') {
-                calcShippingLink = <div className="cart__calc-shipping"><Link to="/">Calculate Shipping</Link></div>;
-            }
-
-            return (
-                <tr key={index}>
-                    <th>{extraLine.title}</th>
-                    <td>
-                        <Currency value={extraLine.price} />
-                        {calcShippingLink}
-                    </td>
-                </tr>
-            );
-        });
-
-        return (
-            <React.Fragment>
-                <thead className="cart__totals-header">
-                    <tr>
-                        <th>Subtotal</th>
-                        <td><Currency value={cart.subtotal} /></td>
-                    </tr>
-                </thead>
-                <tbody className="cart__totals-body">
-                    {extraLines}
-                </tbody>
-            </React.Fragment>
-        );
-    }
-
-    renderCart() {
-        const { cart, cartUpdateQuantities } = this.props;
-        const { quantities } = this.state;
-
-        const updateCartButton = (
-            <AsyncAction
-                action={() => cartUpdateQuantities(quantities)}
-                render={({ run, loading }) => {
-                    const classes = classNames('btn btn-primary cart__update-button', {
-                        'btn-loading': loading,
-                    });
-
-                    return (
-                        <button type="button" onClick={run} className={classes} disabled={!this.cartNeedUpdate()}>
-                            Update Cart
-                        </button>
-                    );
-                }}
-            />
-        );
-
-        return (
-            <div className="cart block">
-                <div className="container">
-                    <table className="cart__table cart-table">
-                        <thead className="cart-table__head">
-                            <tr className="cart-table__row">
-                                <th className="cart-table__column cart-table__column--image">Image</th>
-                                <th className="cart-table__column cart-table__column--product">Product</th>
-                                <th className="cart-table__column cart-table__column--price">Price</th>
-                                <th className="cart-table__column cart-table__column--quantity">Quantity</th>
-                                <th className="cart-table__column cart-table__column--total">Total</th>
-                                <th className="cart-table__column cart-table__column--remove" aria-label="Remove" />
-                            </tr>
-                        </thead>
-                        <tbody className="cart-table__body">
-                            {this.renderItems()}
-                        </tbody>
-                    </table>
-                    <div className="cart__actions">
-                        <form className="cart__coupon-form">
-                            <label htmlFor="input-coupon-code" className="sr-only">Password</label>
-                            <input type="text" className="form-control" id="input-coupon-code" placeholder="Coupon Code" />
-                            <button type="submit" className="btn btn-primary">Apply Coupon</button>
-                        </form>
-                        <div className="cart__buttons">
-                            <Link to="/" className="btn btn-light">Continue Shopping</Link>
-                            {updateCartButton}
-                        </div>
-                    </div>
-
-                    <div className="row justify-content-end pt-md-5 pt-4">
-                        <div className="col-12 col-md-7 col-lg-6 col-xl-5">
-                            <div className="card">
-                                <div className="card-body">
-                                    <h3 className="card-title">Cart Totals</h3>
-                                    <table className="cart__totals">
-                                        {this.renderTotals()}
-                                        <tfoot className="cart__totals-footer">
-                                            <tr>
-                                                <th>Total</th>
-                                                <td><Currency value={cart.total} /></td>
-                                            </tr>
-                                        </tfoot>
-                                    </table>
-                                    <Link to="/shop/checkout" className="btn btn-primary btn-xl btn-block cart__checkout-button">
-                                        Proceed to checkout
-                                    </Link>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
-    render() {
-        const { cart } = this.props;
-        const breadcrumb = [
-            { title: 'Home', url: '' },
-            { title: 'Shopping Cart', url: '' },
-        ];
-
-        let content;
-
-        if (cart.quantity) {
-            content = this.renderCart();
-        } else {
-            content = (
-                <div className="block block-empty">
-                    <div className="container">
-                        <div className="block-empty__body">
-                            <div className="block-empty__message">Your shopping cart is empty!</div>
-                            <div className="block-empty__actions">
-                                <Link to="/" className="btn btn-primary btn-sm">Continue</Link>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            );
-        }
-
-        return (
-            <React.Fragment>
-                <Helmet>
-                    <title>{`Shopping Cart — ${theme.name}`}</title>
-                </Helmet>
-
-                <PageHeader header="Shopping Cart" breadcrumb={breadcrumb} />
-
-                {content}
-            </React.Fragment>
-        );
-    }
+  return (
+    <>
+      <tr key={item?.cartDetailId} className="cart-table__row">
+        <td className="cart-table__column cart-table__column--image">
+          {image}
+        </td>
+        <td className="cart-table__column cart-table__column--product" >
+          <Link to={`/product-detail/${item?.sku}`} className="cart-table__product-name">
+            <span className='' style={{ fontWeight: '500' }}>
+              {`${item?.name} ${item?.colorName}`}
+            </span>
+          </Link>
+        </td>
+        <td className="cart-table__column cart-table__column--quantity" data-title="Kích cỡ" >
+          <select
+            className="form-control form-control-sm view-options-custom"
+            id="view-options-sizes"
+            value={size}
+            onChange={handleChangeSize}
+          >
+            {sizes?.map(option => (
+              <option key={option?.id} value={option?.id} disabled={existingSizes.includes(option.id) || option?.quantity <= 0}>
+                {option?.name} {option?.quantity <= 0 && `(Hết hàng)`}
+              </option>
+            ))}
+          </select>
+        </td>
+        <td className="cart-table__column cart-table__column--quantity" data-title="Số lượng">
+          {/*
+          <InputNumber
+            // onChange={(quantity) => this.handleChangeQuantity(item, quantity)}
+            value={item?.quantity}
+            min={1}
+          />
+          */}
+          <select
+            className="form-control form-control-sm view-options-custom"
+            id="view-options-sizes"
+            value={quantity}
+            onChange={handleChangeQuantity}
+          >
+            {ARR_QUANTITY.map(option => (
+              <option key={option} value={option} disabled={option > item?.stock}>
+                {option}
+              </option>
+            ))}
+          </select>
+        </td>
+        <td className="cart-table__column cart-table__column--price" data-title="Đơn giá" style={{ fontWeight: '500' }}>
+          {formatCurrencyVnd(String(item?.price))}
+        </td>
+        <td className="cart-table__column cart-table__column--total product__price" data-title="Thành tiền">
+          {formatCurrencyVnd(String(totalPrice))}
+        </td>
+        <td className="cart-table__column cart-table__column--remove">
+          {removeButton}
+        </td>
+      </tr>
+      {item?.stock <= 0 ?
+        <tr key={item?.id} className="cart-table__row">
+          <td colSpan={7} className="cart-table__column text-center" style={{ padding: 10 }}>
+            <span className='text-main' style={{ fontSize: 15 }}>Sản phẩm đã hết hàng. Vui lòng chọn sản phẩm khác</span>
+          </td>
+        </tr>
+        :
+        item?.quantity > item?.stock ?
+          <tr key={item?.id} className="cart-table__row">
+            <td colSpan={7} className="cart-table__column text-center" style={{ padding: 10 }}>
+              <span className='text-main' style={{ fontSize: 15 }}>Hiện tại trong hệ thống chỉ còn {item?.stock} sản phẩm. Vui lòng cập nhật lại số lượng</span>
+            </td>
+          </tr> : null
+      }
+    </>
+  );
 }
 
-const mapStateToProps = (state) => ({
-    cart: state.cart,
-});
+function ShopPageCart() {
 
-const mapDispatchToProps = {
-    cartRemoveItem,
-    cartUpdateQuantities,
-};
+  const [inputVoucher, setInputVoucher] = useState("");
+  const [errorVoucher, setErrorVoucher] = useState("");
+  const [voucher, setVoucher] = useState({});
+  const history = useHistory();
+  const { cartItems, onRemoveCartItem, onUpdateCartSize, onUpdateCartQuantity, totalCart } = useUser();
+  const { authUser } = useAuth();
+  const { fetch } = useFetch(null, { fetch: false });
 
-export default connect(mapStateToProps, mapDispatchToProps)(ShopPageCart);
+  const isErrorCart = cartItems?.some((item) => item?.quantity > item?.stock);
+
+  const handleRedirectCheckout = () => {
+
+    // const parsedEndTime = parse(voucher?.endTime, 'HH:mm:ss dd-MM-yyyy', new Date());
+    // const currentDateTime = new Date();
+    //
+    // if (voucher?.code && isBefore(parsedEndTime, currentDateTime)) {
+    //   setErrorVoucher("Mã khuyến mãi đã hết hạn sử dụng")
+    //   return;
+    // }
+
+    if (!isErrorCart) {
+
+      if (voucher?.code) {
+        const getVoucher = {
+          ...voucher,
+          discountValue: caculatorVoucher(),
+        }
+        history.push(PATH_PAGE.checkout.root, { getVoucher, isDeleted: false });
+      }
+      else {
+        history.push(PATH_PAGE.checkout.root);
+      }
+    }
+
+  }
+
+  const onFinishVoucher = (res) => {
+    setVoucher(res);
+    setErrorVoucher("");
+  }
+
+  const onErrorVoucher = (res) => {
+    setVoucher({});
+    setErrorVoucher(res?.message);
+  }
+
+  const handleGetVoucher = () => {
+    if (inputVoucher?.trim() !== "") {
+      const body = {
+        code: inputVoucher,
+        totalCart,
+      }
+      fetch(CLIENT_API.voucher.details, body, (res) => onFinishVoucher(res), (res) => onErrorVoucher(res), false);
+    }
+    else {
+      setVoucher({});
+      setErrorVoucher("");
+    }
+  }
+
+  const caculatorVoucher = () => {
+    if (voucher?.code) {
+
+      if (voucher?.typeDiscount === "percent") {
+        const discountValue = parseInt(totalCart) * (parseInt(voucher.value) / 100);
+        return discountValue > voucher?.maxDiscountValue ? parseInt(voucher?.maxDiscountValue) : parseInt(discountValue);
+      }
+
+      return parseInt(voucher?.value);
+    }
+
+    return 0;
+  }
+
+  const totalFinal = () => {
+    if (parseInt(caculatorVoucher()) >= parseInt(totalCart)) {
+      return 0;
+    }
+
+    return parseInt(totalCart) - parseInt(caculatorVoucher());
+  }
+
+  const handleCheckVoucherIsValid = (total) => {
+    console.log(123)
+    console.log(total);
+    console.log(voucher?.minOrderValue);
+    if (voucher?.code && total < voucher?.minOrderValue) {
+      setVoucher({});
+    }
+    setErrorVoucher("");
+  }
+
+  const items = cartItems?.map((item) => {
+    return <CartItem
+      key={item?.cartDetailId}
+      user={authUser}
+      onRemove={onRemoveCartItem}
+      onUpdateCartSize={onUpdateCartSize}
+      onUpdateCartQuantity={onUpdateCartQuantity}
+      onCheckVoucherIsValid={handleCheckVoucherIsValid}
+      item={item}
+      cartItems={cartItems}
+    />
+  });
+
+  const cart = (
+    <div className="cart block">
+      <div className="container">
+        <table className="cart__table cart-table">
+          <thead className="cart-table__head">
+            <tr className="cart-table__row">
+              <th className="cart-table__column cart-table__column--image">Hình ảnh</th>
+              <th className="cart-table__column cart-table__column--product">Tên sản phẩm</th>
+              <th className="cart-table__column cart-table__column--quantity">Kích cỡ</th>
+              <th className="cart-table__column cart-table__column--quantity">Số lượng</th>
+              <th className="cart-table__column cart-table__column--price">Đơn giá</th>
+              <th className="cart-table__column cart-table__column--total">Thành tiền</th>
+              <th className="cart-table__column cart-table__column--remove" aria-label="Remove" />
+            </tr>
+          </thead>
+          <tbody className="cart-table__body">
+            {items}
+          </tbody>
+        </table>
+        <div className="cart__actions">
+          <form className="cart__coupon-form">
+            <label htmlFor="input-coupon-code" className="sr-only">Password</label>
+            <input
+              type="text"
+              value={inputVoucher}
+              onChange={(e) => setInputVoucher(e.target.value)}
+              className="form-control"
+              id="input-coupon-code"
+              placeholder="Nhập mã khuyến mãi"
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleGetVoucher();
+                }
+              }}
+            />
+            <button type="button" onClick={handleGetVoucher} className="btn btn-primary">Áp dụng</button>
+          </form>
+          <div className="cart__buttons">
+            <Link to={PATH_PAGE.root} className="btn btn-light text-dark">Tiếp tục mua hàng</Link>
+          </div>
+        </div>
+        <p className='mt-3 text-main'>{errorVoucher}</p>
+        {voucher?.id &&
+          <div class="coupon mt-3">
+            <div class="price">
+              <Logo height={90} />
+            </div>
+            <div class="info">
+              <h3 className='text-main'>{`Giảm ${voucher?.typeDiscount === 'percent' ? voucher?.value : formatCurrencyVnd(String(voucher?.value), "đ")}${voucher?.typeDiscount === 'percent' ? '%' : ''}`}</h3>
+
+              <p>
+                {voucher?.typeDiscount === 'percent' && `Giảm tối đa ${formatCurrencyVnd(String(voucher?.maxDiscountValue), "đ")}`}
+              </p>
+              <p>
+                {`Đơn tối thiểu ${voucher?.minOrderValue === 0 ? "0đ" : formatCurrencyVnd(String(voucher?.minOrderValue), "đ")}`}
+              </p>
+
+              <p className='mt-2'>Mã:
+                <span style={{ fontWeight: 'bold' }}>{` ${voucher?.code}`}</span>
+              </p>
+              <p>HSD: {voucher?.endTime}</p>
+            </div>
+          </div>
+        }
+
+        <div className="row justify-content-end pt-md-5 pt-4">
+          <div className="col-12 col-md-7 col-lg-6 col-xl-5">
+            <div className="card">
+              <div className="card-body-cart">
+                <h4 className="text-uppercase">Thông tin đơn hàng</h4>
+                <div className='border-top-cart-page' />
+                <table className="cart__totals">
+                  <tfoot className="cart__totals-footer">
+                    <tr>
+                      <th className='total-cart' style={{ fontWeight: 'bold' }}>Tổng tiền hàng</th>
+                      <td className='total-cart' style={{ fontWeight: 'bold' }}>{formatCurrencyVnd(totalCart)}</td>
+                    </tr>
+                    <tr>
+                      <th className='total-discount' style={{ fontWeight: 'bold' }}>Giảm giá</th>
+                      <td className='total-discount' style={{ fontWeight: 'bold' }}>{caculatorVoucher() > 0 ? `- ${formatCurrencyVnd(parseInt(caculatorVoucher()))}` : `${caculatorVoucher()} VNĐ`}</td>
+                    </tr>
+                  </tfoot>
+                </table>
+                <div className='border-bottom-cart-page' />
+                <table className="cart__totals">
+                  <tfoot className="cart__totals-footer">
+                    <tr>
+                      <th className='total-final' style={{ fontWeight: 'bold' }}>Tạm tính</th>
+                      <td className='total-final product__price'>{totalFinal() !== 0 ? formatCurrencyVnd(String(totalFinal())) : "0 VNĐ"}</td>
+                    </tr>
+                  </tfoot>
+                </table>
+                <button onClick={handleRedirectCheckout} className="btn btn-primary btn-xl btn-block cart__checkout-button">
+                  Tiếp tục thanh toán
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const breadcrumb = [
+    { title: 'Trang chủ', url: PATH_PAGE.root },
+    { title: 'Giỏ hàng', url: PATH_PAGE.cart.root },
+  ];
+
+  let content;
+
+  if (cartItems.length > 0) {
+    content = cart;
+  } else {
+    content = (
+      <div className="block block-empty">
+        <div className="container">
+          <div className="block-empty__body">
+            <div className="block-empty__message">Chưa có sản phẩm trong giỏ hàng!</div>
+            <div className="block-empty__actions">
+              <Link to={PATH_PAGE.root} className="btn btn-primary btn-sm">Tiếp tục mua hàng!</Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <React.Fragment>
+      <Helmet>
+        <title>{`Giỏ hàng của bạn — ${theme.name}`}</title>
+      </Helmet>
+
+      <PageHeader header="Giỏ hàng của bạn" breadcrumb={breadcrumb} />
+
+      {content}
+    </React.Fragment>
+  );
+}
+
+export default ShopPageCart;

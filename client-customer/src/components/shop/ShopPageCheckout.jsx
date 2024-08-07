@@ -1,10 +1,10 @@
 // react
-import React, { Component } from 'react';
+import React, { Component, useEffect, useState } from 'react';
 
 // third-party
 import { connect } from 'react-redux';
 import { Helmet } from 'react-helmet';
-import { Link, Redirect } from 'react-router-dom';
+import { Link, Redirect, useLocation, useHistory } from 'react-router-dom';
 
 // application
 import Collapse from '../shared/Collapse';
@@ -14,350 +14,540 @@ import { Check9x7Svg } from '../../svg';
 
 // data stubs
 import payments from '../../data/shopPayments';
+import deliverys from '../../data/shopDelivery';
 import theme from '../../data/theme';
+import { PATH_PAGE } from '../../routes/path';
+import useUser from '../../hooks/useUser';
+import useAuth from '../../hooks/useAuth';
+import useFetch from '../../hooks/useFetch';
+import { formatCurrencyVnd } from '../../utils/formatNumber';
+
+import * as Yup from 'yup';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { Controller, useForm } from 'react-hook-form';
+import {
+  FormProvider,
+  RHFInput,
+} from '../../components/hook-form';
+import { isVietnamesePhoneNumberValid } from '../../utils/validate';
+import useDeliveryApi from '../../hooks/useDelivery';
+import { CLIENT_API } from '../../api/apiConfig';
+
+const FREE_SHIP_AMOUNT = 1000000;
+
+function ShopPageCheckout() {
 
 
-class ShopPageCheckout extends Component {
-    payments = payments;
+  const { provinces, districts, wards, fetchDistrictsByProvinceId, fetchWardsByDistrictId, setDistricts, setWards, fetchShipFee, shipFee, setShipFee } = useDeliveryApi();
+  const { cartItems, totalCart } = useUser();
+  const { authUser, isAuthenticated } = useAuth();
+  const { fetch, post } = useFetch(null, { fetch: false });
+  const [currentPayment, setCurrentPayment] = useState("cash");
+  const [currentDelivery, setCurrentDelivery] = useState("ghn");
+  const [errorProduct, setErrorProduct] = useState([]);
+  const history = useHistory();
+  const location = useLocation();
 
-    constructor(props) {
-        super(props);
-
-        this.state = {
-            payment: 'bank',
-        };
-    }
-
-    handlePaymentChange = (event) => {
-        if (event.target.checked) {
-            this.setState({ payment: event.target.value });
-        }
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      history.replace(history.location.pathname, { isDeleted: true });
     };
 
-    renderTotals() {
-        const { cart } = this.props;
+    window.addEventListener('beforeunload', handleBeforeUnload);
 
-        if (cart.extraLines.length <= 0) {
-            return null;
-        }
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [history]);
 
-        const extraLines = cart.extraLines.map((extraLine, index) => (
-            <tr key={index}>
-                <th>{extraLine.title}</th>
-                <td><Currency value={extraLine.price} /></td>
-            </tr>
-        ));
+  const locationState = location.state;
+  const getVoucher = locationState && !locationState.isDeleted ? locationState.getVoucher : null;
 
-        return (
-            <React.Fragment>
-                <tbody className="checkout__totals-subtotals">
-                    <tr>
-                        <th>Subtotal</th>
-                        <td><Currency value={cart.subtotal} /></td>
-                    </tr>
-                    {extraLines}
-                </tbody>
-            </React.Fragment>
-        );
+  const caculatorShipFee = () => {
+    if (totalCart >= FREE_SHIP_AMOUNT) {
+      return "Miễn phí";
     }
 
-    renderCart() {
-        const { cart } = this.props;
-
-        const items = cart.items.map((item) => (
-            <tr key={item.id}>
-                <td>{`${item.product.name} × ${item.quantity}`}</td>
-                <td><Currency value={item.total} /></td>
-            </tr>
-        ));
-
-        return (
-            <table className="checkout__totals">
-                <thead className="checkout__totals-header">
-                    <tr>
-                        <th>Product</th>
-                        <th>Total</th>
-                    </tr>
-                </thead>
-                <tbody className="checkout__totals-products">
-                    {items}
-                </tbody>
-                {this.renderTotals()}
-                <tfoot className="checkout__totals-footer">
-                    <tr>
-                        <th>Total</th>
-                        <td><Currency value={cart.total} /></td>
-                    </tr>
-                </tfoot>
-            </table>
-        );
+    if (shipFee === 0) {
+      return "-";
     }
 
-    renderPaymentsList() {
-        const { payment: currentPayment } = this.state;
+    return formatCurrencyVnd(String(shipFee));
+  }
 
-        const payments = this.payments.map((payment) => {
-            const renderPayment = ({ setItemRef, setContentRef }) => (
-                <li className="payment-methods__item" ref={setItemRef}>
-                    <label className="payment-methods__item-header">
-                        <span className="payment-methods__item-radio input-radio">
-                            <span className="input-radio__body">
-                                <input
-                                    type="radio"
-                                    className="input-radio__input"
-                                    name="checkout_payment_method"
-                                    value={payment.key}
-                                    checked={currentPayment === payment.key}
-                                    onChange={this.handlePaymentChange}
-                                />
-                                <span className="input-radio__circle" />
-                            </span>
-                        </span>
-                        <span className="payment-methods__item-title">{payment.title}</span>
-                    </label>
-                    <div className="payment-methods__item-container" ref={setContentRef}>
-                        <div className="payment-methods__item-description text-muted">{payment.description}</div>
+  const total = (
+    <React.Fragment>
+      <tbody className="checkout__totals-subtotals">
+        <tr>
+          <th>Tổng tiền hàng</th>
+          <td>{formatCurrencyVnd(String(totalCart))}</td>
+        </tr>
+        <tr>
+          <th>Giảm giá</th>
+          <td>{getVoucher?.discountValue ? `- ${formatCurrencyVnd(String(getVoucher?.discountValue))}` : "0 VNĐ"}</td>
+        </tr>
+        <tr>
+          <th>Phí vận chuyển</th>
+          <td>{caculatorShipFee()}</td>
+        </tr>
+      </tbody>
+    </React.Fragment>
+  );
+
+  const getErrorMessage = (item) => {
+    const errorItem = errorProduct?.find((err) => err.id === item.id);
+    if (errorItem && errorItem.quantity === 0) {
+      return (
+        <p className='text-error mt-2'>
+          Sản phẩm này hiện tại đã hết hàng, vui lòng cập nhật lại sản phẩm trong giỏ hàng
+        </p>
+      );
+    } else if (errorItem) {
+      return (
+        <p className='text-error mt-2'>
+          Sản phẩm này hiện tại số lượng chỉ còn {errorItem.quantity}, vui lòng cập nhật lại số lượng trong giỏ hàng
+        </p>
+      );
+    }
+    return null;
+  };
+
+  const items = cartItems?.map((item) => (
+    <tr key={item?.cartDetailId}>
+      <td>
+        {`${item?.name} ${item?.colorName} - Size: ${item?.sizeName} × ${item?.quantity}`}
+        {getErrorMessage(item)}
+      </td>
+      <td>{formatCurrencyVnd(String(parseInt(item?.price) * parseInt(item?.quantity)))}</td>
+    </tr>
+  ));
+
+  const totalFinal = () => {
+    if (getVoucher?.discountValue) {
+
+      if (parseInt(getVoucher?.discountValue) >= parseInt(totalCart)) {
+        return 0 + parseInt(totalCart >= FREE_SHIP_AMOUNT ? 0 : shipFee);
+      }
+
+      return parseInt(totalCart) - parseInt(getVoucher?.discountValue) + parseInt(totalCart >= FREE_SHIP_AMOUNT ? 0 : shipFee);
+    }
+
+    return parseInt(totalCart) + parseInt(totalCart >= FREE_SHIP_AMOUNT ? 0 : shipFee);
+  }
+
+  const cart = (
+    <>
+      <table className="checkout__totals">
+        <thead className="checkout__totals-header">
+          <tr>
+            <th>Sản phẩm</th>
+            <th>Thành tiền</th>
+          </tr>
+        </thead>
+        <tbody className="checkout__totals-products">
+          {items}
+        </tbody>
+        {total}
+        <tfoot className="checkout__totals-footer">
+          <tr>
+            <th style={{ fontWeight: 'bold' }} className='total-final'>Tổng cộng</th>
+            <td className='total-final product__price'>{totalFinal() !== 0 ? formatCurrencyVnd(String(totalFinal())) : "0 VNĐ"}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </>
+  );
+
+  const deliveryList = deliverys.map((delivery) => {
+    const renderDelivery = ({ setItemRef, setContentRef }) => (
+      <li className="delivery-methods__item" ref={setItemRef}>
+        <label className="delivery-methods__item-header">
+          <span className="delivery-methods__item-radio input-radio">
+            <span className="input-radio__body">
+              <input
+                type="radio"
+                className="input-radio__input"
+                name="checkout_delivery_method"
+                value={delivery.key}
+                checked={currentDelivery === delivery.key}
+                onChange={(e) => setCurrentDelivery(e.target.value)}
+              />
+              <span className="input-radio__circle" />
+            </span>
+          </span>
+          <span className="delivery-methods__item-title">{delivery.title}</span>
+        </label>
+        <div className="delivery-methods__item-container" ref={setContentRef} style={{ maxHeight: '300px' }}>
+          <div className="delivery-methods__item-description text-dark">{delivery.shipping}</div>
+          <div className="delivery-methods__item-description text-dark">{delivery.description}</div>
+        </div>
+      </li>
+    );
+
+    return (
+      <Collapse
+        key={delivery.key}
+        open={currentDelivery === delivery.key}
+        toggleClass="delivery-methods__item--active"
+        render={renderDelivery}
+      />
+    );
+  });
+
+  const paymentList = payments.map((payment) => {
+    const renderPayment = ({ setItemRef, setContentRef }) => (
+      <li className="payment-methods__item" ref={setItemRef}>
+        <label className="payment-methods__item-header">
+          <span className="payment-methods__item-radio input-radio">
+            <span className="input-radio__body">
+              <input
+                type="radio"
+                className="input-radio__input"
+                name="checkout_payment_method"
+                value={payment.key}
+                checked={currentPayment === payment.key}
+                onChange={(e) => setCurrentPayment(e.target.value)}
+              />
+              <span className="input-radio__circle" />
+            </span>
+          </span>
+          <span className="payment-methods__item-title">{payment.title}</span>
+        </label>
+        <div className="payment-methods__item-container" ref={setContentRef} style={{ maxHeight: '300px' }}>
+          <div className="payment-methods__item-description text-dark">{payment.description}</div>
+        </div>
+      </li>
+    );
+
+    return (
+      <Collapse
+        key={payment.key}
+        open={currentPayment === payment.key}
+        toggleClass="payment-methods__item--active"
+        render={renderPayment}
+      />
+    );
+  });
+
+  const breadcrumb = [
+    { title: 'Trang chủ', url: PATH_PAGE.checkout.root },
+    { title: 'Giỏ hàng', url: PATH_PAGE.cart.root },
+    { title: 'Thanh toán đơn hàng', url: PATH_PAGE.checkout.root },
+  ];
+
+  const OrderSchema = Yup.object().shape({
+    email: Yup.string().required('Bạn chưa nhập email').email('Email không hợp lệ'),
+    fullName: Yup.string().trim().test(
+      'max',
+      'Họ và tên quá dài (tối đa 50 ký tự)',
+      value => value.trim().length <= 50
+    ).required('Họ và tên không được để trống'),
+    address: Yup.string().trim().test(
+      'max',
+      'Địa chỉ cụ thể quá dài (tối đa 255 ký tự)',
+      value => value.trim().length <= 255
+    ).required('Địa chỉ cụ thể không được để trống'),
+    phoneNumber: Yup.string().trim().test('is-vietnamese-phone-number', 'SĐT không hợp lệ', (value) => {
+      return isVietnamesePhoneNumberValid(value);
+    }),
+    province: Yup.string().required('Bạn chưa chọn Tỉnh/Thành'),
+    district: Yup.string().required('Bạn chưa chọn Quận/Huyện'),
+    ward: Yup.string().required('Bạn chưa chọn Xã/Phường'),
+  });
+
+  const defaultValues = {
+    fullName: '',
+    email: '',
+    phoneNumber: '',
+    note: '',
+    address: '',
+    district: '',
+    province: '',
+    ward: '',
+  }
+
+  const methods = useForm({
+    resolver: yupResolver(OrderSchema),
+    defaultValues,
+  });
+
+  const {
+    handleSubmit,
+    control,
+    watch,
+    setValue,
+    getValues,
+    trigger,
+    formState: { isSubmitted },
+  } = methods;
+
+  const onFinish = (res) => {
+    history.push(PATH_PAGE.checkout.success, { order: res });
+  }
+
+  const onError = (err) => {
+    setErrorProduct(err?.error)
+  }
+
+  const onSubmit = async (data) => {
+    const provinceName = provinces?.find(province => province.ProvinceID === parseInt(data?.province))?.ProvinceName;
+    const districtName = districts?.find(district => district.DistrictID === parseInt(data?.district))?.DistrictName;
+    const wardName = wards?.find(ward => ward.WardCode === data?.ward)?.WardName;
+
+    const address = `${data?.address}, ${wardName}, ${districtName}, ${provinceName}`;
+    const { ward, district, province, ...restData } = data;
+
+    const body = {
+      ...restData,
+      address,
+      moneyShip: shipFee,
+      totalMoney: totalCart,
+      discountAmount: getVoucher?.discountValue || null,
+      cartItems,
+      customerId: isAuthenticated ? authUser?.id : null,
+    }
+    console.log(body);
+    post(CLIENT_API.bill.post, body, (res) => onFinish(res), (res) => onError(res), false);
+  }
+
+  const handleChangeProvince = (e) => {
+    const value = e.target.value;
+
+    setValue('district', "");
+    setValue('ward', "");
+
+    if (value !== "") {
+      fetchDistrictsByProvinceId(value);
+    }
+
+    if (value === "") {
+      setDistricts([]);
+    }
+
+    setWards([]);
+
+    setShipFee(0);
+    setValue('province', value);
+
+    if (isSubmitted) {
+      trigger(['district', 'ward', 'province']);
+    }
+  }
+
+  const handleChangeDistrict = (e) => {
+    const value = e.target.value;
+
+    setValue('ward', "");
+
+    if (value !== "") {
+      fetchWardsByDistrictId(value);
+    }
+
+    if (value === "") {
+      setWards([]);
+    }
+
+    setValue('district', value);
+    setShipFee(0);
+
+    if (isSubmitted) {
+      trigger(['district', 'ward', 'province']);
+    }
+  }
+
+  const handleChangeWard = (e) => {
+    const value = e.target.value;
+
+    setValue('ward', value);
+
+    if (isSubmitted) {
+      trigger(['district', 'ward', 'province']);
+    }
+
+    if (value !== "" && parseInt(totalCart) < FREE_SHIP_AMOUNT) {
+      fetchShipFee(getValues('district'), getValues('ward'));
+    }
+
+    if (value === "") {
+      setShipFee(0);
+    }
+  }
+
+  return (
+    <React.Fragment>
+      {cartItems?.length > 0 ?
+        <>
+          <Helmet>
+            <title>{`Thanh toán đơn hàng — ${theme.name}`}</title>
+          </Helmet>
+
+          <PageHeader header="Thanh toán đơn hàng" breadcrumb={breadcrumb} />
+
+          <div className="checkout block">
+            <div className="container">
+              <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+                <div className="row">
+                  {!isAuthenticated &&
+                    <div className="col-12 mb-3">
+                      <div className="alert alert-primary alert-lg">
+                        Bạn đã có tài khoản?
+                        {' '}
+                        <Link to={PATH_PAGE.account.login_register}>Nhấn vào đây để đăng nhập</Link>
+                      </div>
                     </div>
-                </li>
-            );
+                  }
 
-            return (
-                <Collapse
-                    key={payment.key}
-                    open={currentPayment === payment.key}
-                    toggleClass="payment-methods__item--active"
-                    render={renderPayment}
-                />
-            );
-        });
+                  <div className="col-12 col-lg-6 col-xl-7">
+                    <div className="card mb-lg-0">
+                      <div className="card-body">
+                        <h3 className="card-title">Thông tin giao hàng</h3>
+                        <RHFInput name='fullName' topLabel='Họ và tên' placeholder="Nhập họ và tên" isRequired />
+                        <RHFInput name='phoneNumber' topLabel='Số điện thoại' placeholder="Nhập số điện thoại" isRequired />
+                        <RHFInput name='email' topLabel='Email' placeholder="Nhập email" isRequired />
 
-        return (
-            <div className="payment-methods">
-                <ul className="payment-methods__list">
-                    {payments}
-                </ul>
-            </div>
-        );
-    }
-
-    render() {
-        const { cart } = this.props;
-
-        if (cart.items.length < 1) {
-            return <Redirect to="cart" />;
-        }
-
-        const breadcrumb = [
-            { title: 'Home', url: '' },
-            { title: 'Shopping Cart', url: '/shop/cart' },
-            { title: 'Checkout', url: '' },
-        ];
-
-        return (
-            <React.Fragment>
-                <Helmet>
-                    <title>{`Checkout — ${theme.name}`}</title>
-                </Helmet>
-
-                <PageHeader header="Checkout" breadcrumb={breadcrumb} />
-
-                <div className="checkout block">
-                    <div className="container">
-                        <div className="row">
-                            <div className="col-12 mb-3">
-                                <div className="alert alert-primary alert-lg">
-                                    Returning customer?
-                                    {' '}
-                                    <Link to="/account/login">Click here to login</Link>
-                                </div>
+                        <Controller
+                          name="province"
+                          control={control}
+                          render={({ field, fieldState: { error } }) => (
+                            <div className="form-group">
+                              <label>Tỉnh/Thành</label>
+                              <span className="required">*</span>
+                              <select
+                                {...field}
+                                id="checkout-country"
+                                className={`${error ? "input-border-error" : ""} form-control`}
+                                onChange={handleChangeProvince}
+                              >
+                                <option value="">Chọn Tỉnh/Thành</option>
+                                {provinces?.map((province) => {
+                                  return <option key={province.ProvinceID} value={province.ProvinceID}>{province.ProvinceName}</option>
+                                })}
+                              </select>
+                              <span className='text-error'>{error?.message}</span>
                             </div>
+                          )}
+                        />
 
-                            <div className="col-12 col-lg-6 col-xl-7">
-                                <div className="card mb-lg-0">
-                                    <div className="card-body">
-                                        <h3 className="card-title">Billing details</h3>
-                                        <div className="form-row">
-                                            <div className="form-group col-md-6">
-                                                <label htmlFor="checkout-first-name">First Name</label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    id="checkout-first-name"
-                                                    placeholder="First Name"
-                                                />
-                                            </div>
-                                            <div className="form-group col-md-6">
-                                                <label htmlFor="checkout-last-name">Last Name</label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    id="checkout-last-name"
-                                                    placeholder="Last Name"
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className="form-group">
-                                            <label htmlFor="checkout-company-name">
-                                                Company Name
-                                                {' '}
-                                                <span className="text-muted">(Optional)</span>
-                                            </label>
-                                            <input
-                                                type="text"
-                                                className="form-control"
-                                                id="checkout-company-name"
-                                                placeholder="Company Name"
-                                            />
-                                        </div>
-                                        <div className="form-group">
-                                            <label htmlFor="checkout-country">Country</label>
-                                            <select id="checkout-country" className="form-control">
-                                                <option>Select a country...</option>
-                                                <option>United States</option>
-                                                <option>Russia</option>
-                                                <option>Italy</option>
-                                                <option>France</option>
-                                                <option>Ukraine</option>
-                                                <option>Germany</option>
-                                                <option>Australia</option>
-                                            </select>
-                                        </div>
-                                        <div className="form-group">
-                                            <label htmlFor="checkout-street-address">Street Address</label>
-                                            <input
-                                                type="text"
-                                                className="form-control"
-                                                id="checkout-street-address"
-                                                placeholder="Street Address"
-                                            />
-                                        </div>
-                                        <div className="form-group">
-                                            <label htmlFor="checkout-address">
-                                                Apartment, suite, unit etc.
-                                                {' '}
-                                                <span className="text-muted">(Optional)</span>
-                                            </label>
-                                            <input type="text" className="form-control" id="checkout-address" />
-                                        </div>
-                                        <div className="form-group">
-                                            <label htmlFor="checkout-city">Town / City</label>
-                                            <input type="text" className="form-control" id="checkout-city" />
-                                        </div>
-                                        <div className="form-group">
-                                            <label htmlFor="checkout-state">State / County</label>
-                                            <input type="text" className="form-control" id="checkout-state" />
-                                        </div>
-                                        <div className="form-group">
-                                            <label htmlFor="checkout-postcode">Postcode / ZIP</label>
-                                            <input type="text" className="form-control" id="checkout-postcode" />
-                                        </div>
-
-                                        <div className="form-row">
-                                            <div className="form-group col-md-6">
-                                                <label htmlFor="checkout-email">Email address</label>
-                                                <input
-                                                    type="email"
-                                                    className="form-control"
-                                                    id="checkout-email"
-                                                    placeholder="Email address"
-                                                />
-                                            </div>
-                                            <div className="form-group col-md-6">
-                                                <label htmlFor="checkout-phone">Phone</label>
-                                                <input type="text" className="form-control" id="checkout-phone" placeholder="Phone" />
-                                            </div>
-                                        </div>
-
-                                        <div className="form-group">
-                                            <div className="form-check">
-                                                <span className="form-check-input input-check">
-                                                    <span className="input-check__body">
-                                                        <input className="input-check__input" type="checkbox" id="checkout-create-account" />
-                                                        <span className="input-check__box" />
-                                                        <Check9x7Svg className="input-check__icon" />
-                                                    </span>
-                                                </span>
-                                                <label className="form-check-label" htmlFor="checkout-create-account">
-                                                    Create an account?
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="card-divider" />
-                                    <div className="card-body">
-                                        <h3 className="card-title">Shipping Details</h3>
-
-                                        <div className="form-group">
-                                            <div className="form-check">
-                                                <span className="form-check-input input-check">
-                                                    <span className="input-check__body">
-                                                        <input className="input-check__input" type="checkbox" id="checkout-different-address" />
-                                                        <span className="input-check__box" />
-                                                        <Check9x7Svg className="input-check__icon" />
-                                                    </span>
-                                                </span>
-                                                <label className="form-check-label" htmlFor="checkout-different-address">
-                                                    Ship to a different address?
-                                                </label>
-                                            </div>
-                                        </div>
-
-                                        <div className="form-group">
-                                            <label htmlFor="checkout-comment">
-                                                Order notes
-                                                {' '}
-                                                <span className="text-muted">(Optional)</span>
-                                            </label>
-                                            <textarea id="checkout-comment" className="form-control" rows="4" />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="col-12 col-lg-6 col-xl-5 mt-4 mt-lg-0">
-                                <div className="card mb-0">
-                                    <div className="card-body">
-                                        <h3 className="card-title">Your Order</h3>
-
-                                        {this.renderCart()}
-
-                                        {this.renderPaymentsList()}
-
-                                        <div className="checkout__agree form-group">
-                                            <div className="form-check">
-                                                <span className="form-check-input input-check">
-                                                    <span className="input-check__body">
-                                                        <input className="input-check__input" type="checkbox" id="checkout-terms" />
-                                                        <span className="input-check__box" />
-                                                        <Check9x7Svg className="input-check__icon" />
-                                                    </span>
-                                                </span>
-                                                <label className="form-check-label" htmlFor="checkout-terms">
-                                                    I have read and agree to the website
-                                                    <Link to="site/terms">terms and conditions</Link>
-                                                    *
-                                                </label>
-                                            </div>
-                                        </div>
-
-                                        <button type="submit" className="btn btn-primary btn-xl btn-block">Place Order</button>
-                                    </div>
-                                </div>
-                            </div>
+                        <div className="form-row">
+                          <Controller
+                            name="district"
+                            control={control}
+                            render={({ field, fieldState: { error } }) => (
+                              <div className="form-group col-md-6">
+                                <label>Quận/Huyện</label>
+                                <span className="required">*</span>
+                                <select
+                                  {...field}
+                                  id="checkout-country"
+                                  className={`${error ? "input-border-error" : ""} form-control`}
+                                  onChange={handleChangeDistrict}
+                                >
+                                  <option value="">Chọn Quận/Huyện</option>
+                                  {districts?.map((district) => {
+                                    return <option key={district.DistrictID} value={district.DistrictID}>{district.DistrictName}</option>
+                                  })}
+                                </select>
+                                <span className='text-error'>{error?.message}</span>
+                              </div>
+                            )}
+                          />
+                          <Controller
+                            name="ward"
+                            control={control}
+                            render={({ field, fieldState: { error } }) => (
+                              <div className="form-group col-md-6">
+                                <label>Phường/Xã</label>
+                                <span className="required">*</span>
+                                <select
+                                  {...field}
+                                  className={`${error ? "input-border-error" : ""} form-control`}
+                                  id="checkout-country"
+                                  onChange={handleChangeWard}
+                                >
+                                  <option value="">Chọn Phường/Xã</option>
+                                  {wards?.map((ward) => {
+                                    return <option key={ward.WardCode} value={ward.WardCode}>{ward.WardName}</option>
+                                  })}
+                                </select>
+                                <span className='text-error'>{error?.message}</span>
+                              </div>
+                            )}
+                          />
                         </div>
+
+                        <RHFInput name='address' topLabel='Địa chỉ cụ thể' placeholder="Nhập địa chỉ" isRequired />
+
+                        <RHFInput
+                          name='note'
+                          topLabel='Ghi chú đơn hàng'
+                          placeholder="Nhập ghi chú"
+                          optional="Không bắt buộc"
+                          textarea
+                          row={4}
+                        />
+
+                      </div>
+                      <div className="card-divider" />
+
+                      <div className="card-body">
+                        <h3 className="card-title">Phương thức giao hàng</h3>
+
+                        <div className="delivery-methods">
+                          <ul className="delivery-methods__list">
+                            {deliveryList}
+                          </ul>
+                        </div>
+
+                      </div>
+                      <div className="card-divider" />
+
+                      <div className="card-body">
+                        <h3 className="card-title">Phương thức thanh toán</h3>
+
+                        <div className="payment-methods">
+                          <ul className="payment-methods__list">
+                            {paymentList}
+                          </ul>
+                        </div>
+
+                      </div>
                     </div>
+                  </div>
+
+                  <div className="col-12 col-lg-6 col-xl-5 mt-4 mt-lg-0">
+                    <div className="card mb-0">
+                      <div className="card-body">
+                        <h3 className="card-title">Đơn hàng
+                          <div className='border-top-cart-page mt-2' />
+                        </h3>
+                        {cart}
+                        {totalCart >= FREE_SHIP_AMOUNT &&
+                          <p className='text-main' style={{ fontSize: 13.5 }}>Miễn phí vận chuyển đối với các đơn hàng từ 1,000,000đ trở lên</p>
+                        }
+                        <button type="submit" className="btn btn-primary btn-xl btn-block">Hoàn Tất Đặt Hàng</button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-            </React.Fragment>
-        );
-    }
+              </FormProvider>
+            </div>
+          </div>
+        </>
+        :
+        <div className="block block-empty mt-5">
+          <div className="container">
+            <div className="block-empty__body">
+              <div className="block-empty__message">Chưa có sản phẩm trong giỏ hàng!</div>
+              <div className="block-empty__actions">
+                <Link to={PATH_PAGE.root} className="btn btn-primary btn-sm">Tiếp tục mua hàng!</Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </React.Fragment>
+  );
 }
 
 
-const mapStateToProps = (state) => ({
-    cart: state.cart,
-});
-
-const mapDispatchToProps = {};
-
-export default connect(mapStateToProps, mapDispatchToProps)(ShopPageCheckout);
+export default ShopPageCheckout;
