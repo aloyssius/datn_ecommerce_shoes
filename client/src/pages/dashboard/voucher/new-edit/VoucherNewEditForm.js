@@ -52,9 +52,8 @@ VoucherNewEditForm.propTypes = {
   isEdit: PropTypes.bool,
   currentVoucher: PropTypes.object,
 };
-export default function VoucherNewEditForm({ isEdit, currentVoucher }) {
+export default function VoucherNewEditForm({ isEdit, currentVoucher, onUpdateData }) {
 
-  const { showConfirm } = useConfirm();
 
   const navigate = useNavigate();
 
@@ -62,56 +61,69 @@ export default function VoucherNewEditForm({ isEdit, currentVoucher }) {
   const { enqueueSnackbar } = useSnackbar();
 
   const NewVoucherSchema = Yup.object().shape({
-    code: Yup.string().test(
-      'max',
-      'Họ và tên quá dài (tối đa 15 ký tự)',
-      value => value.trim().length <= 15
-    ).required('Mã giảm giá không được để trống'),
-
-    value: Yup.string().test('is-valid', 'Giá trị không hợp lệ', (value) => {
-      if (!/^\d+$/.test(value)) {
-        return false; // Nếu không phải số, không hợp lệ
-      }
-      // Lấy giá trị của typeDiscount từ đâu đó (ví dụ, mình giả sử lấy từ state hoặc props)
-      const typeDiscount = getValues('typeDiscount'); // Đảm bảo bạn có cách lấy giá trị typeDiscount ở đây
-      // Xác định giới hạn số chữ số tối đa dựa vào typeDiscount
-      let maxDigitsAllowed;
-      if (typeDiscount === VoucherTypeDiscount.vi.VND) {
-        maxDigitsAllowed = 9;
-      } else if (typeDiscount === VoucherTypeDiscount.vi.PERCENT) {
-        maxDigitsAllowed = 2;
-      }
-      // Kiểm tra số chữ số của giá trị
-      if (value.length > maxDigitsAllowed) {
-        return false;
-      }
-      return true;
-    }).required('Không được để trống'),
-
+    code: Yup.string()
+      .required('Mã giảm giá không được để trống')
+      .max(15, 'Mã giảm giá không được dài hơn 15 ký tự'),
+    value: Yup.string()
+      .required('Giá trị không được để trống')
+      .max(9, 'Giá trị không được nhập quá 999,999,999'),
     minOrderValue: Yup.string()
-      .max(9, 'Giá trị không hợp lệ')
-      .test(
-        'value is invalid',
-        'Số tiền không hợp lệ',
-        (value) => {
-          return isNumber(value);
-        }).required('Không được để trống'),
+      .required('Giá trị không được để trống')
+      .max(9, 'Giá trị không được nhập quá 999,999,999'),
+    maxDiscountValue: Yup.string()
+      .max(9, 'Giá trị không được nhập quá 999,999,999'),
+    // .typeError('Giá trị phải là một số')
+    // .positive('Giá trị phải lớn hơn 0')
+    // .integer('Giá trị phải là một số nguyên')
 
-    startTime: Yup.date()
-      .required('Ngày bắt đầu không được để trống'),
-    // .test(
-    //   'future',
-    //   'Không nhập ngày quá khứ',
-    //   (value) => {
-    //     return dayjs(value);
+
+
+
+
+    // value: Yup.string().test('is-valid', 'Giá trị không hợp lệ', (value) => {
+    //   if (!/^\d+$/.test(value)) {
+    //     return false; // Nếu không phải số, không hợp lệ
     //   }
-    // ),
+    //   // Lấy giá trị của typeDiscount từ đâu đó (ví dụ, mình giả sử lấy từ state hoặc props)
+    //   const typeDiscount = getValues('typeDiscount'); // Đảm bảo bạn có cách lấy giá trị typeDiscount ở đây
+    //   // Xác định giới hạn số chữ số tối đa dựa vào typeDiscount
+    //   let maxDigitsAllowed;
+    //   if (typeDiscount === VoucherTypeDiscount.vi.VND) {
+    //     maxDigitsAllowed = 9;
+    //   } else if (typeDiscount === VoucherTypeDiscount.vi.PERCENT) {
+    //     maxDigitsAllowed = 2;
+    //   }
+    //   // Kiểm tra số chữ số của giá trị
+    //   if (value.length > maxDigitsAllowed) {
+    //     return false;
+    //   }
+    //   return true;
+    // }).required('Không được để trống'),
 
-    endTime: Yup.date()
-      .required('Ngày kết thúc không được để trống')
+    // minOrderValue: Yup.string()
+    //   .max(9, 'Giá trị không hợp lệ')
+    //   .test(
+    //     'value is invalid',
+    //     'Số tiền không hợp lệ',
+    //     (value) => {
+    //       return isNumber(value);
+    //     }).required('Không được để trống'),
 
-    // images: Yup.array().min(1, 'Images is required'),
-    // price: Yup.number().moreThan(0, 'Vui lòng nhập đơn giá'),
+    // startTime: Yup.date()
+    //   .required('Ngày bắt đầu không được để trống'),
+    // // .test(
+    // //   'future',
+    // //   'Không nhập ngày quá khứ',
+    // //   (value) => {
+    // //     return dayjs(value);
+    // //   }
+    // // ),
+
+    // endTime: Yup.date()
+    //   .required('Ngày kết thúc không được để trống')
+
+    // // images: Yup.array().min(1, 'Images is required'),
+    // // price: Yup.number().moreThan(0, 'Vui lòng nhập đơn giá'),
   });
 
   const defaultValues = useMemo(
@@ -120,10 +132,10 @@ export default function VoucherNewEditForm({ isEdit, currentVoucher }) {
       name: currentVoucher?.name || '',
       typeDiscount: convertToEnumVoucherTypeDiscount(currentVoucher?.typeDiscount),
       value: currentVoucher?.value || '',
-      maxDiscountValue: currentVoucher?.maxDiscountValue || '',
       minOrderValue: currentVoucher?.minOrderValue || '',
-      startTime: convertDateTimeParam(currentVoucher?.startTime),
-      endTime: convertDateTimeParam(currentVoucher?.endTime),
+      maxDiscountValue: currentVoucher?.maxDiscountValue || '',
+      // startTime: convertDateTimeParam(currentVoucher?.startTime),
+      // endTime: convertDateTimeParam(currentVoucher?.endTime),
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [currentVoucher]
@@ -156,29 +168,75 @@ export default function VoucherNewEditForm({ isEdit, currentVoucher }) {
   //     console.error(error);
   //   }
   // };
-  const { post } = useFetch(null, { fetch: false });
+  useEffect(() => {
+    if (isEdit && currentVoucher) {
+      reset(defaultValues);
+    }
+    if (!isEdit) {
+      reset(defaultValues);
+    }
 
-  // const { showConfirm } = useConfirm();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEdit, currentVoucher]);
+
+  const { post, put } = useFetch(null, { fetch: false });
+
+  const { showConfirm } = useConfirm();
   const { onOpenSuccessNotify, onOpenErrorNotify } = useNotification()
 
   const onFinish = (data) => {
-    onOpenSuccessNotify('Thêm mới voucher thành công!')
-    console.log(data);
-    navigate(PATH_DASHBOARD.discount.voucher.edit(data?.id));
-  }
+    // Kiểm tra xem có phải là chế độ chỉnh sửa hay không
+    if (!isEdit) {
+      // Thêm mới voucher
+      onOpenSuccessNotify('Thêm mới voucher thành công!');
+      navigate(PATH_DASHBOARD.discount.voucher.edit(data?.id));
+    } else {
+      // Cập nhật voucher
+      onOpenSuccessNotify('Cập nhật voucher thành công!');
+      onUpdateData(data); // Cập nhật dữ liệu voucher
+    }
+  };
 
   const onSubmit = async (data) => {
-    const body = {
-      ...data,
-      typeDiscount: convertVoucherTypeDiscount(data?.typeDiscount),
-      startTime: convertDateTimeParam(data.startTime),
-      endTime: convertDateTimeParam(data.endTime),
-      value: parseInt(data.value, 10),
-      maxDiscountValue: parseInt(data.value, 10),
-      minOrderValue: parseInt(data.value, 10)
+    if (!isEdit) {
+      const body = {
+        ...data,
+        typeDiscount: convertVoucherTypeDiscount(data?.typeDiscount),
+        startTime: convertDateTimeParam(data.startTime),
+        endTime: convertDateTimeParam(data.endTime),
+        value: parseInt(data.value, 10),
+        // maxDiscountValue: parseInt(data.maxDiscountValue, 10),
+        maxDiscountValue: data.maxDiscountValue ? parseInt(data.maxDiscountValue, 10) : 0,
+        minOrderValue: parseInt(data.minOrderValue, 10)
+      }
+      console.log(body);
+      showConfirm("Xác nhận thêm mới voucher?", () => post(ADMIN_API.voucher.post, body, (response) => onFinish(response)));
     }
-    console.log(body);
-    showConfirm("Xác nhận thêm mới voucher?", () => post(ADMIN_API.voucher.post, body, (response) => onFinish(response)));
+    else {
+      const body = {
+        ...data,
+        typeDiscount: convertVoucherTypeDiscount(data?.typeDiscount),
+        startTime: convertDateTimeParam(data.startTime),
+        endTime: convertDateTimeParam(data.endTime),
+        value: parseInt(data.value, 10),
+        maxDiscountValue: data.maxDiscountValue ? parseInt(data.maxDiscountValue, 10) : 0,
+        minOrderValue: parseInt(data.minOrderValue, 10)
+      }
+      const id = currentVoucher?.id;
+      console.log(body);
+      showConfirm("Xác nhận cập nhật voucher?", () => put(`${ADMIN_API.voucher.put(id)}`, body, (response) => onFinish(response)));
+    }
+
+
+  };
+
+  const handleTypeDiscountChange = (newTypeDiscount) => {
+    // Đặt lại giá trị của cả hai trường
+    setValue('value', '');
+    setValue('maxDiscountValue', '');
+
+    // Cập nhật loại giảm giá
+    setValue('typeDiscount', newTypeDiscount);
   };
 
   const LabelStyleGray = styled(Typography)(({ theme }) => ({
@@ -226,6 +284,7 @@ export default function VoucherNewEditForm({ isEdit, currentVoucher }) {
                   VoucherTypeDiscount.vi.VND,
                   VoucherTypeDiscount.vi.PERCENT
                 ]}
+                onChange={(event) => handleTypeDiscountChange(event.target.value)}
               />
               <Box
                 sx={{
@@ -239,18 +298,46 @@ export default function VoucherNewEditForm({ isEdit, currentVoucher }) {
                   name="value"
                   topLabel="Giá trị"
                   placeholder={getValues('typeDiscount') === VoucherTypeDiscount.vi.PERCENT ? "0" : "0.00"}
-                  value={getValues('value') === 0 ? '' : getValues('value')}
-                  // onChange={(event) => setValue('value', formatCurrencyVnd(event.target.value))}
+                  value={getValues('value') === 0 ? '' : formatCurrencyVnd(getValues('value'))} // Định dạng giá trị với dấu phẩy
                   InputLabelProps={{ shrink: true }}
                   isRequired
+                  onChange={(event) => {
+                    const rawValue = event.target.value.replace(/,/g, ''); // Loại bỏ dấu phẩy
+                    const value = parseFloat(rawValue); // Chuyển đổi thành số
+                    const typeDiscount = getValues('typeDiscount');
+
+                    if (typeDiscount === VoucherTypeDiscount.vi.PERCENT) {
+                      if (!Number.isNaN(value) && value <= 100) {
+                        setValue('value', rawValue); // Lưu giá trị không có dấu phẩy
+                      } else if (event.target.value === '') {
+                        setValue('value', ''); // Xử lý trường hợp giá trị là rỗng
+                      }
+                    } else if (typeDiscount === VoucherTypeDiscount.vi.VND) {
+                      if (!Number.isNaN(value)) {
+                        setValue('value', rawValue); // Lưu giá trị không có dấu phẩy
+                      } else if (event.target.value === '') {
+                        setValue('value', ''); // Xử lý trường hợp giá trị là rỗng
+                      }
+                    }
+                  }}
+                  inputProps={{
+                    max: getValues('typeDiscount') === VoucherTypeDiscount.vi.PERCENT ? 100 : undefined
+                  }}
                 />
                 {getValues('typeDiscount') === VoucherTypeDiscount.vi.PERCENT && (
                   <RHFTextField
                     name="maxDiscountValue"
                     topLabel="Giảm tối đa"
                     placeholder="0.00"
-                    value={getValues('maxDiscountValue') === 0 ? '' : getValues('maxDiscountValue')}
-                    onChange={(event) => setValue('maxDiscountValue', formatCurrencyVnd(event.target.value))}
+                    value={getValues('maxDiscountValue') === 0 ? '' : formatCurrencyVnd(getValues('maxDiscountValue'))}
+                    onChange={(event) => {
+                      const rawValue = event.target.value.replace(/,/g, ''); // loại bỏ dấu phẩy
+                      const formattedVnd = formatCurrencyVnd(rawValue); // định dạng lại với VND
+
+                      setValue('maxDiscountValue', rawValue); // lưu giá trị không có dấu phẩy
+                      // Nếu bạn muốn sử dụng formattedVnd cho một mục đích khác
+                      console.log(formattedVnd); // Hoặc xử lý theo cách khác
+                    }}
                     InputLabelProps={{ shrink: true }}
                   />
                 )}
@@ -265,8 +352,15 @@ export default function VoucherNewEditForm({ isEdit, currentVoucher }) {
                 name="minOrderValue"
                 topLabel="Tổng số tiền đơn hàng tối thiểu"
                 placeholder="0.00"
-                value={getValues('minOrderValue') === 0 ? '' : getValues('minOrderValue')}
-              // onChange={(event) => setValue('minOrderValue', formatCurrencyVnd(event.target.value))}
+                value={getValues('minOrderValue') === 0 ? '' : formatCurrencyVnd(getValues('minOrderValue'))}
+                onChange={(event) => {
+                  const rawValue = event.target.value.replace(/,/g, ''); // loại bỏ dấu phẩy
+                  const formattedVnd = formatCurrencyVnd(rawValue); // định dạng lại với VND
+
+                  setValue('minOrderValue', rawValue); // lưu giá trị không có dấu phẩy
+                  // Nếu bạn muốn sử dụng formattedVnd cho một mục đích khác
+                  console.log(formattedVnd); // Hoặc xử lý theo cách khác
+                }}
               />
             </Stack>
           </Card>
@@ -315,8 +409,8 @@ export default function VoucherNewEditForm({ isEdit, currentVoucher }) {
                               },
                             }}
                             ampm
-                            format="DD/MM/YYYY HH:MM"
-                            disablePast
+                            format="DD/MM/YYYY HH:mm"
+                          // disablePast
                           />
                         </DemoContainer>
                       </LocalizationProvider>
@@ -354,8 +448,8 @@ export default function VoucherNewEditForm({ isEdit, currentVoucher }) {
                               },
                             }}
                             ampm
-                            format="DD/MM/YYYY HH:MM"
-                            disablePast
+                            format="DD/MM/YYYY HH:mm"
+                          // disablePast
                           />
                         </DemoContainer>
                       </LocalizationProvider>

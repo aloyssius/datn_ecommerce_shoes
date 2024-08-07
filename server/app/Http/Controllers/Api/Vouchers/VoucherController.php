@@ -62,25 +62,98 @@ class VoucherController extends Controller
     }
 
     public function show($id)
-    {
+{
+    // Lấy voucher từ cơ sở dữ liệu theo id
+    $voucher = Voucher::select(VoucherResource::fields())
+                    ->where('id', $id)
+                    ->first(); // Sử dụng first() để lấy ra một bản ghi đầu tiên nếu có
 
-        $voucher = Voucher::select(VoucherResource::fields())
-            ->where('id', '=', $id);
-
-        if (!$voucher) {
-            throw new NotFoundException("Không tìm thấy voucher có id là " . $id);
-        }
-
-        return ApiResponse::responseObject(new VoucherResource($voucher));
+    // Kiểm tra nếu không tìm thấy voucher
+    if (!$voucher) {
+        throw new NotFoundException("Không tìm thấy voucher có id là " . $id);
     }
+
+    // Trả về thông tin voucher dưới dạng ApiResponse
+    return ApiResponse::responseObject(new VoucherResource($voucher));
+}
+
+    // public function updateStatus(ProductRequestBody $req)
+    // {
+    //     $product = Product::find($req->id);
+
+    //     if (!$product) {
+    //         throw new NotFoundException("Không tìm thấy sản phẩm có id là " . $req->id);
+    //     }
+
+    //     $product->status = $req->statusProduct;
+    //     $product->update();
+
+    //     $products = Product::getProducts($req);
+
+    //     $statusCounts = Product::select(DB::raw('count(status) as count, status'))
+    //         ->groupBy('status')
+    //         ->get();
+
+    //     $response['products'] = $products['data'];
+    //     $response['statusCounts'] = $statusCounts;
+    //     $response['totalPages'] = $products['totalPages'];
+
+    //     return ApiResponse::responseObject($response);
+    // }
 
     public function store(VoucherRequestBody $req)
     {
         // convert req
         $voucherConverted = ConvertHelper::convertColumnsToSnakeCase($req->all());
 
+        // kiểm tra startTime và cập nhật status
+        $currentDate = $currentDateTime = Carbon::now(); // Lấy ngày hiện tại
+
+        if (isset($voucherConverted['start_time'])) {
+            $startTime = $voucherConverted['start_time'];
+    
+            if ($startTime > $currentDate) {
+                $voucherConverted['status'] = 'up_comming';
+            } elseif ($startTime < $currentDate) {
+                $voucherConverted['status'] = 'on_going';
+            }
+        }
+
         // save
         $voucherCreated = Voucher::create($voucherConverted);
         return ApiResponse::responseObject(new VoucherResource($voucherCreated));
+    }
+
+    public function update($id, VoucherRequestBody $req)
+    {
+        // Lấy voucher từ cơ sở dữ liệu theo id
+        $voucher = Voucher::find($id);
+
+        // Kiểm tra nếu không tìm thấy voucher
+        if (!$voucher) {
+            throw new NotFoundException("Không tìm thấy voucher có id là " . $id);
+        }
+
+        // Chuyển đổi dữ liệu từ request
+        $voucherConverted = ConvertHelper::convertColumnsToSnakeCase($req->all());
+
+        // Kiểm tra và cập nhật status dựa trên startTime
+        $currentDate = $currentDateTime = Carbon::now(); // Lấy ngày hiện tại
+
+        if (isset($voucherConverted['start_time'])) {
+            $startTime = $voucherConverted['start_time'];
+
+            if ($startTime > $currentDate) {
+                $voucherConverted['status'] = 'up_comming'; 
+            } elseif ($startTime < $currentDate) {
+                $voucherConverted['status'] = 'on_going';
+            }
+        }
+
+        // Cập nhật thông tin voucher
+        $voucher->update($voucherConverted);
+
+        // Trả về thông tin voucher đã cập nhật dưới dạng ApiResponse
+        return ApiResponse::responseObject(new VoucherResource($voucher));
     }
 }

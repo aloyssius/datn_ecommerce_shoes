@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { Tooltip, Checkbox, IconButton, TableRow, TableCell, Typography, Stack, Link, MenuItem } from '@mui/material';
 import { format, parse } from 'date-fns';
-import { DiscountStatusTab } from '../../../../constants/enum';
+import { DiscountStatusTab, VoucherTypeDiscountVoucherTableRow } from '../../../../constants/enum';
 // utils
 import { fDate } from '../../../../utils/formatTime';
 import createAvatar from '../../../../utils/createAvatar';
@@ -26,7 +26,7 @@ VoucherTableRow.propTypes = {
 export default function VoucherTableRow({ row, onEditRow }) {
   const theme = useTheme();
 
-  const { code, name, type, value, quantity, startTime, endTime, status } = row;
+  const { code, name, type, value, quantity, startTime, endTime, status, typeDiscount } = row;
 
   const parsedStartTime = parse(startTime, 'HH:mm:ss dd-MM-yyyy', new Date());
   const parsedEndTime = parse(endTime, 'HH:mm:ss dd-MM-yyyy', new Date());
@@ -44,7 +44,7 @@ export default function VoucherTableRow({ row, onEditRow }) {
         </Stack>
       </TableCell>
 
-      <TableCell align="left">{value}</TableCell>
+      <TableCell align="left">{value} {typeDiscount === 'percent' ? VoucherTypeDiscountVoucherTableRow.vi.PERCENT : VoucherTypeDiscountVoucherTableRow.vi.VND}</TableCell>
 
       <TableCell align="left">{quantity}</TableCell>
 

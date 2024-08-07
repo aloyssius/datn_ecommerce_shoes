@@ -13,6 +13,11 @@ export const formatCurrencyVnd = (data) => {
   return ""
 };
 
+export const formatCurrencyComma = (data) => {
+  const rawValue = data.replace(/,/g, ''); // loại bỏ dấu phẩy
+  return rawValue;
+};
+
 export const formatNumberString = (data) => {
   const hasNonZeroNumber = /\d*[1-9]\d*/.test(data);
 
