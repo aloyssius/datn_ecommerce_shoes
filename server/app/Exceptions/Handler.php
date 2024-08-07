@@ -47,6 +47,12 @@ class Handler extends ExceptionHandler
                 ConstantSystem::BAD_REQUEST,
                 $exception->getMessage(),
             );
+        } else if ($exception instanceof RestApiObjectException) {
+            return ApiResponse::responseObject(
+                ConstantSystem::BAD_REQUEST_CODE,
+                ConstantSystem::BAD_REQUEST,
+                $exception->getErrors(),
+            );
         } else if ($exception instanceof NotFoundException) {
             return ApiResponse::responseError(
                 ConstantSystem::NOT_FOUND_CODE,
