@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Constants\ProductStatus;
 use App\Models\Brand;
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Faker\Factory as Faker;
@@ -13,40 +14,30 @@ class ProductTableSeeder extends Seeder
     public function run()
     {
         $faker = Faker::create();
+        $created_at1 = Carbon::now();
+        $created_at2 = Carbon::parse($created_at1)->addMinutes(1);
+        $created_at3 = Carbon::parse($created_at2)->addMinutes(1);
+        $created_at4 = Carbon::parse($created_at3)->addMinutes(1);
+        $created_at5 = Carbon::parse($created_at4)->addMinutes(1);
+        $created_at6 = Carbon::parse($created_at5)->addMinutes(1);
+        $created_at7 = Carbon::parse($created_at6)->addMinutes(1);
+        $created_at8 = Carbon::parse($created_at7)->addMinutes(1);
+        $created_at9 = Carbon::parse($created_at8)->addMinutes(1);
+        $created_at10 = Carbon::parse($created_at9)->addMinutes(1);
+        $created_at11 = Carbon::parse($created_at10)->addMinutes(1);
+        $created_at12 = Carbon::parse($created_at11)->addMinutes(1);
 
-        $productNames = [
-            'Air Max 90',
-            'Classic Leather',
-            'Chuck Taylor All Star',
-            'Gel-Kayano 26',
-            'UltraBoost 20',
-            'Old Skool',
-            'Yeezy Boost 350',
-            'Stan Smith',
-            'Pegasus 37',
-            'Jordan 1',
-            'Gel-Lyte III',
-            'FuelCell Rebel',
-            'NMD_R1',
-            'Clyde Court',
-            'Disruptor 2',
-            'Gel-Nimbus 22',
-            'Free Run 5.0',
-            'Wave Rider 23',
-            'GEL-Contend 5',
-            'Revolution 5'
-        ];
+        $brandNikeId = Brand::where('code', 'TH0001')->first();
 
-        foreach (range(1, 2) as $index) {
-            DB::table('products')->insert([
-                'id' => $faker->uuid,
-                'name' => $productNames[$index - 1],
-                'code' => "SKU{$index}",
-                'status' => $faker->randomElement(ProductStatus::toArray()),
-                'brand_id' => Brand::all()->random()->id,
-                'description' => $faker->text,
-                'created_at' => $faker->dateTime,
-            ]);
-        }
+        DB::table('products')->insert([
+            'id' => $faker->uuid,
+            'name' => "Giày Air Force 1",
+            'code' => "NIKEF1",
+            'status' => ProductStatus::IS_ACTIVE,
+            'brand_id' => $brandNikeId->id,
+            'description' => $faker->text,
+            'created_at' => $created_at1,
+            'updated_at' => $created_at1,
+        ]);
     }
 }
