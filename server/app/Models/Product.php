@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Constants\ProductStatus;
 use App\Http\Resources\Products\ProductResource;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
