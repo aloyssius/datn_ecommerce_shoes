@@ -142,7 +142,17 @@ class CartController extends Controller
             throw new RestApiException("Không tìm sản phẩm này trong giỏ");
         }
 
-        $cartItem->delete();
+        try {
+            DB::beginTransaction();
+
+            $cartItem->delete();
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw new RestApiException($e->getMessage());
+        }
+
         return ApiResponse::responseObject($id);
     }
 

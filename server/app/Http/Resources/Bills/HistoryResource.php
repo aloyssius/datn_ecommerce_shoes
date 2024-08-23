@@ -17,7 +17,9 @@ class HistoryResource extends JsonResource
         return [
             'id' => $this->id,
             'createdAt' => $this->created_at,
-            'createdBy' => $this->created_by,
+            'createdBy' => $this->full_name,
+            'accountCode' => $this->code,
+            'accountRole' => $this->role,
             'note' => $this->note,
             'action' => $this->action,
             'status' => $this->status_timeline,

@@ -2,11 +2,13 @@
 
 namespace App\Http\Resources\Bills;
 
+use App\Constants\TransactionType;
+use App\Helpers\ConvertHelper;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class BillDetailResource extends JsonResource
+class BillDetailEmailResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -22,9 +24,9 @@ class BillDetailResource extends JsonResource
             'phoneNumber' => $this->phone_number,
             'email' => $this->email,
             'address' => $this->address,
-            'shipFee' => $this->money_ship,
-            'discount' => $this->discount_amount,
-            'totalMoney' => $this->total_money,
+            'shipFee' => $this->formatCurrencyOrZeroVnd($this->money_ship),
+            'discount' => $this->formatCurrencyOrZeroVnd($this->discount_amount),
+            'totalMoney' => $this->formatCurrencyOrZeroVnd($this->total_money),
             'status' => $this->status,
             'note' => $this->note,
             'createdAt' => Carbon::parse($this->created_at)->format('H:i:s d/m/Y'),
@@ -35,10 +37,8 @@ class BillDetailResource extends JsonResource
             'histories' => $this->histories,
             'payment' => $this->payment,
             'billItems' => $this->billItems,
-            'totalFinal' => $this->totalFinal,
-            'paymentMethod' => $this->payment_method,
-            'token' => $this->token,
-            'account' => $this->account,
+            'totalFinal' => $this->formatCurrencyOrZeroVnd($this->totalFinal),
+            'paymentMethod' => $this->payment_method === TransactionType::CASH ? "Thanh toán khi nhận hàng (COD)" : "Thanh toán trực tuyến (VNPAY)",
         ];
     }
     /**
@@ -65,5 +65,9 @@ class BillDetailResource extends JsonResource
             'delivery_date',
             'completion_date',
         ];
+    }
+    private function formatCurrencyOrZeroVnd($value)
+    {
+        return $value ? ConvertHelper::formatCurrencyVnd($value) : '0 VNĐ';
     }
 }
