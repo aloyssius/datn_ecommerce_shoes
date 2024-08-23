@@ -251,7 +251,7 @@ class BillController extends Controller
             }
 
             $bill->status = OrderStatus::CANCELED;
-            // $bill->cancellation_date = now();
+            $bill->cancellation_date = now();
             $bill->save();
 
             // tien nong vnpay the nao ?? hoan tien hay co chinh sach mua hang rieng
@@ -362,7 +362,7 @@ class BillController extends Controller
             }
 
             $bill->status = OrderStatus::CANCELED;
-            // $bill->cancellation_date = now();
+            $bill->cancellation_date = now();
             $bill->save();
 
             // tien nong vnpay the nao ??
@@ -486,7 +486,7 @@ class BillController extends Controller
                 $billHistory->created_by = $req->createdBy;
                 $billHistory->save();
 
-                // $bill->cancellation_date = now();
+                $bill->cancellation_date = now();
 
                 $billItems = BillDetails::where('bill_id', $bill->id)->get();
 
