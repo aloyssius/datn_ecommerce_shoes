@@ -66,12 +66,12 @@ export default function ProductVariantTableFooterUpload({ onUpdateImages, varian
       return "";
     }
 
-    if (productImages.length <= IMAGE_MIN_LENGTH - 1) {
+    if (productImages.length < IMAGE_MIN_LENGTH) {
       return "Vui lòng chọn ít nhất 4 hình ảnh cho sản phẩm.";
     }
 
     if (productImages.every((image) => !image?.isDefault)) {
-      return "Vui lòng chọn hỉnh mặc mặc định cho sản phẩm.";
+      return "Vui lòng chọn hỉnh ảnh mặc định cho sản phẩm.";
     }
 
     return "";
@@ -82,7 +82,7 @@ export default function ProductVariantTableFooterUpload({ onUpdateImages, varian
       return false;
     }
 
-    if (productImages.length <= IMAGE_MIN_LENGTH) {
+    if (productImages.length < IMAGE_MIN_LENGTH) {
       return true;
     }
 

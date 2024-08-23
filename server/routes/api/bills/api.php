@@ -17,5 +17,6 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/bills', [BillController::class, 'index']);
 Route::post('/bills', [BillController::class, 'store']);
-Route::put('/bills/{id}', [BillController::class, 'update']);
+Route::put('/bills', [BillController::class, 'update']);
+Route::put('/bills/status', [BillController::class, 'updateStatus']);
 Route::get('/bills/{id}', [BillController::class, 'show']);

@@ -28,9 +28,8 @@ class AccountResource extends JsonResource
             'status' => $this->status,
             'createdAt' => $this->created_at,
             'addresses' => $this->addresses,
+            'cartItems' => $this->cartItems,
         ];
-
-
     }
     /**
      * Get the fields that should be selected from the database.

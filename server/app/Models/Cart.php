@@ -6,8 +6,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Cart extends BaseModel
 {
-    use SoftDeletes;
-
     protected $fillable = [
         'account_id',
     ];

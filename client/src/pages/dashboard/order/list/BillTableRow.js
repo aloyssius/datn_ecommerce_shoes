@@ -23,7 +23,7 @@ BillTableRow.propTypes = {
 export default function BillTableRow({ row, onEditRow }) {
   const theme = useTheme();
 
-  const { code, fullName, phoneNumber, createdAt, totalMoney, status } = row;
+  const { code, fullName, phoneNumber, createdAt, totalMoney, status, totalPayment } = row;
 
   const parsedDateTime = parse(createdAt, 'HH:mm:ss dd-MM-yyyy', new Date());
   const formattedDate = format(parsedDateTime, 'dd/MM/yyyy');
@@ -75,27 +75,27 @@ export default function BillTableRow({ row, onEditRow }) {
       <TableCell align="left">
         <Label
           variant={theme.palette.mode === 'light' ? 'ghost' : 'filled'}
-          color={
-            (status === BillStatusTab.en.COMPLETED && 'success') ||
-            (status === BillStatusTab.en.PENDING_CONFIRM && 'warning') ||
-            (status === BillStatusTab.en.CANCELED && 'error') ||
-            'default'
-          }
+                        color={
+                          (totalPayment !== 0 && 'success') ||
+                          (totalPayment === 0 && 'warning') ||
+                          'default'
+                        }
           sx={{ textTransform: 'capitalize' }}
         >
-          {convertOrderStatus(status)}
+                        {totalPayment !== 0 ? "Đã thanh toán" : "Chưa thanh toán"}
         </Label>
       </TableCell>
 
       <TableCell align="left">
         <Label
           variant={theme.palette.mode === 'light' ? 'ghost' : 'filled'}
-          color={
-            (status === BillStatusTab.en.COMPLETED && 'success') ||
-            (status === BillStatusTab.en.PENDING_CONFIRM && 'warning') ||
-            (status === BillStatusTab.en.CANCELED && 'error') ||
-            'default'
-          }
+                        color={
+                          (status === BillStatusTab.en.PENDING_CONFIRM && 'warning') ||
+                          (status === BillStatusTab.en.COMPLETED && 'success') ||
+                          (status === BillStatusTab.en.WAITTING_DELIVERY && 'default') ||
+                          (status === BillStatusTab.en.DELIVERING && 'primary') ||
+                          (status === BillStatusTab.en.CANCELED && 'error')
+                        }
           sx={{ textTransform: 'capitalize' }}
         >
           {convertOrderStatus(status)}

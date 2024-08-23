@@ -38,6 +38,17 @@ export const apiFormData = (url, data) => {
   });
 };
 
+export const apiFormDataPut = (url, data) => {
+  return axiosInstance.put(url, data, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+      'Access-Control-Allow-Origin': "*",
+      'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,PATCH,OPTIONS',
+      'Access-Control-Allow-Credentials': true
+    },
+  });
+};
+
 export const apiPut = (url, data) => {
   return axiosInstance.put(url, data);
 };

@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\Accounts\CustomerController;
 use App\Http\Controllers\Api\Accounts\EmployeeController;
 use App\Http\Controllers\Api\Vouchers\VoucherController;
 use App\Http\Controllers\Api\Promotions\PromotionController;
+use App\Http\Controllers\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -32,4 +33,5 @@ Route::middleware(['api', 'cors'])->group(function () {
     require __DIR__ . '/api/products/api.php';
     require __DIR__ . '/api/vouchers/api.php';
     require __DIR__ . '/api/promotions/api.php';
+    require __DIR__ . '/api/carts/api.php';
 });

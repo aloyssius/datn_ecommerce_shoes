@@ -15,12 +15,13 @@ class ProductItemResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
+            'sku' => $this->sku,
+            'name' => $this->name,
+            'createdAt' => $this->created_at,
             'price' => $this->price,
-            'quantity' => $this->quantity,
             'status' => $this->status,
-            'colorId' => $this->color_id,
-            'sizeId' => $this->size_id,
+            'colorName' => $this->colorName,
+            'pathUrl' => $this->PATH_URL,
         ];
     }
     /**

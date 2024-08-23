@@ -29,6 +29,12 @@ Route::put('/products', [ProductController::class, 'update']);
 Route::post('/products', [ProductController::class, 'store']);
 Route::delete('/products', [ProductController::class, 'destroy']);
 
+// product client
+Route::get('/product-list', [ProductController::class, 'clientIndex']);
+Route::get('/product-details/{sku}', [ProductController::class, 'findBySkuClient']);
+Route::get('/product-detail/{id}', [ProductController::class, 'findByClientId']);
+Route::get('/product-home', [ProductController::class, 'indexHomeClient']);
+
 // color
 Route::get('/attributes/colors', [AttributeColorController::class, 'index']);
 Route::put('/attributes/colors/status', [AttributeColorController::class, 'updateStatus']);

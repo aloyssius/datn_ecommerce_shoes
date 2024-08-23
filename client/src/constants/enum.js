@@ -22,6 +22,23 @@ export const BillTypeOption = {
   }
 };
 
+export const BillStatusTimeline = {
+  en: {
+    CREATED: 'created',
+    WAITTING_DELIVERY: 'waitting_delivery',
+    DELIVERING: 'delivering',
+    COMPLETED: 'completed',
+    CANCELED: 'canceled',
+  },
+  vi: {
+    PENDING_CONFIRM: 'Chờ xác nhận',
+    WAITTING_DELIVERY: 'Chờ giao hàng',
+    DELIVERING: 'Đang giao hàng',
+    COMPLETED: 'Hoàn thành',
+    CANCELED: 'Đã hủy',
+  }
+};
+
 export const BillStatusTab = {
   en: {
     PENDING_CONFIRM: 'pending_confirm',

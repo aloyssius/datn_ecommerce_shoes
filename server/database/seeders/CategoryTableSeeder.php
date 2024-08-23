@@ -15,36 +15,23 @@ class CategoryTableSeeder extends Seeder
     public function run()
     {
         $faker = Faker::create();
+        $productId1 = Product::where('code', 'NIKEF1')->first()->id;
+        $categoryMaleId = Category::where('code', 'DM0001')->first()->id;
+        $categoryFemaleId = Category::where('code', 'DM0002')->first()->id;
+        $categoryUnisexId = Category::where('code', 'DM0003')->first()->id;
+        $categorySportId = Category::where('code', 'DM0004')->first()->id;
 
-        $productNames = [
-            'Air Max 90',
-            'Classic Leather',
-            'Chuck Taylor All Star',
-            'Gel-Kayano 26',
-            'UltraBoost 20',
-            'Old Skool',
-            'Yeezy Boost 350',
-            'Stan Smith',
-            'Pegasus 37',
-            'Jordan 1',
-            'Gel-Lyte III',
-            'FuelCell Rebel',
-            'NMD_R1',
-            'Clyde Court',
-            'Disruptor 2',
-            'Gel-Nimbus 22',
-            'Free Run 5.0',
-            'Wave Rider 23',
-            'GEL-Contend 5',
-            'Revolution 5'
-        ];
+        // 1
 
-        foreach (range(1, 2) as $index) {
-            DB::table('product_categories')->insert([
-                'id' => $faker->uuid,
-                'category_id' => Category::all()->random()->id,
-                'product_id' => Product::all()->random()->id,
-            ]);
-        }
+        DB::table('product_categories')->insert([
+            'id' => $faker->uuid,
+            'category_id' => $categorySportId,
+            'product_id' => $productId1,
+        ]);
+        DB::table('product_categories')->insert([
+            'id' => $faker->uuid,
+            'category_id' => $categoryUnisexId,
+            'product_id' => $productId1,
+        ]);
     }
 }

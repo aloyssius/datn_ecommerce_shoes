@@ -19,11 +19,11 @@ class Bill extends BaseModel
         'email',
         'address',
         'phone_number',
+        'status',
         'money_ship',
         'total_money',
         'discount_amount',
         'customer_id',
-        'employee_id',
     ];
 
     protected $casts = [
@@ -40,15 +40,24 @@ class Bill extends BaseModel
 
     public function getConfirmationDateAttribute($value)
     {
-        return Carbon::parse($value)->format('H:i:s d-m-Y');
+        if ($value !== null) {
+            return Carbon::parse($value)->format('H:i:s d/m/Y');
+        }
+        return null;
     }
 
     public function getDeliveryDateAttribute($value)
     {
-        return Carbon::parse($value)->format('H:i:s d-m-Y');
+        if ($value !== null) {
+            return Carbon::parse($value)->format('H:i:s d/m/Y');
+        }
+        return null;
     }
     public function getCompletionDateAttribute($value)
     {
-        return Carbon::parse($value)->format('H:i:s d-m-Y');
+        if ($value !== null) {
+            return Carbon::parse($value)->format('H:i:s d/m/Y');
+        }
+        return null;
     }
 }

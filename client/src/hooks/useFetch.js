@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import Swal from 'sweetalert2'
-import { apiGet, apiPost, apiPut, apiDelete, apiFormData } from '../utils/axios';
+import { apiGet, apiPost, apiPut, apiDelete, apiFormData, apiFormDataPut } from '../utils/axios';
 import useLoading from './useLoading';
 import useNotification from './useNotification';
 
@@ -20,6 +20,7 @@ const useFetch = (url, options = { fetch: true }) => {
     const fetchData = async () => {
       console.log(url);
       setIsLoading(true);
+      // onOpenLoading('backdrop');
       onOpenLoading();
       try {
         console.log(params);
@@ -108,6 +109,22 @@ const useFetch = (url, options = { fetch: true }) => {
 
   };
 
+  const formDataFilePut = async (url, data, onFinish) => {
+    onOpenLoading('backdrop');
+    try {
+      const response = await apiFormDataPut(url, data);
+      onCloseLoading();
+      onFinish?.(response.data.data);
+    } catch (error) {
+      console.log(error);
+      onCloseLoading();
+      onOpenErrorNotify(error?.message);
+    } finally {
+      onResetLoading();
+    }
+
+  };
+
   const put = async (url, data, onFinish) => {
     onOpenLoading('backdrop');
     try {
@@ -145,6 +162,7 @@ const useFetch = (url, options = { fetch: true }) => {
     fetch,
     post,
     formDataFile,
+    formDataFilePut,
     put,
     remove,
     firstFetch,

@@ -20,7 +20,7 @@ export default function ProductNewEdit() {
   const { id } = useParams();
   const location = useLocation();
   const isEdit = location.pathname.includes('edit');
-  const { data } = useFetch(ADMIN_API.product.details(id), { fetch: isEdit })
+  const { data, setData } = useFetch(ADMIN_API.product.details(id), { fetch: isEdit })
 
   return (
 
@@ -33,7 +33,7 @@ export default function ProductNewEdit() {
             { name: !isEdit ? 'Tạo sản phẩm' : 'Product-name' },
           ]}
         />
-        <ProductNewEditForm isEdit={isEdit} currentProduct={data} />
+        <ProductNewEditForm isEdit={isEdit} currentProduct={data} onUpdateData={setData} />
       </Container>
     </Page>
   );

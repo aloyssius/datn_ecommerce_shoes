@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Bills;
 
+use App\Models\Bill;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -12,6 +13,9 @@ class BillResource extends JsonResource
      *
      * @return array<string, mixed>
      */
+
+
+
     public function toArray(Request $request): array
     {
         return [
@@ -21,6 +25,7 @@ class BillResource extends JsonResource
             'phoneNumber' => $this->phone_number,
             'totalMoney' => $this->total_money,
             'status' => $this->status,
+            'totalPayment' => floatval($this->totalPayment),
             'createdAt' => $this->created_at,
         ];
     }
