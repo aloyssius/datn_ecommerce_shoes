@@ -152,7 +152,7 @@ class ProductsView extends Component {
             <div className="products-view__pagination">
               <Pagination
                 current={page}
-                siblings={2}
+                siblings={4}
                 total={dataPage?.totalPages}
                 onPageChange={this.handlePageChange}
               />
