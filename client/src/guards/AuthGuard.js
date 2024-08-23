@@ -6,7 +6,7 @@ import useAuth from '../hooks/useAuth';
 // pages
 import Login from '../pages/auth/Login';
 // components
-import LoadingScreen from '../components/LoadingScreen';
+import LoadingScreenCustom from '../components/LoadingScreenCustom';
 
 // ----------------------------------------------------------------------
 
@@ -19,9 +19,9 @@ export default function AuthGuard({ children }) {
   const { pathname } = useLocation();
   const [requestedLocation, setRequestedLocation] = useState(null);
 
-  // if (!isInitialized) {
-  //   return <LoadingScreen />;
-  // }
+  if (!isInitialized) {
+    return <LoadingScreenCustom isAuth />;
+  }
 
   if (!isAuthenticated) {
     if (pathname !== requestedLocation) {
