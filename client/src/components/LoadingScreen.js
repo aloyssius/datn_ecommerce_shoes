@@ -33,7 +33,7 @@ export default function LoadingScreen({ isDashboard, ...other }) {
     <>
       <ProgressBar />
 
-      {!isDashboard && (
+      {/* !isDashboard && (
         <RootStyle {...other}>
           <m.div
             initial={{ rotateY: 0 }}
@@ -88,7 +88,7 @@ export default function LoadingScreen({ isDashboard, ...other }) {
             }}
           />
         </RootStyle>
-      )}
+      ) */}
     </>
   );
 }
