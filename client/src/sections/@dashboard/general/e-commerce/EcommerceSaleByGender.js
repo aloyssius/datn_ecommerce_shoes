@@ -33,11 +33,15 @@ const ChartWrapperStyle = styled('div')(({ theme }) => ({
 
 const CHART_DATA = [44, 75];
 
-export default function EcommerceSaleByGender() {
+export default function EcommerceSaleByGender({ totalCount, totalPercent }) {
   const theme = useTheme();
 
-  const chartOptions = merge(BaseOptionChart(), {
-    labels: ['Mens', 'Womens'],
+  const completed = totalPercent && totalPercent?.find((item) => item?.status === "completed")?.percentage;
+  const canceled = totalPercent && totalPercent?.find((item) => item?.status === "canceled")?.percentage;
+
+  const chartOptions = totalPercent && totalCount ? merge(BaseOptionChart(), {
+    labels: ['Đã giao', 'Đã hủy'],
+    colors: [theme.palette.primary.main, theme.palette.error.main],
     legend: { floating: true, horizontalAlign: 'center' },
     fill: {
       type: 'gradient',
@@ -56,11 +60,11 @@ export default function EcommerceSaleByGender() {
           [
             {
               offset: 0,
-              color: theme.palette.warning.light,
+              color: theme.palette.error.light,
             },
             {
               offset: 100,
-              color: theme.palette.warning.main,
+              color: theme.palette.error.main,
             },
           ],
         ],
@@ -72,19 +76,69 @@ export default function EcommerceSaleByGender() {
         dataLabels: {
           value: { offsetY: 16 },
           total: {
-            formatter: () => fNumber(2324),
+            label: "Tổng cộng",
+            formatter: () => totalCount,
           },
         },
       },
     },
-  });
+  }) :
+    merge(BaseOptionChart(), {
+      labels: ['Đã giao', 'Đã hủy'],
+      colors: [theme.palette.primary.main, theme.palette.error.main],
+      legend: { floating: true, horizontalAlign: 'center' },
+      fill: {
+        type: 'gradient',
+        gradient: {
+          colorStops: [
+            [
+              {
+                offset: 0,
+                color: theme.palette.primary.light,
+              },
+              {
+                offset: 100,
+                color: theme.palette.primary.main,
+              },
+            ],
+            [
+              {
+                offset: 0,
+                color: theme.palette.error.light,
+              },
+              {
+                offset: 100,
+                color: theme.palette.error.main,
+              },
+            ],
+          ],
+        },
+      },
+      plotOptions: {
+        radialBar: {
+          hollow: { size: '68%' },
+          dataLabels: {
+            value: { offsetY: 16 },
+            total: {
+              label: "Tổng cộng",
+              formatter: () => 0,
+            },
+          },
+        },
+      },
+    })
+    ;
 
   return (
+        <>
+      {totalCount && totalPercent &&
     <Card>
-      <CardHeader title="Sale By Gender" />
-      <ChartWrapperStyle dir="ltr">
-        <ReactApexChart type="radialBar" series={CHART_DATA} options={chartOptions} height={310} />
-      </ChartWrapperStyle>
+          <CardHeader title="Biểu đồ trạng thái đơn hàng" />
+          <ChartWrapperStyle dir="ltr">
+            <ReactApexChart type="radialBar" series={[parseInt(completed, 10), parseInt(canceled, 10)]} options={chartOptions} height={310} />
+          </ChartWrapperStyle>
     </Card>
+      }
+        </>
   );
 }
