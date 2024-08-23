@@ -34,6 +34,9 @@ class VoucherResource extends JsonResource
         return [
             'id',
             'code',
+            'type_discount',
+            'max_discount_value',
+            'min_order_value',
             'name',
             'value',
             'quantity',
@@ -42,4 +45,5 @@ class VoucherResource extends JsonResource
             'end_time',
         ];
     }
+
 }

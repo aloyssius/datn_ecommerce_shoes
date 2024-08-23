@@ -19,8 +19,8 @@ import {
   Pagination,
   Typography,
 } from '@mui/material';
-import dayjs from 'dayjs'
-import relativeTime from 'dayjs/plugin/relativeTime'
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
 import { ADMIN_API } from '../../../../api/apiConfig';
 import useFetch from '../../../../hooks/useFetch';
 import { All, VoucherTypeOption, DiscountStatusTab } from '../../../../constants/enum';
@@ -55,8 +55,6 @@ const TYPE_OPTIONS = [
 const TABLE_HEAD = [
   { id: 'code', label: 'Mã', align: 'left' },
   { id: 'value', label: 'Giá trị giảm', align: 'left' },
-  // { id: 'value', label: 'Giảm tối đa', align: 'left' },
-  // { id: 'value', label: 'Điều kiện', align: 'left' },
   { id: 'quantity', label: 'Lượt sử dụng', align: 'left' },
   { id: 'startTime', label: 'Ngày bắt đầu', align: 'left' },
   { id: 'endTime', label: 'Ngày kết thúc', align: 'left' },
@@ -68,7 +66,6 @@ const TABLE_HEAD = [
 
 export default function VoucherList() {
   const { themeStretch } = useSettings();
-
   const navigate = useNavigate();
 
   const {
@@ -94,11 +91,8 @@ export default function VoucherList() {
   );
 
   const [filterSearch, setFilterSearch] = useState('');
-
   const [filterType, setFilterType] = useState(All.EN);
-
   const [filterStartDate, setFilterStartDate] = useState(null);
-
   const [filterEndDate, setFilterEndDate] = useState(null);
 
   const { currentTab: filterStatus, onChangeTab: onFilterStatus } = useTabs(All.EN);
@@ -120,27 +114,25 @@ export default function VoucherList() {
 
   const { data, totalPages, setParams, fetchCount, statusCounts, firstFetch } = useFetch(ADMIN_API.voucher.all);
 
-
   const handleFilter = () => {
     const params = {
       currentPage: page,
       pageSize: rowsPerPage,
       search: filterSearch || null,
       status: filterStatus !== All.EN ? filterStatus : null,
-      type
+      type: type || null,
+      startDate: filterStartDate ? dayjs(filterStartDate).format('YYYY-MM-DD') : null,
+      endDate: filterEndDate ? dayjs(filterEndDate).format('YYYY-MM-DD') : null,
     };
     setParams(params);
   }
 
   useEffect(() => {
-    if (firstFetch) {
-      handleFilter();
-    }
-  }, [page, rowsPerPage, filterSearch, filterStatus, filterType]);
+    handleFilter();
+  }, [page, rowsPerPage, filterSearch, filterStatus, filterType, filterStartDate, filterEndDate]);
 
   useEffect(() => {
     if (statusCounts) {
-
       const updatedTabs = tabs.map(tab => {
         let count = 0;
         if (tab.value === All.EN) {
@@ -246,38 +238,32 @@ export default function VoucherList() {
             filterEndDate={filterEndDate}
             onFilterSearch={handleFilterSearch}
             onFilterType={handleFilterType}
-            onFilterStartDate={(newValue) => {
-              setFilterStartDate(newValue);
-            }}
-            onFilterEndDate={(newValue) => {
-              setFilterEndDate(newValue);
-            }}
+            onFilterStartDate={setFilterStartDate}
+            onFilterEndDate={setFilterEndDate}
             optionsType={TYPE_OPTIONS}
           />
 
           {!isDefault &&
             <Stack sx={{ mb: 3, px: 2 }}>
-              <>
-                <VoucherTagFiltered
-                  isShowReset={isDefault}
-                  status={filterStatus}
-                  type={filterType}
-                  startDate={filterStartDate}
-                  endDate={filterEndDate}
-                  onRemoveStatus={() => onFilterStatus(null, All.EN)}
-                  onRemoveType={() => setFilterType(All.EN)}
-                  onRemoveDate={() => {
-                    setFilterEndDate(null);
-                    setFilterStartDate(null);
-                  }}
-                  onResetAll={() => {
-                    onFilterStatus(null, All.EN)
-                    setFilterType(All.EN)
-                    setFilterEndDate(null);
-                    setFilterStartDate(null);
-                  }}
-                />
-              </>
+              <VoucherTagFiltered
+                isShowReset={!isDefault}
+                status={filterStatus}
+                type={filterType}
+                startDate={filterStartDate}
+                endDate={filterEndDate}
+                onRemoveStatus={() => onFilterStatus(null, All.EN)}
+                onRemoveType={() => setFilterType(All.EN)}
+                onRemoveDate={() => {
+                  setFilterEndDate(null);
+                  setFilterStartDate(null);
+                }}
+                onResetAll={() => {
+                  onFilterStatus(null, All.EN);
+                  setFilterType(All.EN);
+                  setFilterEndDate(null);
+                  setFilterStartDate(null);
+                }}
+              />
             </Stack>
           }
 
@@ -297,103 +283,39 @@ export default function VoucherList() {
                       key={row.id}
                       row={row}
                       onEditRow={() => handleEditRow(row.id)}
+                      onSelectRow={() => onSelectRow(row.id)}
                     />
                   ))}
-                  {/*
-                  <TableNoData isNotFound={isNotFound} />
-                  */}
+                  <TableEmptyRows height={emptyRows(page, rowsPerPage, dataFiltered.length)} />
                 </TableBody>
               </Table>
+              <TableNoData isNotFound={dataFiltered.length === 0} />
             </TableContainer>
           </Scrollbar>
 
-          <Divider />
-
-          <Box sx={{ position: 'relative', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', alignItems: 'center' }}>
-            <TablePagination
-              rowsPerPageOptions={[10, 15, 25]}
-              component="div"
-              rowsPerPage={rowsPerPage}
-              onRowsPerPageChange={onChangeRowsPerPage}
-              ActionsComponent={() => null}
-              labelDisplayedRows={() => ''}
-              labelRowsPerPage='Số hàng mỗi trang:'
-              sx={{
-                borderTop: 'none',
-              }}
-            />
-
-            <Pagination
-              sx={{ px: 1 }}
-              page={page}
-              count={totalPages}
-              onChange={onChangePage}
-            />
-          </Box>
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25]}
+            component="div"
+            count={fetchCount}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={onChangePage}
+            onRowsPerPageChange={onChangeRowsPerPage}
+          />
         </Card>
       </Container>
     </Page>
   );
 }
 
-// ----------------------------------------------------------------------
+// Utils
 
-function applySortFilter({
-  data,
-  comparator,
-}) {
+function applySortFilter({ data, comparator }) {
   const stabilizedThis = data.map((el, index) => [el, index]);
-
   stabilizedThis.sort((a, b) => {
     const order = comparator(a[0], b[0]);
     if (order !== 0) return order;
     return a[1] - b[1];
   });
-
-  data = stabilizedThis.map((el) => el[0]);
-
-  return data;
+  return stabilizedThis.map((el) => el[0]);
 }
-
-// ----------------------------------------------------------------------
-
-// const dataFiltered = applySortFilter({
-//   tableData,
-//   comparator: getComparator(order, orderBy),
-//   filterSearch,
-//   filterStatus,
-//   filterStartDate,
-//   filterEndDate,
-//   filterDiscountValue,
-//   filterQuantity,
-//   filterType,
-//   filterTypeDiscount,
-// });
-
-// ----------------------------------------------------------------------
-
-// function useDebounce(cb, delay) {
-//   const [debounceValue, setDebounceValue] = useState(cb);
-//   useEffect(() => {
-//     const handler = setTimeout(() => {
-//       setDebounceValue(cb);
-//     }, delay);
-//
-//     return () => {
-//       clearTimeout(handler);
-//     };
-//   }, [cb, delay]);
-//   return debounceValue;
-// }
-//
-// const debounceValue = useDebounce(filterSearch, 300);
-//
-// useEffect(() => {
-//   const dataFiltered = applySortFilter({
-//     tableData,
-//     comparator: getComparator(order, orderBy),
-//     filterSearch,
-//   });
-//   setTableFiltered(dataFiltered);
-// }, [debounceValue]);
-//

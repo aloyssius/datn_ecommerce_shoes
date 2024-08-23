@@ -33,9 +33,9 @@ class VoucherRequest extends BaseRequest
     {
         return array_merge(parent::rules(), [
             'search' => 'string|nullable',
-            'status' => [
-                Rule::in(VoucherStatus::toArray()), 'nullable'
-            ],
+            // 'status' => [
+            //     Rule::in(VoucherStatus::toArray()), 'nullable'
+            // ],
             'type' => [
                 Rule::in(VoucherType::toArray()), 'nullable'
             ],
@@ -53,7 +53,7 @@ class VoucherRequest extends BaseRequest
     public function messages()
     {
         return array_merge(parent::messages(), [
-            'status.in' => 'Trạng thái voucher không hợp lệ.',
+            // 'status.in' => 'Trạng thái voucher không hợp lệ.',
             'startTime.date' => 'Ngày bắt đầu không hợp lệ.',
             'startTime.date_format' => 'Định dạng ngày bắt đầu không hợp lệ.',
             'endTime.date_format' => 'Định dạng ngày kết thúc không hợp lệ.',

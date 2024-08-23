@@ -24,4 +24,6 @@ Route::group([
     Route::post('/vouchers', [VoucherController::class, 'store']);
     Route::put('/vouchers/{id}', [VoucherController::class, 'update']);
     Route::get('/vouchers/{id}', [VoucherController::class, 'show']);
+    Route::put('/vouchers/{id}/end', [VoucherController::class, 'endVoucher']);
+    Route::put('/vouchers/{id}/restore', [VoucherController::class, 'restoreVoucher']);
 });

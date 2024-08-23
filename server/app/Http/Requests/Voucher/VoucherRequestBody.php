@@ -27,8 +27,8 @@ class VoucherRequestBody extends BaseRequest
             'code' => 'required|max:15',
             'value' => 'required',
             'minOrderValue' => 'required|max:9',
-            'startTime' => 'required|date_format:d-m-Y H:i',
-            'endTime' => 'required|date_format:d-m-Y H:i',
+            // 'startTime' => 'required|date_format:d-m-Y H:i|after_or_equal:now',
+            // 'endTime' => 'required|date_format:d-m-Y H:i|after:startTime',
         ];
     }
 
@@ -41,7 +41,10 @@ class VoucherRequestBody extends BaseRequest
             'startTime.required' => 'Không được bỏ trống.',
             'endTime.required' => 'Không được bỏ trống.',
 
-            'fullName.max' => 'Chỉ được phép nhập tối đa 15 ký tự.',
+            'code.max' => 'Chỉ được phép nhập tối đa 15 ký tự.',
+            // 'startTime.after_or_equal' => 'Thời gian bắt đầu phải lớn hơn hoặc bằng thời gian hiện tại.',
+            // 'endTime.after' => 'Thời gian kết thúc phải lớn hơn thời gian bắt đầu.',
+
             // 'email.string' => 'Email không phải là chữ.',
             // 'phoneNumber.string' => 'SĐT phải là chữ.',
             // 'gender.in' => 'Giới tính không hợp lệ.',
