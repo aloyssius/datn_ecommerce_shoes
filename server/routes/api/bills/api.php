@@ -15,8 +15,27 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/bills', [BillController::class, 'index']);
-Route::post('/bills', [BillController::class, 'store']);
-Route::put('/bills', [BillController::class, 'update']);
-Route::put('/bills/status', [BillController::class, 'updateStatus']);
-Route::get('/bills/{id}', [BillController::class, 'show']);
+Route::group([
+    'middleware' => 'jwt.verify',
+    'prefix' => 'auth'
+
+], function ($router) {
+
+    // admin
+    Route::get('/statistics', [BillController::class, 'revenueStatistics']);
+    Route::get('/bills', [BillController::class, 'index']);
+    Route::put('/bills/status', [BillController::class, 'adminUpdateStatus']);
+    Route::get('/bills/{id}', [BillController::class, 'showAdmin']);
+    // Route::put('/bills/address', [BillController::class, 'adminUpdateAdress']);
+    // Route::put('/bills/product/quantity', [BillController::class, 'adminUpdateQuantity']);
+});
+
+// client
+Route::post('/bills', [BillController::class, 'clientStore']);
+Route::get('/tracking-order', [BillController::class, 'showClient']);
+Route::put('/bill/status/customer', [BillController::class, 'updateStatusCanceledByCustomer']);
+
+Route::post('/bills/vn-pay/payment', [BillController::class, 're_vnpay_payment']);
+Route::get('/bills/vn-pay/process-payment', [BillController::class, 'processPaymentBill']);
+
+Route::put('/bill/payment-method', [BillController::class, 'updatePaymentMethodByCustomer']);

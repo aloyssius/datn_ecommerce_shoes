@@ -47,7 +47,7 @@ return new class extends Migration
             $table->baseColumn()->addColumnCode();
             $table->string('full_name', ConstantSystem::FULL_NAME_MAX_LENGTH)->nullable();
             $table->dateTime('birth_date')->nullable();
-            $table->string('phone_number', ConstantSystem::PHONE_NUMBER_MAX_LENGTH)->unique()->nullable();
+            $table->string('phone_number', ConstantSystem::PHONE_NUMBER_MAX_LENGTH)->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password', ConstantSystem::DEFAULT_MAX_LENGTH)->nullable();
             $table->string('email', ConstantSystem::EMAIL_MAX_LENGTH)->nullable();
@@ -63,7 +63,7 @@ return new class extends Migration
             $table->baseColumn();
             $table->string('full_name', ConstantSystem::FULL_NAME_MAX_LENGTH);
             $table->string('address', ConstantSystem::ADDRESS_MAX_LENGTH);
-            $table->string('phone_number', ConstantSystem::PHONE_NUMBER_MAX_LENGTH)->unique();
+            $table->string('phone_number', ConstantSystem::PHONE_NUMBER_MAX_LENGTH);
             $table->string('province_id');
             $table->string('district_id');
             $table->string('ward_code');
@@ -171,11 +171,12 @@ return new class extends Migration
         // Bills
         $schema->create('bills', function (BaseBlueprint $table) {
             $table->baseColumn()->addColumnCode()->addSoftDeletes();
-            $table->timestamp('confirmation_date')->nullable();
+            $table->timestamp('cancellation_date')->nullable();
             $table->timestamp('delivery_date')->nullable();
             $table->timestamp('completion_date')->nullable();
             $table->string('note', ConstantSystem::DEFAULT_MAX_LENGTH)->nullable();
             $table->enum('status', OrderStatus::toArray())->default(OrderStatus::PENDING_COMFIRM);
+            $table->enum('payment_method', TransactionType::toArray());
             $table->string('full_name', ConstantSystem::FULL_NAME_MAX_LENGTH);
             $table->string('email', ConstantSystem::EMAIL_MAX_LENGTH);
             $table->string('address', ConstantSystem::ADDRESS_MAX_LENGTH);
@@ -184,6 +185,7 @@ return new class extends Migration
             $table->bigDecimal('total_money');
             $table->bigDecimalNullable('discount_amount');
             $table->foreignUuid('customer_id')->nullable()->references('id')->on('accounts');
+            $table->foreignUuid('voucher_id')->nullable()->references('id')->on('vouchers');
             // $table->foreignUuid('employee_id')->references('id')->on('accounts');
             // $table->index(['full_name', 'created_at', 'phone_number', 'code', 'status']);
         });
