@@ -180,32 +180,37 @@
                     <!-- start copy -->
                     <tr>
                         <td align="left" bgcolor="#ffffff" style="padding: 24px; font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 24px;">
-                            <p style="margin-bottom: 15px;">Xin chào, </p>
-                            Vui lòng xác nhận rằng
-                            địa chỉ email này là của bạn bằng cách nhấp vào nút bên dưới hoặc sử dụng liên kết này trong vòng 48 giờ.
+                            <p style="margin-bottom: 15px;">Xin chào,
+                                Bạn vừa được tạo tài khoản tại ĐKN Shop, dưới đây là thông tin đăng nhập của bạn
+                            </p>
+                            <p>
+                                Email: {{$user->email}}
+                            </p>
+                            <p>
+                                Mật khẩu: {{$pass}}
                             </p>
                         </td>
                     </tr>
                     <!-- end copy -->
 
                     <!-- start button -->
-                    <tr>
-                        <td align="left" bgcolor="#ffffff">
-                            <table border="0" cellpadding="0" cellspacing="0" width="100%">
-                                <tr>
-                                    <td align="center" bgcolor="#ffffff" style="padding: 12px;">
-                                        <table border="0" cellpadding="0" cellspacing="0">
-                                            <tr>
-                                                <td align="center" bgcolor="#FF6801" style="border-radius: 6px;">
-                                                    <a href="{{ env('REACT_PATH_VERIFY_EMAIL') . '/' . $user->id }}" target="_blank" style="display: inline-block; padding: 16px 36px; font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif; font-size: 16px; color: #ffffff; text-decoration: none; border-radius: 6px;">Xác nhận địa chỉ email</a>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </table>
-                        </td>
-                    </tr>
+                    <!-- <tr> -->
+                    <!--     <td align="left" bgcolor="#ffffff"> -->
+                    <!--         <table border="0" cellpadding="0" cellspacing="0" width="100%"> -->
+                    <!--             <tr> -->
+                    <!--                 <td align="center" bgcolor="#ffffff" style="padding: 12px;"> -->
+                    <!--                     <table border="0" cellpadding="0" cellspacing="0"> -->
+                    <!--                         <tr> -->
+                    <!--                             <td align="center" bgcolor="#FF6801" style="border-radius: 6px;"> -->
+                    <!--                                 <a href="{{ env('REACT_PATH_VERIFY_EMAIL') . '/' . $user->id }}" target="_blank" style="display: inline-block; padding: 16px 36px; font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif; font-size: 16px; color: #ffffff; text-decoration: none; border-radius: 6px;">Xác nhận địa chỉ email</a> -->
+                    <!--                             </td> -->
+                    <!--                         </tr> -->
+                    <!--                     </table> -->
+                    <!--                 </td> -->
+                    <!--             </tr> -->
+                    <!--         </table> -->
+                    <!--     </td> -->
+                    <!-- </tr> -->
                     <!-- end button -->
 
                     <!-- start copy -->
