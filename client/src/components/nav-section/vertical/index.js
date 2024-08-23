@@ -4,7 +4,7 @@ import { styled } from '@mui/material/styles';
 import { List, Box, ListSubheader } from '@mui/material';
 //
 import { NavListRoot } from './NavList';
-
+import useAuth from '../../../hooks/useAuth';
 // ----------------------------------------------------------------------
 
 export const ListSubheaderStyle = styled((props) => <ListSubheader disableSticky disableGutters {...props} />)(
@@ -28,6 +28,8 @@ NavSectionVertical.propTypes = {
 };
 
 export default function NavSectionVertical({ navConfig, isCollapse = false, ...other }) {
+  const { user } = useAuth();
+
   return (
     <Box {...other}>
       {navConfig.map((group) => (
@@ -44,7 +46,7 @@ export default function NavSectionVertical({ navConfig, isCollapse = false, ...o
           </ListSubheaderStyle>
           */}
 
-          {group.items.map((list) => (
+          {group.items.filter((item) => item.role.includes(user?.role)).map((list) => (
             <NavListRoot key={list.title} list={list} isCollapse={isCollapse} />
           ))}
         </List>

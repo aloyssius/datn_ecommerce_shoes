@@ -6,6 +6,7 @@ import { List, Collapse } from '@mui/material';
 //
 import { NavItemRoot, NavItemSub } from './NavItem';
 import { getActive } from '..';
+import useAuth from '../../../hooks/useAuth';
 
 // ----------------------------------------------------------------------
 
@@ -16,6 +17,8 @@ NavListRoot.propTypes = {
 
 export function NavListRoot({ list, isCollapse }) {
   const { pathname } = useLocation();
+
+  const { user } = useAuth();
 
   const active = !list.noRoot ? getActive(list.path, pathname) : list.children.some((item) => pathname.includes(item.root));
 
@@ -31,7 +34,7 @@ export function NavListRoot({ list, isCollapse }) {
         {!isCollapse && (
           <Collapse in={open} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
-              {(list.children || []).map((item) => (
+              {(list.children || []).filter((item) => item.role.includes(user?.role)).map((item) => (
                 <NavListSub key={item.title} list={item} />
               ))}
             </List>
