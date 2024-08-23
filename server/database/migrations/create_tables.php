@@ -29,6 +29,13 @@ return new class extends Migration
             return new BaseBlueprint($table, $callback);
         });
 
+        // $schema->create('users', function (BaseBlueprint $table) {
+        //     $table->baseColumn()->addColumnName();
+        //     $table->string('password', ConstantSystem::DEFAULT_MAX_LENGTH)->nullable();
+        //     $table->string('email', ConstantSystem::DEFAULT_MAX_LENGTH)->unique()->nullable();
+        //     $table->text('remember_token')->nullable();
+        // });
+
         // Role
         $schema->create('roles', function (BaseBlueprint $table) {
             $table->baseColumn()->addColumnName();
@@ -38,11 +45,12 @@ return new class extends Migration
         // Account
         $schema->create('accounts', function (BaseBlueprint $table) {
             $table->baseColumn()->addColumnCode();
-            $table->string('full_name', ConstantSystem::FULL_NAME_MAX_LENGTH);
+            $table->string('full_name', ConstantSystem::FULL_NAME_MAX_LENGTH)->nullable();
             $table->dateTime('birth_date')->nullable();
             $table->string('phone_number', ConstantSystem::PHONE_NUMBER_MAX_LENGTH)->unique()->nullable();
-            $table->string('password', ConstantSystem::PASSWORD_MAX_LENGTH)->nullable();
-            $table->string('email', ConstantSystem::EMAIL_MAX_LENGTH)->unique()->nullable();
+            $table->timestamp('email_verified_at')->nullable();
+            $table->string('password', ConstantSystem::DEFAULT_MAX_LENGTH)->nullable();
+            $table->string('email', ConstantSystem::EMAIL_MAX_LENGTH)->nullable();
             $table->string('identity_card', ConstantSystem::IDENTITY_CARD_MAX_LENGTH)->nullable()->unique();
             $table->boolean('gender')->nullable();
             $table->enum('status', CommonStatus::toArray())->default(CommonStatus::IS_ACTIVE);
@@ -167,7 +175,7 @@ return new class extends Migration
             $table->timestamp('delivery_date')->nullable();
             $table->timestamp('completion_date')->nullable();
             $table->string('note', ConstantSystem::DEFAULT_MAX_LENGTH)->nullable();
-            $table->enum('status', OrderStatus::toArray())->default(OrderStatus::PENDING_COMFIRN);
+            $table->enum('status', OrderStatus::toArray())->default(OrderStatus::PENDING_COMFIRM);
             $table->string('full_name', ConstantSystem::FULL_NAME_MAX_LENGTH);
             $table->string('email', ConstantSystem::EMAIL_MAX_LENGTH);
             $table->string('address', ConstantSystem::ADDRESS_MAX_LENGTH);
@@ -175,8 +183,8 @@ return new class extends Migration
             $table->bigDecimal('money_ship');
             $table->bigDecimal('total_money');
             $table->bigDecimalNullable('discount_amount');
-            $table->foreignUuid('customer_id')->references('id')->on('accounts');
-            $table->foreignUuid('employee_id')->references('id')->on('accounts');
+            $table->foreignUuid('customer_id')->nullable()->references('id')->on('accounts');
+            // $table->foreignUuid('employee_id')->references('id')->on('accounts');
             // $table->index(['full_name', 'created_at', 'phone_number', 'code', 'status']);
         });
 
@@ -184,7 +192,6 @@ return new class extends Migration
         $schema->create('bill_details', function (BaseBlueprint $table) {
             $table->baseColumn();
             $table->bigDecimal('price');
-            $table->bigDecimalNullable('price_after_promotion');
             $table->integer('quantity');
             $table->foreignUuid('bill_id')->references('id')->on('bills');
             $table->foreignUuid('product_details_id')->references('id')->on('product_details');
@@ -195,6 +202,7 @@ return new class extends Migration
             $table->baseColumn()->addSoftDeletes();
             $table->enum('status_timeline', BillHistoryStatusTimeline::toArray());
             $table->string('note', ConstantSystem::DEFAULT_MAX_LENGTH);
+            $table->string('action', ConstantSystem::DEFAULT_MAX_LENGTH);
             $table->foreignUuid('bill_id')->references('id')->on('bills');
         });
 
@@ -204,7 +212,6 @@ return new class extends Migration
             $table->bigDecimal('total_money');
             $table->enum('type', TransactionType::toArray());
             $table->string('trading_code', ConstantSystem::CODE_MAX_LENGTH)->unique()->nullable();
-            $table->string('note', ConstantSystem::DEFAULT_MAX_LENGTH)->nullable();
             $table->foreignUuid('bill_id')->references('id')->on('bills');
         });
 

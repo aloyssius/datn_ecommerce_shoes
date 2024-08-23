@@ -5,7 +5,7 @@ namespace App\Constants;
 class BillHistoryStatusTimeline
 {
     const CREATED = 'created';
-    const PENDING_CONFIRM = 'pending_confirm';
+    const WAITTING_DELIVERY = 'waitting_delivery';
     const DELYVERING = 'delivering';
     const COMPLETED = 'completed';
     const CANCELED = 'canceled';
@@ -14,7 +14,7 @@ class BillHistoryStatusTimeline
     {
         return [
             self::CREATED,
-            self::PENDING_CONFIRM,
+            self::WAITTING_DELIVERY,
             self::DELYVERING,
             self::COMPLETED,
             self::CANCELED,

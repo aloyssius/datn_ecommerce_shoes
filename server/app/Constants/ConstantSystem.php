@@ -29,4 +29,14 @@ class ConstantSystem
 
     const BAD_REQUEST_CODE = 400;
     const BAD_REQUEST = 'BAD_REQUEST';
+
+    const UNAUTHORIZED_CODE = 401;
+    const UNAUTHORIZED = 'UNAUTHORIZED';
+
+    const CREATED_CODE = 201;
+    const SUCCESS_CODE = 200;
+
+    const CUSTOMER_CODE_PREFIX = 'KH';
+    const EMPLOYEE_CODE_PREFIX = 'NV';
+    const BILL_CODE_PREFIX = 'HD';
 }

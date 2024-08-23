@@ -4,12 +4,19 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 use App\Models\Address;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
-
-class Account extends BaseModel
+class Account extends Authenticatable implements JWTSubject, MustVerifyEmail
 {
-    // use HasFactory;
+    use HasUuids;
+
+    public $incrementing = false;
+
+    protected $keyType = 'string';
 
     protected $fillable = [
         'code',
@@ -23,17 +30,18 @@ class Account extends BaseModel
         'gender',
         'status',
         'role_id',
+        'created_by',
+        'updated_by',
     ];
 
     protected $casts = [
         'gender' => 'integer',
     ];
 
-    public function __construct(array $attributes = [])
-    {
-        $this->fillable = array_merge(parent::getBaseFillable(), $this->fillable);
-        parent::__construct($attributes);
-    }
+    protected $hidden = [
+        'password',
+        // 'remember_token',
+    ];
 
     public function getBirthDateAttribute($value)
     {
@@ -46,5 +54,42 @@ class Account extends BaseModel
     public function addresses()
     {
         return $this->hasMany(Address::class);
+    }
+    /**
+     * Get the identifier that will be stored in the subject claim of the JWT.
+     *
+     * @return mixed
+     */
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    /**
+     * Return a key value array, containing any custom claims to be added to the JWT.
+     *
+     * @return array
+     */
+    public function getJWTCustomClaims()
+    {
+        return [];
+    }
+
+    public function getCreatedAtAttribute($value)
+    {
+        return Carbon::parse($value)->timezone('Asia/Ho_Chi_Minh')->format('H:i:s d-m-Y');
+    }
+
+    public function getUpdatedAtAttribute($value)
+    {
+        return Carbon::parse($value)->timezone('Asia/Ho_Chi_Minh')->format('H:i:s d-m-Y');
+    }
+
+    public function getDeletedAtAttribute($value)
+    {
+        if ($value !== null) {
+            return Carbon::parse($value)->timezone('Asia/Ho_Chi_Minh')->format('H:i:s d-m-Y');
+        }
+        return null;
     }
 }

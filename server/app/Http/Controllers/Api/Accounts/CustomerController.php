@@ -18,6 +18,8 @@ use App\Http\Requests\Account\AccountRequestBody;
 use App\Http\Requests\Address\AddressRequestBody;
 use App\Models\Role;
 use App\Constants\AddressDefault as AddressDefault;
+use App\Constants\ConstantSystem;
+use App\Exceptions\RestApiException;
 use App\Models\Address;
 use Carbon\Carbon;
 use DateTime;
@@ -28,7 +30,7 @@ class CustomerController extends Controller
     public function index(AccountRequest $req)
     {
 
-        $accounts = Account::join('roles', 'accounts.role_id', '=' ,'roles.id')
+        $accounts = Account::join('roles', 'accounts.role_id', '=', 'roles.id')
             ->select('accounts.id', 'accounts.full_name', 'accounts.code', 'accounts.email', 'accounts.avatar_url', 'accounts.phone_number', 'accounts.birth_date', 'accounts.gender', 'accounts.status', 'accounts.created_at')
             ->where('roles.code', '=', RoleEnum::CUSTOMER);
 
@@ -58,19 +60,16 @@ class CustomerController extends Controller
 
     public function show($id)
     {
-
-        $account = Account::join('roles', 'accounts.role_id', 'roles.id')
-            ->select('accounts.id', 'accounts.full_name', 'accounts.code', 'accounts.email', 'accounts.avatar_url', 'accounts.phone_number', 'accounts.birth_date', 'accounts.gender', 'accounts.status', 'accounts.created_at')
-            ->where('roles.code', '=', RoleEnum::CUSTOMER)->find($id);
+        $account = Account::find($id);
 
         if (!$account) {
             throw new NotFoundException("Không tìm thấy khách hàng có id là " . $id);
         }
 
         $addresses = Address::select(AddressResource::fields())
-                    ->where('account_id', '=', $account->id)
-                    ->orderBy('created_at', 'desc')
-                    ->get();
+            ->where('account_id', '=', $account->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
         $account['addresses'] = AddressResource::collection($addresses);
 
         return ApiResponse::responseObject(new AccountResource($account));
@@ -78,15 +77,28 @@ class CustomerController extends Controller
 
     public function store(AccountRequestBody $req)
     {
-        $account = Account::query(); // tạo instance query
-        $prefix = 'KH'; // mã bắt đầu với 'KH'
+        $account = Account::query();
+        $prefix = ConstantSystem::CUSTOMER_CODE_PREFIX; // mã bắt đầu với 'KH'
 
-        // tìm role customer
         $roleCustomer = Role::where('code', RoleEnum::CUSTOMER)->first();
 
+        $findEmailCustomer = Account::where('email', $req->email)
+            ->where('role_id', $roleCustomer->id)->first();
+
+        if ($findEmailCustomer) {
+            throw new RestApiException("Địa chỉ email này đã tồn tại");
+        }
+
+        $findPhoneNumberCustomer = Account::where('phone_number', $req->phoneNumber)
+            ->where('role_id', $roleCustomer->id)->first();
+
+        if ($findPhoneNumberCustomer) {
+            throw new RestApiException("SĐT này đã tồn tại");
+        }
+
         $moreColumns = [
-            'code' => CustomCodeHelper::generateCode($account, $prefix), // tạo code tự tăng
-            'roleId' => $roleCustomer->id, // lấy id của role customer
+            'code' => CustomCodeHelper::generateCode($account, $prefix),
+            'roleId' => $roleCustomer->id,
         ];
 
         // convert req
@@ -100,13 +112,13 @@ class CustomerController extends Controller
     public function storeAddress(AddressRequestBody $req)
     {
         $addressConverted = ConvertHelper::convertColumnsToSnakeCase($req->all());
-        $addressCreated = Address::create($addressConverted);
-        
+        Address::create($addressConverted);
+
         $addresses = Address::select(AddressResource::fields())
-        ->where('account_id', '=', $req->accountId)
-        ->orderBy('created_at', 'desc')
-        ->get();
-         
+            ->where('account_id', '=', $req->accountId)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
         return ApiResponse::responseObject(AddressResource::collection($addresses));
     }
 
@@ -115,14 +127,14 @@ class CustomerController extends Controller
         $address = Address::where('id', '=', $req->id)->first();
 
         if (!$address) {
-            throw new NotFoundException("Không tìm thấy khách hàng có id là " . $id);
+            throw new NotFoundException("Không tìm thấy địa chỉ có id là " . $req->id);
         }
 
-        $addressDefault = Address::where('account_id', '=' , $req->accountId)
-        ->where('is_default', '=', AddressDefault::IS_DEFAULT)
-        ->first();
+        $addressDefault = Address::where('account_id', '=', $req->accountId)
+            ->where('is_default', '=', AddressDefault::IS_DEFAULT)
+            ->first();
 
-        if($addressDefault) {
+        if ($addressDefault) {
             $addressDefault['is_default'] = AddressDefault::UN_DEFAULT;
             $addressDefault->save();
         }
@@ -131,10 +143,10 @@ class CustomerController extends Controller
         $address->save();
 
         $addresses = Address::select(AddressResource::fields())
-        ->where('account_id', '=', $req->accountId)
-        ->orderBy('created_at', 'desc')
-        ->get();
-         
+            ->where('account_id', '=', $req->accountId)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
         return ApiResponse::responseObject(AddressResource::collection($addresses));
     }
 }
