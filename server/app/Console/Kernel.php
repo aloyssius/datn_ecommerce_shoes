@@ -13,15 +13,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        $schedule->job(new UpdateDiscountStatus)->everyMinute();
     }
-
-    // protected function schedule(Schedule $schedule)
-    // {
-    //     // Lập lịch chạy job mỗi phút
-    //     $schedule->job(new UpdateDiscountStatus)->everyMinute();
-    // }
-
     /**
      * Register the commands for the application.
      */

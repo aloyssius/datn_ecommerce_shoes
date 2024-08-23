@@ -15,6 +15,8 @@ import Avatar from '../../../../components/Avatar';
 import Iconify from '../../../../components/Iconify';
 import { TableMoreMenu } from '../../../../components/table';
 import { PATH_DASHBOARD } from '../../../../routes/paths';
+import { formatCurrencyVnd, formatNumber } from '../../../../utils/formatCurrency';
+import { convertDiscountStatus, convertVoucherType } from '../../../../utils/ConvertEnum';
 
 // ----------------------------------------------------------------------
 
@@ -44,7 +46,7 @@ export default function VoucherTableRow({ row, onEditRow }) {
         </Stack>
       </TableCell>
 
-      <TableCell align="left">{value} {typeDiscount === 'percent' ? VoucherTypeDiscountVoucherTableRow.vi.PERCENT : VoucherTypeDiscountVoucherTableRow.vi.VND}</TableCell>
+      <TableCell align="left">{formatCurrencyVnd(String(value))} {typeDiscount === 'percent' ? VoucherTypeDiscountVoucherTableRow.vi.PERCENT : VoucherTypeDiscountVoucherTableRow.vi.VND}</TableCell>
 
       <TableCell align="left">{quantity}</TableCell>
 
@@ -62,7 +64,7 @@ export default function VoucherTableRow({ row, onEditRow }) {
           }
           sx={{ textTransform: 'capitalize' }}
         >
-          {status}
+          {convertDiscountStatus(status)}
         </Label>
       </TableCell>
 

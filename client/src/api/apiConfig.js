@@ -81,6 +81,8 @@ export const ADMIN_API = {
     details: (id) => path(ROOTS_API, `/vouchers/${id}`),
     post: path(ROOTS_API, '/vouchers'),
     put: (id) => path(ROOTS_API, `/vouchers/${id}`),
+    endVoucher: (id) => path(ROOTS_API, `/vouchers/${id}/end`),
+    restoreVoucher: (id) => path(ROOTS_API, `/vouchers/${id}/restore`),
   },
 
   employee: {

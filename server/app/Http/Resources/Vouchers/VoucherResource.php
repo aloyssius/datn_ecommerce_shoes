@@ -18,10 +18,10 @@ class VoucherResource extends JsonResource
             'id' => $this->id,
             'code' => $this->code,
             'name' => $this->name,
-            'value' => $this->formatAmount($this->value), // Định dạng số tiền
+            'value' => $this->value,
             'typeDiscount' => $this->type_discount,
-            'maxDiscountValue' => $this->formatAmount($this->max_discount_value), // Định dạng số tiền
-            'minOrderValue' => $this->formatAmount($this->min_order_value), // Định dạng số tiền
+            'maxDiscountValue' => $this->max_discount_value,
+            'minOrderValue' => $this->min_order_value,
             'quantity' => $this->quantity,
             'status' => $this->status,
             'startTime' => $this->start_time,
@@ -46,8 +46,4 @@ class VoucherResource extends JsonResource
         ];
     }
 
-    private function formatAmount($amount)
-    {
-        return number_format($amount, 0, ',', '.');
-    }
 }
