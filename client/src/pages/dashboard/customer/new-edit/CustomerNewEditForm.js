@@ -24,6 +24,7 @@ import { fData } from '../../../../utils/formatNumber';
 import { PATH_DASHBOARD } from '../../../../routes/paths';
 // components
 import Label from '../../../../components/Label';
+import MyAvatar from '../../../../components/MyAvatar';
 import { FormProvider, RHFRadioGroup, RHFTextField, RHFUploadAvatar } from '../../../../components/hook-form';
 import { AccountGenderOption, AccountStatusTab } from '../../../../constants/enum';
 import CustomerNewEditListAddress from './CustomerNewEditListAddress';
@@ -38,6 +39,7 @@ import { ADMIN_API } from '../../../../api/apiConfig';
 CustomerNewEditForm.propTypes = {
   isEdit: PropTypes.bool,
   currentCustomer: PropTypes.object,
+  onUpdate: PropTypes.func,
 };
 
 const IOSSwitch = styled((props) => (
@@ -103,7 +105,7 @@ const LabelStyle = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }));
 
-export default function CustomerNewEditForm({ isEdit, currentCustomer, isLoading }) {
+export default function CustomerNewEditForm({ isEdit, currentCustomer, onUpdate }) {
   const navigate = useNavigate();
 
   const NewCustomerSchemahema = Yup.object().shape({
@@ -139,8 +141,8 @@ export default function CustomerNewEditForm({ isEdit, currentCustomer, isLoading
       phoneNumber: currentCustomer?.phoneNumber || '',
       birthDate: convertDatePicker(currentCustomer?.birthDate),
       gender: convertToEnumAccountGender(currentCustomer?.gender),
-      status: currentCustomer?.status || AccountStatusTab.en.IS_ACTIVE,
-      avatarUrl: currentCustomer?.avatarUrl || '',
+      // status: currentCustomer?.status || AccountStatusTab.en.IS_ACTIVE,
+      // avatarUrl: currentCustomer?.avatarUrl || '',
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [currentCustomer]
@@ -157,10 +159,11 @@ export default function CustomerNewEditForm({ isEdit, currentCustomer, isLoading
     control,
     setValue,
     handleSubmit,
-    formState: { isSubmitting },
   } = methods;
 
   const values = watch();
+
+  const { fullName, phoneNumber, birthDate, gender } = values;
 
   useEffect(() => {
     if (isEdit && currentCustomer) {
@@ -173,51 +176,77 @@ export default function CustomerNewEditForm({ isEdit, currentCustomer, isLoading
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEdit, currentCustomer]);
 
-  const { post } = useFetch(null, { fetch: false });
+  const { post, put } = useFetch(null, { fetch: false });
 
   const { showConfirm } = useConfirm();
-  const { onOpenSuccessNotify, onOpenErrorNotify } = useNotification();
+  const { onOpenSuccessNotify } = useNotification();
 
   const onFinish = (data) => {
-    onOpenSuccessNotify('Thêm mới khách hàng thành công!')
-    console.log(data);
-    navigate(PATH_DASHBOARD.account.customer.edit(data?.id));
+    if (!isEdit) {
+      onOpenSuccessNotify('Thêm mới khách hàng thành công!')
+      console.log(data);
+      navigate(PATH_DASHBOARD.account.customer.edit(data?.id));
+    }
+    else {
+      console.log(data);
+      onOpenSuccessNotify('Cập nhật khách hàng thành công!')
+      onUpdate(data);
+    }
   }
 
   const onSubmit = async (data) => {
-    const body = {
-      ...data,
-      gender: convertAccountGender(data?.gender),
-      birthDate: convertDateParam(data.birthDate)
+    if (!isEdit) {
+      const body = {
+        ...data,
+        gender: convertAccountGender(data?.gender),
+        birthDate: convertDateParam(data.birthDate)
+      }
+      console.log(body);
+      showConfirm("Xác nhận thêm mới khách hàng?", () => post(ADMIN_API.customer.post, body, (response) => onFinish(response)));
     }
-    console.log(body);
-    showConfirm("Xác nhận thêm mới khách hàng?", () => post(ADMIN_API.customer.post, body, (response) => onFinish(response)));
+    else {
+      const body = {
+        ...data,
+        gender: convertAccountGender(data?.gender),
+        id: currentCustomer?.id,
+        birthDate: convertDateParam(data.birthDate)
+      }
+      console.log(body);
+      showConfirm("Xác nhận cập nhật khách hàng?", () => put(ADMIN_API.customer.put, body, (response) => onFinish(response)));
+    }
   };
 
-  const handleDrop = useCallback(
-    (acceptedFiles) => {
-      const file = acceptedFiles[0];
+  const isDefault = fullName?.trim() !== currentCustomer?.fullName ||
+    phoneNumber?.trim() !== currentCustomer?.phoneNumber ||
+    convertDateParam(birthDate) !== currentCustomer?.birthDate ||
+    convertAccountGender(gender) !== currentCustomer?.gender;
 
-      if (file) {
-        setValue(
-          'avatarUrl',
-          Object.assign(file, {
-            preview: URL.createObjectURL(file),
-          })
-        );
-      }
-    },
-    [setValue]
-  );
+  // const handleDrop = useCallback(
+  //   (acceptedFiles) => {
+  //     const file = acceptedFiles[0];
+  //
+  //     if (file) {
+  //       setValue(
+  //         'avatarUrl',
+  //         Object.assign(file, {
+  //           preview: URL.createObjectURL(file),
+  //         })
+  //       );
+  //     }
+  //   },
+  //   [setValue]
+  // );
 
   return (
     <>
       <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
         <Grid container spacing={3}>
+          {/*
           <Grid item xs={12} md={4}>
             <Card sx={{ py: !isEdit ? 8.8 : 4, px: 3 }} className='card'>
 
-              <Box sx={{ mt: 5 }}>
+              <Box sx={{ mt: 5, display: 'flex', justifyContent: 'center' }}>
+
                 <RHFUploadAvatar
                   name="avatarUrl"
                   accept="image/*"
@@ -272,8 +301,9 @@ export default function CustomerNewEditForm({ isEdit, currentCustomer, isLoading
               )}
             </Card>
           </Grid>
+          */}
 
-          <Grid item xs={12} md={8}>
+          <Grid item xs={12} md={12}>
             <Card sx={{ p: 2 }} className='card'>
               <LabelStyleHeader sx={{ ml: 0.8 }}>Thông tin khách hàng</LabelStyleHeader>
               <Box
@@ -287,7 +317,7 @@ export default function CustomerNewEditForm({ isEdit, currentCustomer, isLoading
                 }}
               >
                 <RHFTextField name="fullName" topLabel="Họ và tên" placeholder="Nhập họ và tên" isRequired />
-                <RHFTextField name="email" topLabel="Email" isRequired placeholder="Nhập email" />
+                <RHFTextField name="email" topLabel="Email" isRequired placeholder="Nhập email" disabled={isEdit} />
                 <RHFTextField name="phoneNumber" topLabel="Số điện thoại" placeholder="Nhập số điện thoại" isRequired />
 
                 <RHFRadioGroup
@@ -341,10 +371,10 @@ export default function CustomerNewEditForm({ isEdit, currentCustomer, isLoading
               </Box>
 
               <Stack direction="row" justifyContent="flex-end" spacing={1.5} sx={{ mt: 3, px: 1 }}>
-                <Button onClick={() => console.log(values.birthDate)} color="inherit" variant="contained">
+                <Button onClick={() => navigate(PATH_DASHBOARD.account.customer.root)} color="inherit" variant="contained">
                   Hủy
                 </Button>
-                <Button type="submit" variant="contained">
+                <Button type="submit" variant="contained" disabled={!isDefault && isEdit}>
                   Lưu
                 </Button>
               </Stack>
@@ -352,7 +382,9 @@ export default function CustomerNewEditForm({ isEdit, currentCustomer, isLoading
           </Grid>
         </Grid >
       </FormProvider >
+      {/*
       <CustomerNewEditListAddress isEdit={isEdit} listAddress={currentCustomer?.addresses} />
+      */}
     </>
   );
 }

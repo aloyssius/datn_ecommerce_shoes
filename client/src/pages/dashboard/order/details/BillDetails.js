@@ -2,7 +2,7 @@ import { useParams, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 // @mui
 import { styled, useTheme } from '@mui/material/styles';
-import { Box, Container, TextField, IconButton, MenuItem, CardHeader, CardContent, Button, Stack, Grid, Card, Typography } from '@mui/material';
+import { Dialog, Tooltip, Box, Container, TextField, IconButton, MenuItem, CardHeader, CardContent, Button, Stack, Grid, Card, Typography } from '@mui/material';
 import { Timeline, TimelineDot, TimelineItem, TimelineContent, TimelineSeparator, TimelineConnector } from '@mui/lab';
 import useConfirm from '../../../../hooks/useConfirm';
 import useNotification from '../../../../hooks/useNotification';
@@ -10,6 +10,7 @@ import useNotification from '../../../../hooks/useNotification';
 import { PATH_DASHBOARD } from '../../../../routes/paths';
 // hooks
 import useSettings from '../../../../hooks/useSettings';
+import useAuth from '../../../../hooks/useAuth';
 // components
 import Label from '../../../../components/Label';
 import Avatar from '../../../../components/Avatar';
@@ -20,6 +21,7 @@ import HeaderBreadcrumbs from '../../../../components/HeaderBreadcrumbs';
 import useFetch from '../../../../hooks/useFetch';
 import { ADMIN_API } from '../../../../api/apiConfig';
 import BillProductDetails from './BillProductDetails';
+import BillDetailDialogAddress from './BillDetailDialogAddress';
 // utils
 import { BillStatusTab, BillStatusTimeline } from '../../../../constants/enum';
 import createAvatar from '../../../../utils/createAvatar';
@@ -28,6 +30,8 @@ import { _analyticOrderTimeline } from '../../../../_mock';
 import { fDateTime } from '../../../../utils/formatTime';
 import { formatCurrencyVnd } from '../../../../utils/formatCurrency';
 import { convertOrderStatus } from '../../../../utils/ConvertEnum';
+import BillDetailDialogPayment from './BillDetailDialogPayment';
+import BillDetailDialogTimeline from './BillDetailDialogTimeline';
 
 // ----------------------------------------------------------------------
 
@@ -41,48 +45,13 @@ export default function BillDetails() {
   const { themeStretch } = useSettings();
   const theme = useTheme();
   const { id } = useParams();
+  const { user } = useAuth();
   const { data, put, setData } = useFetch(ADMIN_API.bill.details(id));
   const { showConfirm } = useConfirm();
   const { onOpenSuccessNotify } = useNotification();
-
-  const products = [
-    {
-      id: 2,
-      name: "Panda",
-      size: 41,
-      price: 20000,
-      color: "White Blue",
-      cover: "https://ananas.vn/wp-content/uploads/Pro_AV00207_1.jpg",
-      quantity: 10,
-    },
-    {
-      id: 1,
-      name: "Nike",
-      size: 42,
-      price: 10000,
-      color: "White",
-      cover: "https://ananas.vn/wp-content/uploads/Pro_AV00207_1.jpg",
-      quantity: 10,
-    },
-    {
-      id: 3,
-      name: "PDB",
-      size: 42,
-      price: 30000,
-      color: "Red",
-      cover: "https://ananas.vn/wp-content/uploads/Pro_AV00207_1.jpg",
-      quantity: 10,
-    },
-    {
-      id: 4,
-      name: "Nice",
-      size: 40,
-      price: 20000,
-      color: "Blue",
-      cover: "https://ananas.vn/wp-content/uploads/Pro_AV00207_1.jpg",
-      quantity: 10,
-    },
-  ];
+  const [open, setOpen] = useState(false);
+  const [openTimeline, setOpenTimeline] = useState(false);
+  const [openPaymentHis, setOpenPaymentHis] = useState(false);
 
   const onFinishUpdateStatus = (res) => {
     setData(res);
@@ -91,14 +60,21 @@ export default function BillDetails() {
 
   const handleUpdateStatus = (e) => {
     const value = e.target.value;
-    const body = {
-      id: data?.id,
-      status: value,
-      actionTimeline: actionHistory(value),
-      totalFinal,
+    if (value === BillStatusTab.en.CANCELED) {
+      setOpen(true);
     }
-    console.log(body);
-    showConfirm("Xác nhận cập nhật trạng thái đơn hàng?", () => put(ADMIN_API.bill.putStatus, body, (response) => onFinishUpdateStatus(response)));
+    else {
+      const body = {
+        id: data?.id,
+        status: value,
+        actionTimeline: actionHistory(value),
+        createdBy: user?.id,
+        totalFinal,
+      }
+      console.log(body);
+      const title = value === BillStatusTab.en.COMPLETED ? `Xác nhận đơn hàng đã được giao và đã nhận được số tiền là ${formatCurrency(String(totalFinal))}?` : "Xác nhận cập nhật trạng thái đơn hàng?";
+      showConfirm(title, () => put(ADMIN_API.bill.putStatus, body, (response) => onFinishUpdateStatus(response)));
+    }
   }
 
   const status = data?.status || "";
@@ -107,6 +83,18 @@ export default function BillDetails() {
   const totalMoney = data?.totalMoney || 0;
   const totalQuantityProduct = data && data.billItems && data.billItems.reduce((total, item) => total + (item?.quantity || 0), 0) || 0;
   const totalFinal = parseInt(totalMoney, 10) - parseInt(discount, 10) + parseInt(shipFee, 10);
+
+  const isOrderTransferNotYetPayment = () => {
+    if (data?.paymentMethod === TRANSFER && data?.payment === null/*  && data?.status === BillStatusTab.en.PENDING_CONFIRM */) {
+      return true;
+    }
+
+    return false;
+  }
+
+  const historiesFiltered = data?.histories?.filter((item, index, self) =>
+    index === self.findIndex((t) => t.status === item.status)
+  );
 
   return (
 
@@ -131,9 +119,9 @@ export default function BillDetails() {
                     <Iconify style={{ fontSize: 23 }} icon={'eva:shopping-bag-outline'} />
                     <LabelStyleHeader>Danh sách sản phẩm</LabelStyleHeader>
                   </Stack>
-                  {status === BillStatusTab.en.PENDING_CONFIRM &&
+                  {/* (status === BillStatusTab.en.PENDING_CONFIRM || status === BillStatusTab.en.WAITTING_DELIVERY) && !isOrderTransferNotYetPayment() &&
                     <Button sx={{ paddingInline: 2 }} size="small" color="primary" variant="contained">Thêm sản phẩm</Button>
-                  }
+                  */}
                 </Stack>
                 <Stack spacing={3} sx={{ py: 2 }}>
 
@@ -141,6 +129,9 @@ export default function BillDetails() {
                     <BillProductDetails
                       products={data?.billItems || []}
                       status={status}
+                      isOrderTransferNotYetPayment={isOrderTransferNotYetPayment}
+                      data={data}
+                      onUpdate={(dataUpdate) => setData(dataUpdate)}
                     // onDelete={handleDeleteCart}
                     // onIncreaseQuantity={handleIncreaseQuantity}
                     // onDecreaseQuantity={handleDecreaseQuantity}
@@ -197,15 +188,23 @@ export default function BillDetails() {
                 }}
               >
                 <CardHeader title={
-                  <Stack direction="row" spacing={1}>
-                    <Iconify style={{ fontSize: 23 }} icon={'eva:file-text-outline'} />
-                    <LabelStyleHeader>Lịch sử đơn hàng</LabelStyleHeader>
-                  </Stack>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: "space-between" }}>
+                    <Stack direction="row" spacing={1}>
+                      <Iconify style={{ fontSize: 23 }} icon={'eva:file-text-outline'} />
+                      <LabelStyleHeader>Lịch sử đơn hàng</LabelStyleHeader>
+                    </Stack>
+                    <Tooltip title="Xem lịch sử">
+                      <IconButton size='medium' onClick={() => setOpenTimeline(true)}>
+                        <Iconify icon={'eva:menu-2-outline'} />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
+
                 } />
                 <CardContent>
                   <Timeline>
-                    {data?.histories?.map((item, index) => (
-                      <OrderItem key={item.id} item={item} isLast={index === data?.histories.length - 1} />
+                    {historiesFiltered?.map((item, index) => (
+                      <OrderItem key={item.id} item={item} isLast={index === historiesFiltered.length - 1} />
                     ))}
                   </Timeline>
                 </CardContent>
@@ -223,21 +222,23 @@ export default function BillDetails() {
                   <LabelStyleHeader>Xử lý đơn hàng</LabelStyleHeader>
                 </Stack>
 
-
                 <Stack spacing={1.7} sx={{ mt: 2 }}>
+
+                  {isOrderTransferNotYetPayment() &&
+                    <Typography variant="subtitle2" sx={{ color: 'error.main' }}>{"Không thể giao hàng vì đơn hàng chưa được thanh toán bởi khách hàng"}</Typography>
+                  }
 
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2, alignItems: 'center' }}>
                     <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                      Trạng thái đơn hàng
+                      Trạng thái
                     </Typography>
 
                     <TextField
-                      fullWidth
                       select
-                      // label="Trạng thái"
+                      InputLabelProps={{ shrink: true }}
+                      defaultValue={status === BillStatusTab.en.PENDING_CONFIRM ? "" : status}
+                      value={status === BillStatusTab.en.PENDING_CONFIRM ? "" : status}
                       size='small'
-                      defaultValue={status}
-                      value={status}
                       onChange={handleUpdateStatus}
                       SelectProps={{
                         MenuProps: {
@@ -245,15 +246,19 @@ export default function BillDetails() {
                         },
                       }}
                       sx={{
-                        maxWidth: { md: 160 },
+                        width: { md: 160 },
                         textTransform: 'capitalize',
+                        '& .MuiSelect-select span::before': {
+                          content: "'Chọn trạng thái'",
+                          fontSize: 14,
+                        },
                       }}
                     >
-                      {STATUS_ARR.map((option) => (
+                      {STATUS_ARR.filter((item) => item !== BillStatusTab.en.PENDING_CONFIRM).map((option) => (
                         <MenuItem
                           disabled={
+                            (isOrderTransferNotYetPayment() && option !== BillStatusTab.en.CANCELED) ||
                             ((status === BillStatusTab.en.PENDING_CONFIRM || status === BillStatusTab.en.WAITTING_DELIVERY) && option === BillStatusTab.en.COMPLETED) ||
-                            (status === BillStatusTab.en.DELIVERING && option === BillStatusTab.en.PENDING_CONFIRM) ||
                             (status === BillStatusTab.en.DELIVERING && option === BillStatusTab.en.WAITTING_DELIVERY) ||
                             (status === BillStatusTab.en.CANCELED &&
                               (option === BillStatusTab.en.WAITTING_DELIVERY || option === BillStatusTab.en.DELIVERING ||
@@ -301,19 +306,32 @@ export default function BillDetails() {
                     <Typography variant="subtitle2">{data?.createdAt || DIVIDE_DATA}</Typography>
                   </Stack>
 
-                  <Stack direction="row" justifyContent="space-between">
-                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                      Ngày giao hàng
-                    </Typography>
-                    <Typography variant="subtitle2">{data?.deliveryDate || DIVIDE_DATA}</Typography>
-                  </Stack>
+                  {data?.deliveryDate &&
+                    <Stack direction="row" justifyContent="space-between">
+                      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                        Ngày giao hàng
+                      </Typography>
+                      <Typography variant="subtitle2">{data?.deliveryDate || DIVIDE_DATA}</Typography>
+                    </Stack>
+                  }
 
-                  <Stack direction="row" justifyContent="space-between">
-                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                      Ngày hoàn thành
-                    </Typography>
-                    <Typography variant="subtitle2">{data?.completionDate || DIVIDE_DATA}</Typography>
-                  </Stack>
+                  {data?.completionDate &&
+                    <Stack direction="row" justifyContent="space-between">
+                      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                        Ngày hoàn thành
+                      </Typography>
+                      <Typography variant="subtitle2">{data?.completionDate || DIVIDE_DATA}</Typography>
+                    </Stack>
+                  }
+
+                  {data?.cancellationDate &&
+                    <Stack direction="row" justifyContent="space-between">
+                      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                        Ngày hủy đơn
+                      </Typography>
+                      <Typography variant="subtitle2">{data?.cancellationDate || DIVIDE_DATA}</Typography>
+                    </Stack>
+                  }
 
                   <Stack direction="row" justifyContent="space-between">
                     <Typography variant="body2" sx={{ color: 'text.secondary' }}>
@@ -351,8 +369,8 @@ export default function BillDetails() {
                       {createAvatar("").name}
                     </Avatar>
                     :
-                    <Avatar alt={data?.fullName} color={createAvatar(data?.name).color} sx={{ mr: 2 }}>
-                      {createAvatar(data?.fullName).name}
+                    <Avatar alt={data?.account?.fullName} color={createAvatar(data?.account?.fullName).color} sx={{ mr: 2 }}>
+                      {createAvatar(data?.account?.fullName).name}
                     </Avatar>
                   }
 
@@ -363,22 +381,21 @@ export default function BillDetails() {
                       </Typography> :
                       <>
                         <Typography variant="body2">
-                          {data?.fullName}
+                          {data?.account?.fullName} {`(${data?.account?.code})`}
                         </Typography>
 
                         <Typography variant="body2">
-                          {data?.phoneNumber}
+                          {data?.account?.phoneNumber}
                         </Typography>
 
                         <Typography noWrap variant="body2" sx={{ color: 'text.disabled', fontSize: '13px' }}>
-                          {data?.email}
+                          {data?.account?.email}
                         </Typography>
                       </>
                     }
                   </Stack>
                 </Box>
               </Card>
-
 
               <Card sx={{ p: 3 }} className='card'>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -387,11 +404,13 @@ export default function BillDetails() {
                     <LabelStyleHeader>Thông tin giao hàng</LabelStyleHeader>
                   </Stack>
 
-                  {status === BillStatusTab.en.PENDING_CONFIRM &&
-                    <IconButton size='medium'>
-                      <Iconify icon={'eva:edit-outline'} />
-                    </IconButton>
-                  }
+                  {/* (status === BillStatusTab.en.PENDING_CONFIRM || status === BillStatusTab.en.WAITTING_DELIVERY) && !isOrderTransferNotYetPayment() &&
+                    <Tooltip title="Chỉnh sửa">
+                      <IconButton size='medium' onClick={() => setOpen(true)}>
+                        <Iconify icon={'eva:edit-outline'} />
+                      </IconButton>
+                    </Tooltip>
+                  */}
                 </Box>
 
                 <Stack spacing={1.7} sx={{ mt: 2 }}>
@@ -411,6 +430,13 @@ export default function BillDetails() {
 
                   <Stack direction="row" justifyContent="space-between">
                     <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                      Email
+                    </Typography>
+                    <Typography variant="subtitle2">{data?.email || DIVIDE_DATA}</Typography>
+                  </Stack>
+
+                  <Stack direction="row" justifyContent="space-between">
+                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                       Địa chỉ
                     </Typography>
                     <Typography sx={{ maxWidth: 170 }} wrap variant="subtitle2">{data?.address || DIVIDE_DATA}</Typography>
@@ -420,17 +446,26 @@ export default function BillDetails() {
               </Card>
 
               <Card sx={{ p: 3 }} className='card'>
-                <Stack direction="row" spacing={1}>
-                  <Iconify style={{ fontSize: 23 }} icon={'eva:credit-card-outline'} />
-                  <LabelStyleHeader>Thanh toán</LabelStyleHeader>
-                </Stack>
+
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Stack direction="row" spacing={1}>
+                    <Iconify style={{ fontSize: 23 }} icon={'eva:credit-card-outline'} />
+                    <LabelStyleHeader>Thông tin thanh toán</LabelStyleHeader>
+                  </Stack>
+
+                  <Tooltip title="Xem lịch sử">
+                    <IconButton size='medium' onClick={() => setOpenPaymentHis(true)}>
+                      <Iconify icon={'eva:menu-2-outline'} />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
 
                 <Stack spacing={1.7} sx={{ mt: 2 }}>
                   <Stack direction="row" justifyContent="space-between">
                     <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                       Hình thức thanh toán
                     </Typography>
-                    <Typography variant="subtitle2">{data?.payment?.tradingCode ? "Ví VNPAY" : "Thanh toán khi nhận hàng"}</Typography>
+                    <Typography variant="subtitle2">{data?.paymentMethod === TRANSFER ? "Thanh toán trực truyến" : "Thanh toán khi nhận hàng"}</Typography>
                   </Stack>
 
                   <Stack direction="row" justifyContent="space-between">
@@ -444,7 +479,7 @@ export default function BillDetails() {
                     <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                       Trạng thái thanh toán
                     </Typography>
-                    {data?.code ?
+                    {data?.id ?
                       <Label
                         variant={theme.palette.mode === 'light' ? 'ghost' : 'filled'}
                         color={
@@ -467,12 +502,39 @@ export default function BillDetails() {
           </Grid>
         </Grid>
       </Container>
+
+      <BillDetailDialogPayment open={openPaymentHis} onClose={() => setOpenPaymentHis(false)} data={data} />
+      {/*
+      <BillDetailDialogAddress
+        open={open}
+        onClose={() => setOpen(false)}
+        currentAddress={data}
+        totalFinal={totalFinal}
+        onUpdate={(dataUpdate) => setData(dataUpdate)}
+      />
+      */}
+
+      <DialogCancelOrder
+        open={open}
+        onClose={() => setOpen(false)}
+        data={data}
+        user={user}
+        onUpdate={(dataUpdate) => setData(dataUpdate)}
+      />
+
+      <BillDetailDialogTimeline
+        open={openTimeline}
+        onClose={() => setOpenTimeline(false)}
+        histories={data?.histories}
+      />
     </Page>
   );
 }
 
+// thieu note address
+
 function OrderItem({ item, isLast }) {
-  const { status, note, createdAt, action } = item;
+  const { status, createdAt, action } = item;
   return (
     <TimelineItem>
       <TimelineSeparator>
@@ -496,11 +558,6 @@ function OrderItem({ item, isLast }) {
             </Typography>
           </Stack>
 
-          <Stack>
-            <IconButton size='medium'>
-              <Iconify icon={'eva:menu-2-outline'} />
-            </IconButton>
-          </Stack>
         </Stack>
       </TimelineContent>
     </TimelineItem>
@@ -522,9 +579,11 @@ const STATUS_ARR = [
   BillStatusTab.en.CANCELED,
 ]
 
+const TRANSFER = "transfer";
+
 const DIVIDE_DATA = "---";
 
-const actionHistory = (status, noteCanceled) => {
+const actionHistory = (status) => {
 
   if (status === BillStatusTab.en.WAITTING_DELIVERY) {
     return {
@@ -546,11 +605,95 @@ const actionHistory = (status, noteCanceled) => {
     }
   }
 
-  if (status === BillStatusTab.en.CANCELED) {
-    return {
-      action: "Đã hủy đơn",
-      note: noteCanceled || "?",
+}
+
+const DialogCancelOrder = ({ open, onClose, data, user, onUpdate }) => {
+
+  const [note, setNote] = useState("");
+
+  useEffect(() => {
+    if (open) {
+      setNote("");
     }
+  }, [open])
+
+  const handleClose = () => {
+    setNote("");
+    onClose();
   }
 
+  const { put } = useFetch(null, { fetch: false });
+  const { showConfirm } = useConfirm();
+  const { onOpenSuccessNotify } = useNotification();
+
+  const onFinish = (data) => {
+    onOpenSuccessNotify("Cập nhật trạng thái thành công")
+    onUpdate(data);
+    onClose();
+  }
+
+  const handleUpdate = () => {
+    const body = {
+      id: data?.id,
+      status: BillStatusTab.en.CANCELED,
+      action: "Đã hủy đơn",
+      note,
+      createdBy: user?.id,
+    }
+    console.log(body);
+    showConfirm("Xác nhận hủy đơn hàng?", () => put(ADMIN_API.bill.putStatus, body, (response) => onFinish(response)));
+  };
+
+  return (
+
+    <Dialog fullWidth maxWidth="xs" open={open} onClose={handleClose} sx={{ bottom: 50 }}>
+      <Stack sx={{ px: 3, mt: 3, ml: 0.5 }}>
+        <Typography sx={{ display: 'flex' }} variant="h6">Xác nhận hủy đơn
+        </Typography>
+
+      </Stack>
+      <Stack spacing={1} sx={{ px: 3, maxHeight: 600, mt: 1 }}>
+        <Box
+          sx={{
+            p: 1,
+            mt: 1.5,
+            display: 'grid',
+            columnGap: 3.5,
+            rowGap: 2.5,
+            gridTemplateColumns: { xs: 'repeat(1, 1fr)', sm: 'repeat(1, 1fr)' },
+          }}
+        >
+          <Grid>
+            <LabelStyle>
+              Ghi chú
+            </LabelStyle>
+            <TextField
+              fullWidth
+              value={note}
+              size='small'
+              onChange={(e) => setNote(e.target.value)}
+              multiline
+              rows={3}
+            />
+          </Grid>
+        </Box>
+
+        <Stack direction="row" justifyContent="flex-end" spacing={1.5} sx={{ py: 3, px: 1 }}>
+          <Button color="inherit" size="small" onClick={handleClose}>
+            Hủy bỏ
+          </Button>
+          <Button size="small" onClick={handleUpdate} variant="contained" type="submit" disabled={note?.trim() === ""}>
+            Xác nhận
+          </Button>
+        </Stack>
+      </Stack>
+
+    </Dialog>
+  )
 }
+
+const LabelStyle = styled(Typography)(({ theme }) => ({
+  ...theme.typography.subtitle2,
+  color: theme.palette.text.secondary,
+  marginBottom: theme.spacing(0.5),
+}));

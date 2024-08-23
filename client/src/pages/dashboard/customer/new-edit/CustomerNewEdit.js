@@ -20,7 +20,7 @@ export default function CustomerNewEdit() {
   const { pathname } = useLocation();
   const { id } = useParams();
   const isEdit = pathname.includes('edit');
-  const { data } = useFetch(ADMIN_API.customer.details(id), { fetch: isEdit })
+  const { data, setData } = useFetch(ADMIN_API.customer.details(id), { fetch: isEdit })
 
   return (
 
@@ -33,7 +33,7 @@ export default function CustomerNewEdit() {
             { name: !isEdit ? 'Tạo khách hàng' : data?.code },
           ]}
         />
-        <CustomerNewEditForm isEdit={isEdit} currentCustomer={data} />
+        <CustomerNewEditForm isEdit={isEdit} currentCustomer={data} onUpdate={(dataCus) => setData(dataCus)} />
       </Container>
     </Page>
   );

@@ -20,7 +20,7 @@ EmployeTableRow.propTypes = {
 export default function EmployeTableRow({ row, onEditRow }) {
   const theme = useTheme();
 
-  const { code, fullName, phoneNumber, email, gender, avatarUrl, status } = row;
+  const { code, fullName, phoneNumber, email, gender, status } = row;
 
   return (
     <TableRow hover>
@@ -60,7 +60,7 @@ export default function EmployeTableRow({ row, onEditRow }) {
           }
           sx={{ textTransform: 'capitalize' }}
         >
-          {convertAccountStatus(status)}
+          {status === AccountStatusTab.en.IS_ACTIVE ? "Đang làm việc" : "Đã nghỉ việc"}
         </Label>
       </TableCell>
 

@@ -3,7 +3,7 @@ import { sentenceCase } from 'change-case';
 // @mui
 import { useTheme, styled } from '@mui/material/styles';
 import { Chip, Typography, Stack, Button } from '@mui/material';
-import { All } from '../../../../constants/enum';
+import { All, AccountStatusTab } from '../../../../constants/enum';
 // utils
 import getColorName from '../../../../utils/getColorName';
 import { convertAccountStatus } from '../../../../utils/ConvertEnum';
@@ -64,7 +64,7 @@ export default function EmployeeTagFiltered({
         <WrapperStyle>
           <LabelStyle>Trạng thái:</LabelStyle>
           <Stack direction="row" flexWrap="wrap" sx={{ p: 0.75 }}>
-            <Chip size="small" color='primary' label={convertAccountStatus(status)} deleteIcon={'ic:round-clear-all'} onDelete={onRemoveStatus} sx={{ m: 0.5 }} />
+            <Chip size="small" color='primary' label={status === AccountStatusTab.en.IS_ACTIVE ? "Đang làm việc" : "Đã nghĩ việc"} deleteIcon={'ic:round-clear-all'} onDelete={onRemoveStatus} sx={{ m: 0.5 }} />
           </Stack>
         </WrapperStyle>
       )}

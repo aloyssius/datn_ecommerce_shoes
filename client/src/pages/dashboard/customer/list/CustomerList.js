@@ -70,13 +70,13 @@ export default function CustomerList() {
     page,
     onChangePage,
     onChangeRowsPerPage,
-  } = useTable({});
+  } = useTable({defaultOrderBy: 'code'});
 
   const [tabs, setTabs] = useState(
     [
       { value: All.EN, label: All.VI, color: 'info', count: 0 },
-      { value: AccountStatusTab.en.IS_ACTIVE, label: AccountStatusTab.vi.IS_ACTIVE, color: 'success', count: 0 },
-      { value: AccountStatusTab.en.UN_ACTIVE, label: AccountStatusTab.vi.UN_ACTIVE, color: 'error', count: 0 },
+      { value: AccountStatusTab.en.IS_ACTIVE, label: "Đã có tài khoản", color: 'success', count: 0 },
+      { value: AccountStatusTab.en.UN_ACTIVE, label: "Chưa có tài khoản", color: 'error', count: 0 },
     ]
   );
 
@@ -131,7 +131,7 @@ export default function CustomerList() {
           count = statusCounts.reduce((acc, curr) => acc + curr.count, 0);
         } else {
           const statusCount = statusCounts.find(item => item.status === tab.value);
-          count = statusCount ? statusCount.count : tab.count;
+          count = statusCount ? statusCount.count : 0;
         }
 
         return {

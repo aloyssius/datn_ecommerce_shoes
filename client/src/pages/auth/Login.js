@@ -70,6 +70,7 @@ export default function Login() {
   return (
     <Page title="Login">
       <RootStyle>
+        {/*
         <HeaderStyle>
           <Logo />
           {smUp && (
@@ -95,42 +96,43 @@ export default function Login() {
             />
           </SectionStyle>
         )}
+        */}
 
         <Container maxWidth="sm">
           <ContentStyle>
-            <Stack direction="row" alignItems="center" sx={{ mb: 5 }}>
+            <Stack alignItems="center" sx={{ mb: 5, textAlign: 'center' }}>
+              {/*
               <Box sx={{ flexGrow: 1 }}>
                 <Typography variant="h4" gutterBottom>
-                  Sign in to Minimal
+                  Đăng nhập vào ĐKN Shop
                 </Typography>
                 <Typography sx={{ color: 'text.secondary' }}>Enter your details below.</Typography>
               </Box>
+              */}
 
-              <Tooltip title={capitalCase(method)} placement="right">
-                <>
-                  <Image
-                    disabledEffect
-                    src={`https://minimal-assets-api.vercel.app/assets/icons/auth/ic_${method}.png`}
-                    sx={{ width: 32, height: 32 }}
-                  />
-                </>
-              </Tooltip>
+              <Image
+                disabledEffect
+                src={`https://res.cloudinary.com/dgupbx2im/image/upload/v1724158710/zeoaq4hjed7adnxwgudu.png`}
+                sx={{ width: 172, height: 122 }}
+              />
             </Stack>
 
+            {/*
             <Alert severity="info" sx={{ mb: 3 }}>
               Use email : <strong>demo@minimals.cc</strong> / password :<strong> demo1234</strong>
             </Alert>
+            */}
 
             <LoginForm />
 
-            {!smUp && (
+            {/* !smUp && (
               <Typography variant="body2" align="center" sx={{ mt: 3 }}>
                 Don’t have an account?{' '}
                 <Link variant="subtitle2" component={RouterLink} to={PATH_AUTH.register}>
                   Get started
                 </Link>
               </Typography>
-            )}
+            ) */}
           </ContentStyle>
         </Container>
       </RootStyle>

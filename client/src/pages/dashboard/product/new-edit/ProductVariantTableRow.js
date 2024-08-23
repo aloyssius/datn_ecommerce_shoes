@@ -21,7 +21,7 @@ ProductVariantTableRow.propTypes = {
 const TextFieldNumberMemo = React.memo(TextFieldNumber);
 const SwitchStyleMemo = React.memo(SwitchStyle);
 
-export default function ProductVariantTableRow({ row, selected, onSelectRow, onEditRow, onDeleteRow }) {
+export default function ProductVariantTableRow({ row, selected, onSelectRow, onEditRow, onDeleteRow, isEdit }) {
 
   const { sizeName, quantity, status, colorId, sizeId } = row;
 
@@ -63,18 +63,20 @@ export default function ProductVariantTableRow({ row, selected, onSelectRow, onE
         </Stack>
       </TableCell>
 
-      <TableCell align="left">
-        <Tooltip title='Xóa kích cỡ' placement='right'>
-          <IconButton onClick={onDeleteRow}>
-            <Iconify
-              icon={'eva:trash-2-outline'}
-              width={23}
-              height={23}
-              sx={{ color: 'error.main' }}
-            />
-          </IconButton>
-        </Tooltip>
-      </TableCell>
+      {!isEdit &&
+        <TableCell align="left">
+          <Tooltip title='Xóa kích cỡ' placement='right'>
+            <IconButton onClick={onDeleteRow}>
+              <Iconify
+                icon={'eva:trash-2-outline'}
+                width={23}
+                height={23}
+                sx={{ color: 'error.main' }}
+              />
+            </IconButton>
+          </Tooltip>
+        </TableCell>
+      }
     </TableRow>
   );
 }

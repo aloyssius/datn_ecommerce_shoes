@@ -39,17 +39,32 @@ export default function CustomerTableRow({ row, onEditRow }) {
         </Avatar>
 
         <Stack>
+          {fullName ? 
           <Link noWrap variant="subtitle2" onClick={onEditRow} sx={{ color: 'primary.main', cursor: 'pointer' }}>
             {fullName}
           </Link>
+            :
+          <Typography variant="subtitle2" noWrap>
+            {"Chưa cập nhật"}
+          </Typography>
+          }
         </Stack>
       </TableCell>
 
       <TableCell align="left">{email}</TableCell>
 
-      <TableCell align="left">{phoneNumber}</TableCell>
+      <TableCell align="left">{phoneNumber || "Chưa cập nhật"}</TableCell>
 
-      <TableCell align="left">{gender === 0 ? 'Nam' : 'Nữ'}</TableCell>
+      <TableCell align="left">
+        {(() => {
+        if (gender === null) {
+            return "Chưa cập nhật";
+        } if (gender === 0) {
+            return "Nam";
+        } 
+            return "Nữ";
+    })()}
+      </TableCell>
 
       <TableCell align="left">
         <Label
@@ -61,7 +76,7 @@ export default function CustomerTableRow({ row, onEditRow }) {
           }
           sx={{ textTransform: 'capitalize' }}
         >
-          {convertAccountStatus(status)}
+          {status === AccountStatusTab.en.IS_ACTIVE ? "Đã có tài khoản" : "Chưa có tài khoản"}
         </Label>
       </TableCell>
 
