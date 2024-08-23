@@ -15,8 +15,10 @@ const initialState = {
   isAuthenticated: false,
   isInitialized: false,
   authUser: null,
+  addressDefault: {},
   onChangeUserAuth: () => { },
   onChangeIsAuth: () => { },
+  updateAddressDefault: () => { },
 };
 
 const AuthContext = createContext({
@@ -40,6 +42,7 @@ function AuthProvider({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [authUser, setAuthUser] = useState(null);
+  const [addressDefault, setAddressDefault] = useState({});
 
   useEffect(() => {
     const initialize = async () => {
@@ -57,6 +60,7 @@ function AuthProvider({ children }) {
           console.log(response?.data);
 
           setAuthUser(user);
+          setAddressDefault(user?.addressDefault)
           setIsAuthenticated(true);
         } else {
           setAuthUser(null);
@@ -85,6 +89,7 @@ function AuthProvider({ children }) {
     console.log(response?.data);
     setSession(accessToken);
     setAuthUser(user);
+    setAddressDefault(user?.addressDefault)
     setIsAuthenticated(true);
 
     if (isRemoveCartBrowser) {
@@ -99,6 +104,7 @@ function AuthProvider({ children }) {
       onCloseLoading();
       setSession(null);
       setAuthUser(null);
+      setAddressDefault({})
       setIsAuthenticated(false);
       history.push(PATH_PAGE.root);
     } catch (error) {
@@ -106,6 +112,7 @@ function AuthProvider({ children }) {
       onCloseLoading();
       setSession(null);
       setAuthUser(null);
+      setAddressDefault({})
       setIsAuthenticated(false);
       history.push(PATH_PAGE.root);
     }
@@ -122,6 +129,8 @@ function AuthProvider({ children }) {
         logout,
         onChangeIsAuth: (value) => setIsAuthenticated(value),
         onChangeUserAuth: (user) => setIsAuthenticated(user),
+        updateAddressDefault: (address) => setAddressDefault(address),
+        addressDefault,
       }}
     >
       {children}
