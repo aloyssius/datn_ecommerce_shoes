@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 // @mui
 import { styled, useTheme } from '@mui/material/styles';
 import { Stack, Drawer } from '@mui/material';
@@ -13,6 +13,7 @@ import cssStyles from '../../../utils/cssStyles';
 import { NAVBAR } from '../../../config';
 // components
 import Logo from '../../../components/Logo';
+import Image from '../../../components/Image';
 import Scrollbar from '../../../components/Scrollbar';
 import { NavSectionVertical } from '../../../components/nav-section';
 //
@@ -74,7 +75,16 @@ export default function NavbarVertical({ isOpenSidebar, onCloseSidebar }) {
         }}
       >
         <Stack direction="row" alignItems="center" justifyContent="space-between">
+          {/*
           <Logo />
+          */}
+          <Link to={'/dashboard/app'}>
+          <Image
+            disabledEffect
+            src={`https://res.cloudinary.com/dgupbx2im/image/upload/v1724158710/zeoaq4hjed7adnxwgudu.png`}
+            sx={{ width: 70, height: 50 }}
+          />
+          </Link>
 
           {isDesktop && !isCollapse && (
             <CollapseButton onToggleCollapse={onToggleCollapse} collapseClick={collapseClick} />
