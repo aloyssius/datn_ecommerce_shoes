@@ -121,4 +121,14 @@ class ApiResponse
         ];
         return response()->json($response, $code);
     }
+
+    public static function responseErrorVnPay($rspCode,  $message = '', $code = 400)
+    {
+        $response = [
+            'status' => $code,
+            'rspCode' => $rspCode,
+            'message'    => $message,
+        ];
+        return response()->json($response, $code);
+    }
 }

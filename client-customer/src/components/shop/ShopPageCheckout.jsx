@@ -1,16 +1,13 @@
 // react
-import React, { Component, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 // third-party
-import { connect } from 'react-redux';
 import { Helmet } from 'react-helmet';
-import { Link, Redirect, useLocation, useHistory } from 'react-router-dom';
+import { Link, useLocation, useHistory } from 'react-router-dom';
 
 // application
 import Collapse from '../shared/Collapse';
-import Currency from '../shared/Currency';
 import PageHeader from '../shared/PageHeader';
-import { Check9x7Svg } from '../../svg';
 
 // data stubs
 import payments from '../../data/shopPayments';
@@ -32,6 +29,7 @@ import {
 import { isVietnamesePhoneNumberValid } from '../../utils/validate';
 import useDeliveryApi from '../../hooks/useDelivery';
 import { CLIENT_API } from '../../api/apiConfig';
+import { Modal } from 'reactstrap';
 
 const FREE_SHIP_AMOUNT = 1000000;
 
@@ -39,12 +37,13 @@ function ShopPageCheckout() {
 
 
   const { provinces, districts, wards, fetchDistrictsByProvinceId, fetchWardsByDistrictId, setDistricts, setWards, fetchShipFee, shipFee, setShipFee } = useDeliveryApi();
-  const { cartItems, totalCart } = useUser();
-  const { authUser, isAuthenticated } = useAuth();
-  const { fetch, post } = useFetch(null, { fetch: false });
+  const { cartItems, totalCart, resetCart } = useUser();
+  const { authUser, isAuthenticated, addressDefault } = useAuth();
+  const { post } = useFetch(null, { fetch: false });
   const [currentPayment, setCurrentPayment] = useState("cash");
   const [currentDelivery, setCurrentDelivery] = useState("ghn");
   const [errorProduct, setErrorProduct] = useState([]);
+  const [open, setOpen] = useState(false);
   const history = useHistory();
   const location = useLocation();
 
@@ -194,7 +193,7 @@ function ShopPageCheckout() {
     );
   });
 
-  const paymentList = payments.map((payment) => {
+  const paymentList = payments.filter((item) => item.key !== "cashMethod").map((payment) => {
     const renderPayment = ({ setItemRef, setContentRef }) => (
       <li className="payment-methods__item" ref={setItemRef}>
         <label className="payment-methods__item-header">
@@ -255,15 +254,34 @@ function ShopPageCheckout() {
     ward: Yup.string().required('Bạn chưa chọn Xã/Phường'),
   });
 
+  useEffect(() => {
+    reset(defaultValues);
+
+    if (addressDefault) {
+      if (addressDefault?.provinceId) {
+        fetchDistrictsByProvinceId(addressDefault?.provinceId);
+      }
+
+      if (addressDefault?.districtId) {
+        fetchWardsByDistrictId(addressDefault?.districtId);
+      }
+
+      if (addressDefault?.wardCode) {
+        fetchShipFee(addressDefault?.districtId, addressDefault?.wardCode);
+      }
+    }
+
+  }, [authUser, addressDefault])
+
   const defaultValues = {
-    fullName: '',
-    email: '',
-    phoneNumber: '',
+    fullName: addressDefault?.fullName || '',
+    email: authUser?.email || '',
+    phoneNumber: addressDefault?.phoneNumber || '',
     note: '',
-    address: '',
-    district: '',
-    province: '',
-    ward: '',
+    address: addressDefault?.address || '',
+    district: addressDefault?.districtId || '',
+    province: addressDefault?.provinceId || '',
+    ward: addressDefault?.wardCode || '',
   }
 
   const methods = useForm({
@@ -274,15 +292,21 @@ function ShopPageCheckout() {
   const {
     handleSubmit,
     control,
-    watch,
     setValue,
     getValues,
     trigger,
+    reset,
     formState: { isSubmitted },
   } = methods;
 
   const onFinish = (res) => {
-    history.push(PATH_PAGE.checkout.success, { order: res });
+    if (res?.id) {
+      history.push(PATH_PAGE.checkout.success, { order: res });
+    }
+    else {
+      window.location.href = res;
+    }
+    resetCart();
   }
 
   const onError = (err) => {
@@ -305,6 +329,9 @@ function ShopPageCheckout() {
       discountAmount: getVoucher?.discountValue || null,
       cartItems,
       customerId: isAuthenticated ? authUser?.id : null,
+      voucherId: getVoucher?.id || null,
+      totalFinal: totalFinal(),
+      paymentMethod: currentPayment,
     }
     console.log(body);
     post(CLIENT_API.bill.post, body, (res) => onFinish(res), (res) => onError(res), false);
@@ -322,9 +349,8 @@ function ShopPageCheckout() {
 
     if (value === "") {
       setDistricts([]);
+      setWards([]);
     }
-
-    setWards([]);
 
     setShipFee(0);
     setValue('province', value);
@@ -400,6 +426,11 @@ function ShopPageCheckout() {
                   <div className="col-12 col-lg-6 col-xl-7">
                     <div className="card mb-lg-0">
                       <div className="card-body">
+                        {/*
+                        <div className='d-flex justify-content-between'>
+                          <button onClick={() => setOpen(true)} type='button' className='btn btn-secondary-light btn-sm mt-1'>Chọn địa chỉ</button>
+                        </div>
+                        */}
                         <h3 className="card-title">Thông tin giao hàng</h3>
                         <RHFInput name='fullName' topLabel='Họ và tên' placeholder="Nhập họ và tên" isRequired />
                         <RHFInput name='phoneNumber' topLabel='Số điện thoại' placeholder="Nhập số điện thoại" isRequired />
@@ -545,6 +576,19 @@ function ShopPageCheckout() {
           </div>
         </div>
       }
+
+      <Modal isOpen={open} fade={false} toggle={() => setOpen(false)} centered size="lg">
+        <div className="" style={{ padding: "20px 30px", height: "auto" }}>
+          <div className=''>
+            <span style={{ fontWeight: 'bold', fontSize: 17.5 }}>{"DANH SÁCH ĐỊA CHỈ"}</span>
+          </div>
+          <div className='mt-2' style={{ border: "1px solid #333333" }}></div>
+
+          <div className='mt-3'>
+          </div>
+
+        </div>
+      </Modal>
     </React.Fragment>
   );
 }

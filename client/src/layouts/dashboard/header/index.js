@@ -77,7 +77,9 @@ export default function DashboardHeader({ onOpenSidebar, isCollapse = false, ver
             <Iconify icon="eva:menu-2-fill" />
           </IconButtonAnimate>
         )}
+        {/*
         <Searchbar />
+        */}
 
         <Box sx={{ flexGrow: 1 }} />
 

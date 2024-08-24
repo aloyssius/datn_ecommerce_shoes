@@ -1,11 +1,13 @@
-import React, { Component, useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import theme from '../../data/theme';
 import Helmet from "react-helmet";
 import { Link, Redirect, useHistory, useLocation } from 'react-router-dom';
 import { PATH_PAGE } from '../../routes/path';
+import useAuth from '../../hooks/useAuth';
 
 function ShopPageCheckoutSuccess() {
 
+  const { isAuthenticated } = useAuth();
   const history = useHistory();
   const location = useLocation();
   const order = location.state?.order;
@@ -21,6 +23,8 @@ function ShopPageCheckoutSuccess() {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, [history]);
+
+  // ko nhat thiet phai clear state
 
   if (!order?.code) {
     return <Redirect to='not-found' />
@@ -41,7 +45,7 @@ function ShopPageCheckoutSuccess() {
           Mã đơn hàng của bạn là {" "}
           <span className='text-main' style={{ fontWeight: 500 }}>{order?.code}</span>
           , hãy lưu lại để tra cứu đơn hàng khi cần thiết. Vui lòng check mail xác nhận để kiểm tra thông tin hoặc tra cứu tình trạng đơn hàng {" "}
-          <Link to={`/track-order/${order?.code}`} className='text-decoration'>tại đây</Link>
+          <Link to={`${PATH_PAGE.track_order.details}?token=${order?.token}`} className='text-decoration'>tại đây</Link>
           . Gọi ngay hotline {" "}
           <Link className='text-decoration'>0963 429 749</Link>
           {" "} trước khi đơn hàng được chuyển qua giao nhận nếu bạn muốn thay đổi thông tin.

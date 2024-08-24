@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { Tooltip, Checkbox, IconButton, TableRow, TableCell, Typography, Stack, Link, MenuItem } from '@mui/material';
 import { format, parse } from 'date-fns';
-import { DiscountStatusTab } from '../../../../constants/enum';
+import { DiscountStatusTab, VoucherTypeDiscountVoucherTableRow } from '../../../../constants/enum';
 // utils
 import { fDate } from '../../../../utils/formatTime';
 import createAvatar from '../../../../utils/createAvatar';
@@ -15,6 +15,8 @@ import Avatar from '../../../../components/Avatar';
 import Iconify from '../../../../components/Iconify';
 import { TableMoreMenu } from '../../../../components/table';
 import { PATH_DASHBOARD } from '../../../../routes/paths';
+import { formatCurrencyVnd, formatNumber } from '../../../../utils/formatCurrency';
+import { convertDiscountStatus, convertVoucherType } from '../../../../utils/ConvertEnum';
 
 // ----------------------------------------------------------------------
 
@@ -26,7 +28,7 @@ VoucherTableRow.propTypes = {
 export default function VoucherTableRow({ row, onEditRow }) {
   const theme = useTheme();
 
-  const { code, name, type, value, quantity, startTime, endTime, status } = row;
+  const { code, name, type, value, quantity, startTime, endTime, status, typeDiscount } = row;
 
   const parsedStartTime = parse(startTime, 'HH:mm:ss dd-MM-yyyy', new Date());
   const parsedEndTime = parse(endTime, 'HH:mm:ss dd-MM-yyyy', new Date());
@@ -44,7 +46,7 @@ export default function VoucherTableRow({ row, onEditRow }) {
         </Stack>
       </TableCell>
 
-      <TableCell align="left">{value}</TableCell>
+      <TableCell align="left">{formatCurrencyVnd(String(value))} {typeDiscount === 'percent' ? VoucherTypeDiscountVoucherTableRow.vi.PERCENT : VoucherTypeDiscountVoucherTableRow.vi.VND}</TableCell>
 
       <TableCell align="left">{quantity}</TableCell>
 
@@ -62,7 +64,7 @@ export default function VoucherTableRow({ row, onEditRow }) {
           }
           sx={{ textTransform: 'capitalize' }}
         >
-          {status}
+          {convertDiscountStatus(status)}
         </Label>
       </TableCell>
 

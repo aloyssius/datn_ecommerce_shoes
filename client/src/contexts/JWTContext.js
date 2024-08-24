@@ -1,8 +1,9 @@
 import { createContext, useEffect, useReducer } from 'react';
 import PropTypes from 'prop-types';
 // utils
-import axios from '../utils/axios';
+import { apiGet, apiPost } from '../utils/axios';
 import { isValidToken, setSession } from '../utils/jwt';
+import { ADMIN_API } from '../api/apiConfig';
 
 // ----------------------------------------------------------------------
 
@@ -74,8 +75,10 @@ function AuthProvider({ children }) {
         if (accessToken && isValidToken(accessToken)) {
           setSession(accessToken);
 
-          const response = await axios.get('/api/account/my-account');
-          const { user } = response.data;
+          const response = await apiGet(ADMIN_API.my_account);
+          const user = response.data?.data;
+
+          console.log(user);
 
           dispatch({
             type: 'INITIALIZE',
@@ -109,11 +112,14 @@ function AuthProvider({ children }) {
   }, []);
 
   const login = async (email, password) => {
-    const response = await axios.post('/api/account/login', {
+    const response = await apiPost(ADMIN_API.login, {
       email,
       password,
     });
-    const { accessToken, user } = response.data;
+    const { accessToken, user } = response.data?.data;
+
+    console.log(accessToken);
+    console.log(user);
 
     setSession(accessToken);
     dispatch({
@@ -125,7 +131,7 @@ function AuthProvider({ children }) {
   };
 
   const register = async (email, password, firstName, lastName) => {
-    const response = await axios.post('/api/account/register', {
+    const response = await apiPost('/api/account/register', {
       email,
       password,
       firstName,
@@ -143,8 +149,15 @@ function AuthProvider({ children }) {
   };
 
   const logout = async () => {
-    setSession(null);
-    dispatch({ type: 'LOGOUT' });
+    try {
+      const response = await apiPost(ADMIN_API.logout);
+      setSession(null);
+      dispatch({ type: 'LOGOUT' });
+    } catch (error) {
+      setSession(null);
+      dispatch({ type: 'LOGOUT' });
+    }
+
   };
 
   return (

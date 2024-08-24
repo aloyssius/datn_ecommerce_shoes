@@ -16,7 +16,7 @@ import { ColorPreview } from '../../../../components/color-utils';
 export default function EcommerceLatestProducts() {
   return (
     <Card>
-      <CardHeader title="Latest Products" />
+      <CardHeader title="Sản phẩm mới nhất" />
       <Scrollbar>
         <Stack spacing={3} sx={{ p: 3, pr: 0 }}>
           {_ecommerceLatestProducts.map((product) => (

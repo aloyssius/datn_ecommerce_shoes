@@ -1,5 +1,5 @@
 // react
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 
 // third-party
 import { Link } from 'react-router-dom';
@@ -9,7 +9,6 @@ import { Helmet } from 'react-helmet';
 import Pagination from '../shared/Pagination';
 
 // data stubs
-import dataOrders from '../../data/accountOrders';
 import theme from '../../data/theme';
 import useFetch from '../../hooks/useFetch';
 import { CLIENT_API } from '../../api/apiConfig';
@@ -20,11 +19,24 @@ import { PATH_PAGE } from '../../routes/path';
 export default function AccountPageOrders() {
 
   const { authUser } = useAuth();
-  const { data } = useFetch(CLIENT_API.account.bills(authUser?.id));
+  const { fetch, res, page } = useFetch(null, { fetch: false });
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const ordersList = data?.map((order) => (
+  const handleFilter = () => {
+    const params = {
+      currentPage,
+      accountId: authUser?.id
+    };
+    fetch(CLIENT_API.account.bills, params, () => { }, () => { }, false);
+  }
+
+  useEffect(() => {
+    handleFilter();
+  }, [currentPage])
+
+  const ordersList = res?.map((order) => (
     <tr key={order.id}>
-      <td><Link className="text-decoration" style={{ fontWeight: '500' }} to={PATH_PAGE.track_order.details(order?.code)}>{`#${order?.code}`}</Link></td>
+      <td><Link className="text-decoration" style={{ fontWeight: '500' }} to={PATH_PAGE.account.order_detail(order?.code)}>{`#${order?.code}`}</Link></td>
       <td>{order.createdAt}</td>
       <td>{convertOrderStatus(order.status)}</td>
       <td>{formatCurrencyVnd(String(order.totalMoney))}</td>
@@ -60,7 +72,7 @@ export default function AccountPageOrders() {
       </div>
       <div className="card-divider" />
       <div className="card-footer">
-        {/*<Pagination current={page} total={3} onPageChange={this.handlePageChange} />*/}
+        <Pagination siblings={4} current={currentPage} total={page?.totalPages} onPageChange={(page) => setCurrentPage(page)} />
       </div>
     </div>
   );
@@ -78,7 +90,7 @@ const convertOrderStatus = (status) => {
       statusConverted = "Đang giao hàng";
       break;
     case "completed":
-      statusConverted = "Hoàn thành";
+      statusConverted = "Đã giao";
       break;
     default:
       statusConverted = "Đã hủy";

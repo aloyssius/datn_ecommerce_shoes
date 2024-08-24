@@ -25,6 +25,7 @@ class Account extends Authenticatable implements JWTSubject, MustVerifyEmail
         'phone_number',
         'password',
         'identity_card',
+        'email_verified_at',
         'avatar_url',
         'email',
         'gender',
@@ -51,10 +52,6 @@ class Account extends Authenticatable implements JWTSubject, MustVerifyEmail
         return null;
     }
 
-    public function addresses()
-    {
-        return $this->hasMany(Address::class);
-    }
     /**
      * Get the identifier that will be stored in the subject claim of the JWT.
      *

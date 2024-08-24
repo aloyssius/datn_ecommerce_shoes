@@ -52,7 +52,7 @@ const TABLE_HEAD = [
   { id: 'createdAt', label: 'Ngày tạo', align: 'left' },
   { id: 'totalMoney', label: 'Tổng tiền', align: 'left' },
   { id: 'status', label: 'Trạng thái thanh toán', align: 'left' },
-  { id: 'status', label: 'Trạng thái xử lý', align: 'left' },
+  { id: 'totalPayment', label: 'Trạng thái xử lý', align: 'left' }, // ? them status payment
   { id: 'action', label: '', align: 'left' },
 ];
 
@@ -72,7 +72,7 @@ export default function BillList() {
     onSelectRow,
     onSort,
     onChangeRowsPerPage,
-  } = useTable({});
+  } = useTable({ defaultOrderBy: "code" });
 
   const [tabs, setTabs] = useState(
     [
@@ -136,7 +136,7 @@ export default function BillList() {
           count = statusCounts.reduce((acc, curr) => acc + curr.count, 0);
         } else {
           const statusCount = statusCounts.find(item => item.status === tab.value);
-          count = statusCount ? statusCount.count : tab.count;
+          count = statusCount ? statusCount.count : 0;
         }
 
         return {
@@ -274,6 +274,9 @@ export default function BillList() {
               rowsPerPageOptions={[10, 15, 25]}
               component="div"
               rowsPerPage={rowsPerPage}
+              page={0}
+              onPageChange={onChangePage}
+              count={0}
               onRowsPerPageChange={onChangeRowsPerPage}
               ActionsComponent={() => null}
               labelDisplayedRows={() => ''}

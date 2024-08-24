@@ -27,7 +27,7 @@ class BillDetails extends BaseModel
               FROM IMAGES
               WHERE IS_DEFAULT = 1
             )
-            SELECT BD.id as billDetailId, PD.id, PD.sku, P.name, PD.price, C.name as colorName, PDI.path_url as pathUrl, S.name as sizeName, PD.quantity as stock, BD.quantity, BD.created_at as createdAt
+            SELECT BD.id as billDetailId, PD.id, PD.sku, P.name, BD.price, C.name as colorName, PDI.path_url as pathUrl, S.name as sizeName, PD.quantity as stock, BD.quantity, BD.created_at as createdAt
             FROM BILL_DETAILS BD
             JOIN BILLS B ON BD.BILL_ID = B.ID
             JOIN PRODUCT_DETAILS PD ON BD.PRODUCT_DETAILS_ID = PD.ID

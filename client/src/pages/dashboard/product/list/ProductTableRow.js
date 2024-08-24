@@ -6,6 +6,7 @@ import { FormControlLabel, Tooltip, Switch, Checkbox, IconButton, TableRow, Tabl
 import LinearProgress, { linearProgressClasses } from '@mui/material/LinearProgress';
 import { ProductStatusTab } from '../../../../constants/enum';
 // utils
+import useAuth from '../../../../hooks/useAuth';
 // components
 import Label from '../../../../components/Label';
 import Image from '../../../../components/Image';
@@ -48,7 +49,8 @@ const BorderLinearProgress = ({ value }) => {
 
 
 export default function ProductTableRow({ row, onEditRow, onUpdateRow }) {
-
+  const theme = useTheme();
+  const {user} = useAuth();
   const { id, code, name, brand, imageUrl, createdAt, totalQuantity, status, stockStatus } = row;
 
   const parsedDateTime = parse(createdAt, 'HH:mm:ss dd-MM-yyyy', new Date());
@@ -67,9 +69,15 @@ export default function ProductTableRow({ row, onEditRow, onUpdateRow }) {
     <TableRow hover>
       <TableCell align="left">
         <Stack>
+          {user?.role === 'admin' ?
           <Link noWrap variant="subtitle2" onClick={onEditRow} sx={{ color: 'primary.main', cursor: 'pointer' }}>
             {`${code}`}
           </Link>
+            :
+          <Typography variant="subtitle2" noWrap sx={{ color: 'primary.main'}}>
+            {code}
+          </Typography>
+          }
         </Stack>
       </TableCell>
 
@@ -116,13 +124,27 @@ export default function ProductTableRow({ row, onEditRow, onUpdateRow }) {
       </TableCell>
 
       <TableCell align="left">
+        {user?.role === 'admin' ? 
         <Stack sx={{ ml: 0.5 }}>
           <SwitchStyle defaultChecked={status === ProductStatusTab.en.IS_ACTIVE} action={handleUpdate} />
         </Stack>
+        :
+        <Label
+          variant={theme.palette.mode === 'light' ? 'ghost' : 'filled'}
+          color={
+            (status === ProductStatusTab.en.UN_ACTIVE && 'error') ||
+            (status === ProductStatusTab.en.IS_ACTIVE && 'success')
+          }
+          sx={{ textTransform: 'capitalize' }}
+        >
+          {convertProductStatus(status)}
+        </Label>
+        }
       </TableCell>
 
       <TableCell align="left">
 
+        {user?.role === 'admin' ? 
         <Tooltip title='Cập nhật'>
           <IconButton onClick={onEditRow}>
             <Iconify
@@ -133,6 +155,9 @@ export default function ProductTableRow({ row, onEditRow, onUpdateRow }) {
             />
           </IconButton>
         </Tooltip>
+        :
+          null
+        }
       </TableCell>
     </TableRow>
   );

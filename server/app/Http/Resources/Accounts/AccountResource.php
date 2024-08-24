@@ -28,7 +28,10 @@ class AccountResource extends JsonResource
             'status' => $this->status,
             'createdAt' => $this->created_at,
             'addresses' => $this->addresses,
+            'addressDefault' => $this->addressDefault,
             'cartItems' => $this->cartItems,
+            'role' => $this->role,
+            'active' => $this->email_verified_at,
         ];
     }
     /**

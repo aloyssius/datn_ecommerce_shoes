@@ -4,6 +4,10 @@ export default [
     url: '/',
   },
   {
+    title: 'GIỚI THIỆU',
+    url: '/site/about-us',
+  },
+  {
     title: 'SẢN PHẨM',
     url: '/product-list',
   },
@@ -16,8 +20,8 @@ export default [
     url: '/product-list/female',
   },
   {
-    title: 'GIỚI THIỆU',
-    url: '/site/about-us',
+    title: 'LIÊN HỆ',
+    url: '/contact',
   },
   // {
   //   title: 'Shop',

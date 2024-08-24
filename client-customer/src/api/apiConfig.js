@@ -8,10 +8,12 @@ const AUTH_API = '/api/auth';
 export const CLIENT_API = {
   root: ROOTS_API,
   bill: {
-    all: path(ROOTS_API, '/bills'),
     post: path(ROOTS_API, '/bills'),
-    put: (id) => path(ROOTS_API, `/bills/${id}`),
-    details: (id) => path(ROOTS_API, `/bills/${id}`),
+    details: path(ROOTS_API, `/tracking-order`),
+    vnpay: path(ROOTS_API, `/bills/vn-pay/process-payment`),
+    create_payment: path(ROOTS_API, `/bills/vn-pay/payment`),
+    billStatus: path(ROOTS_API, `/bill/status/customer`),
+    paymentMethod: path(ROOTS_API, `/bill/payment-method`),
   },
 
   cart: {
@@ -26,11 +28,6 @@ export const CLIENT_API = {
   product: {
     all: path(ROOTS_API, '/product-list'),
     home: path(ROOTS_API, '/product-home'),
-    post: path(ROOTS_API, '/products'),
-    attributes: path(ROOTS_API, '/products/attributes/all'),
-    postAttributes: path(ROOTS_API, '/products/attributes'),
-    put: path(ROOTS_API, `/products`),
-    putStatus: path(ROOTS_API, `/products/status`),
     details: (sku) => path(ROOTS_API, `/product-details/${sku}`),
     details_size: (id) => path(ROOTS_API, `/product-detail/${id}`),
   },
@@ -43,19 +40,22 @@ export const CLIENT_API = {
     verify: (id) => path(AUTH_API, `/account/verify/${id}`),
     details: path(AUTH_API, `/account/my-account`),
     put: path(AUTH_API, '/account/update'),
-    bills: (accountId) => path(AUTH_API, `/account/bills/${accountId}`),
-    // details: (id) => path(ROOTS_API, `/bills/${id}`),
+
+    bills: path(AUTH_API, `/account/bills`),
+    billDetail: path(AUTH_API, `/account/bill-detail`),
+    billStatus: path(AUTH_API, `/account/bill/status`),
+    billPaymentMethod: path(AUTH_API, `/account/bill/payment-method`),
+
     address: {
-      all: (id) => path(ROOTS_API, `/customers/${id}/address`),
-      details: (id) => path(ROOTS_API, `/customers/address/${id}`),
-      post: path(ROOTS_API, '/customers/address'),
-      put: (id) => path(ROOTS_API, `/customers/address/${id}`),
+      all: path(AUTH_API, `/account/addresses`),
+      delete: (id) => path(AUTH_API, `/account/addresses/${id}`),
+      post: path(AUTH_API, `/account/addresses`),
+      put: path(AUTH_API, `/account/addresses`),
+      putIsDefault: path(AUTH_API, `/account/addresses/default`),
     }
   },
 
   voucher: {
-    all: path(ROOTS_API, '/vouchers'),
-    post: path(ROOTS_API, '/vouchers'),
     details: path(ROOTS_API, `/cart-voucher`),
   },
 };

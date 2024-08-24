@@ -207,16 +207,20 @@ export default function ProductNewEditForm({ isEdit, currentProduct, onUpdateDat
       ...variantItem,
     };
   }));
+  const stripHtml = (html) => {
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    return doc.body.textContent || "";
+  };
 
   const isNotDefaultEdit =
     name?.trim() !== currentProduct?.name ||
     code?.trim() !== currentProduct?.code ||
-    description?.trim() !== currentProduct?.description ||
+    stripHtml(description?.trim()) !== currentProduct?.description ||
     brand?.id !== currentProduct?.brandId ||
     status !== (currentProduct?.status === ProductStatusTab.en.IS_ACTIVE) ||
     compareArrays(currentProduct?.categories, categorys, "id") ||
-    compareArrays(currentProduct?.colors, colors, "id") ||
-    compareArrays(currentProduct?.sizes, sizes, "id") ||
+    // compareArrays(currentProduct?.colors, colors, "id") ||
+    // compareArrays(currentProduct?.sizes, sizes, "id") ||
     compareArrayValues(oldProductItems, newProductItems, "quantity") ||
     compareArrayValues(oldProductItems, newProductItems, "status") ||
     compareArrayValues(oldProductItems, newProductItems, "price") ||
@@ -226,7 +230,7 @@ export default function ProductNewEditForm({ isEdit, currentProduct, onUpdateDat
 
   const handleCancel = () => {
     if (!isDefault && !isEdit) {
-      showConfirmCancel(`Xác nhận hủy bỏ thêm mới"?`, "Tất cả thay đổi của bạn sẽ không được lưu!", () => navigate(PATH_DASHBOARD.product.list))
+      showConfirmCancel(`Xác nhận hủy bỏ thêm mới?`, "Tất cả thay đổi của bạn sẽ không được lưu!", () => navigate(PATH_DASHBOARD.product.list))
       return;
     }
     if (isNotDefaultEdit && isEdit) {
@@ -681,12 +685,14 @@ export default function ProductNewEditForm({ isEdit, currentProduct, onUpdateDat
               </Stack>
             </Card>
 
-            <Card sx={{ p: 3 }} className="card">
-              <LabelStyleHeader>Màu sắc & kích cỡ</LabelStyleHeader>
-              <Stack spacing={3} sx={{ py: 2 }}>
-                <ProductNewEditColorSize data={data} onCreateAttribute={handleCreateAttribute} />
-              </Stack>
-            </Card>
+            {!isEdit &&
+              <Card sx={{ p: 3 }} className="card">
+                <LabelStyleHeader>Màu sắc & kích cỡ</LabelStyleHeader>
+                <Stack spacing={3} sx={{ py: 2 }}>
+                  <ProductNewEditColorSize data={data} onCreateAttribute={handleCreateAttribute} />
+                </Stack>
+              </Card>
+            }
 
             <Card sx={{ p: 3 }} className="card">
               <LabelStyleHeader>Phiên bản sản phẩm</LabelStyleHeader>
@@ -975,13 +981,13 @@ export default function ProductNewEditForm({ isEdit, currentProduct, onUpdateDat
 function compareArrays(oldArray, newArray, property) {
   const newSet = new Set(newArray.map(item => item[property]));
 
-  for (let i = 0; i < oldArray.length; i += 1) {
+  for (let i = 0; i < oldArray?.length; i += 1) {
     if (!newSet.has(oldArray[i][property])) {
       return true; // Một hoặc nhiều phần tử đã bị xóa
     }
   }
 
-  for (let i = 0; i < newArray.length; i += 1) {
+  for (let i = 0; i < newArray?.length; i += 1) {
     if (!oldArray.some(item => item[property] === newArray[i][property])) {
       return true; // Một hoặc nhiều phần tử đã được thêm
     }

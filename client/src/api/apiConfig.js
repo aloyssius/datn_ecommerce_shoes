@@ -2,15 +2,22 @@ function path(root, sublink) {
   return `${root}${sublink}`;
 }
 
-const ROOTS_API = '/api';
+const ROOTS_API = '/api/auth';
 
 export const ADMIN_API = {
   root: ROOTS_API,
+  login: path(ROOTS_API, '/login'),
+  my_account: path(ROOTS_API, '/my-account'),
+  logout: path(ROOTS_API, '/account/logout'),
+  changePass: path(ROOTS_API, '/change-password'),
+  statistics: path(ROOTS_API, '/statistics'),
   bill: {
     all: path(ROOTS_API, '/bills'),
     post: path(ROOTS_API, '/bills'),
     put: (id) => path(ROOTS_API, `/bills/${id}`),
     putStatus: path(ROOTS_API, `/bills/status`),
+    putAddress: path(ROOTS_API, `/bills/address`),
+    putQuantity: path(ROOTS_API, `/bills/product/quantity`),
     details: (id) => path(ROOTS_API, `/bills/${id}`),
   },
 
@@ -67,7 +74,7 @@ export const ADMIN_API = {
     all: path(ROOTS_API, '/customers'),
     details: (id) => path(ROOTS_API, `/customers/${id}`),
     post: path(ROOTS_API, '/customers'),
-    put: (id) => path(ROOTS_API, `/customers/${id}`),
+    put: path(ROOTS_API, `/customers`),
     // details: (id) => path(ROOTS_API, `/bills/${id}`),
     address: {
       all: (id) => path(ROOTS_API, `/customers/${id}/address`),
@@ -79,14 +86,18 @@ export const ADMIN_API = {
 
   voucher: {
     all: path(ROOTS_API, '/vouchers'),
+    details: (id) => path(ROOTS_API, `/vouchers/${id}`),
     post: path(ROOTS_API, '/vouchers'),
+    put: (id) => path(ROOTS_API, `/vouchers/${id}`),
+    endVoucher: (id) => path(ROOTS_API, `/vouchers/${id}/end`),
+    restoreVoucher: (id) => path(ROOTS_API, `/vouchers/${id}/restore`),
   },
 
   employee: {
     all: path(ROOTS_API, '/employees'),
     details: (id) => path(ROOTS_API, `/employees/${id}`),
     post: path(ROOTS_API, '/employees'),
-    put: (id) => path(ROOTS_API, `/employees/${id}`),
+    put: path(ROOTS_API, `/employees`),
     address: {
       all: (id) => path(ROOTS_API, `/employees/${id}/address`),
       details: (id) => path(ROOTS_API, `/employees/address/${id}`),

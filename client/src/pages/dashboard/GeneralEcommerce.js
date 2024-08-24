@@ -1,21 +1,25 @@
+import { useState } from 'react';
 // @mui
 import { useTheme } from '@mui/material/styles';
-import { Container, Grid } from '@mui/material';
+import { TextField, Container, Grid, Stack, Typography, MenuItem } from '@mui/material';
+import DatePicker from '@mui/lab/DatePicker';
+import { ADMIN_API } from '../../api/apiConfig';
 // hooks
 import useSettings from '../../hooks/useSettings';
+import useFetch from '../../hooks/useFetch';
 // components
 import Page from '../../components/Page';
 // sections
 import {
-  EcommerceWelcome,
-  EcommerceNewProducts,
+  // EcommerceWelcome,
+  // EcommerceNewProducts,
   EcommerceYearlySales,
   EcommerceBestSalesman,
   EcommerceSaleByGender,
   EcommerceWidgetSummary,
-  EcommerceSalesOverview,
+  // EcommerceSalesOverview,
   EcommerceLatestProducts,
-  EcommerceCurrentBalance,
+  // EcommerceCurrentBalance,
 } from '../../sections/@dashboard/general/e-commerce';
 
 // ----------------------------------------------------------------------
@@ -23,57 +27,138 @@ import {
 export default function GeneralEcommerce() {
   const theme = useTheme();
   const { themeStretch } = useSettings();
+  const { data } = useFetch(ADMIN_API.statistics);
+
+  const { totalBill, totalCount, totalPercent, products, years, revenueByMonth } = data;
+
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date());
+  const [date, setDate] = useState("Hôm nay");
 
   return (
-    <Page title="General: E-commerce">
-      <Container maxWidth={themeStretch ? false : 'xl'}>
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={8}>
-            <EcommerceWelcome />
-          </Grid>
+    <Page title="Thống kê - DKN Shop">
+      <>
+        {data?.totalBill &&
+          <Container maxWidth={themeStretch ? false : 'xl'}>
+            <Stack direction="row" justifyContent="space-between">
+              <Typography sx={{ fontSize: 40, fontWeight: '550' }}>THỐNG KÊ</Typography>
+              <Stack spacing={2} direction="row">
+                <DatePicker
+                  label="Từ ngày"
+                  inputFormat='dd/MM/yyyy'
+                  value={startDate}
+                  onChange={(date) => setStartDate(date)}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      fullWidth
+                      sx={{
+                        // maxWidth: { md: INPUT_WIDTH },
+                        width: 200,
+                      }}
+                    />
+                  )}
+                />
 
-          <Grid item xs={12} md={4}>
-            <EcommerceNewProducts />
-          </Grid>
+                <DatePicker
+                  label="Đến ngày"
+                  inputFormat='dd/MM/yyyy'
+                  value={endDate}
+                  onChange={(date) => setEndDate(date)}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      fullWidth
+                      sx={{
+                        // maxWidth: { md: INPUT_WIDTH },
+                        width: 200,
+                      }}
+                    />
+                  )}
+                />
 
-          <Grid item xs={12} md={4}>
-            <EcommerceWidgetSummary
-              title="Product Sold"
-              percent={2.6}
-              total={765}
-              chartColor={theme.palette.primary.main}
-              chartData={[22, 8, 35, 50, 82, 84, 77, 12, 87, 43]}
-            />
-          </Grid>
+                <TextField
+                  fullWidth
+                  select
+                  label="Tùy chọn"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  SelectProps={{
+                    MenuProps: {
+                      sx: { '& .MuiPaper-root': { maxHeight: 260 } },
+                    },
+                  }}
+                  sx={{
+                    width: 200,
+                    textTransform: 'capitalize',
+                  }}
+                >
+                  {dates.map((option) => (
+                    <MenuItem
+                      key={option}
+                      value={option}
+                      sx={{
+                        mx: 1,
+                        my: 0.5,
+                        borderRadius: 0.75,
+                        typography: 'body2',
+                        textTransform: 'capitalize',
+                      }}
+                    >
+                      {option}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Stack>
+            </Stack>
+            <Grid container spacing={3} sx={{ mt: 0 }}>
 
-          <Grid item xs={12} md={4}>
-            <EcommerceWidgetSummary
-              title="Total Balance"
-              percent={-0.1}
-              total={18765}
-              chartColor={theme.palette.chart.green[0]}
-              chartData={[56, 47, 40, 62, 73, 30, 23, 54, 67, 68]}
-            />
-          </Grid>
+              <Grid item xs={12} md={4}>
+                <EcommerceWidgetSummary
+                  title="Tổng Doanh Thu"
+                  percent={2.6}
+                  total={parseInt(totalBill?.totalMoney, 10) || '0đ'}
+                  chartColor={theme.palette.primary.main}
+                  // chartData={[22, 8, 35, 50, 82, 84, 77, 12, 87, 43]}
+                  type='revenue'
+                  color='success'
+                />
+              </Grid>
 
-          <Grid item xs={12} md={4}>
-            <EcommerceWidgetSummary
-              title="Sales Profit"
-              percent={0.6}
-              total={4876}
-              chartColor={theme.palette.chart.red[0]}
-              chartData={[40, 70, 75, 70, 50, 28, 7, 64, 38, 27]}
-            />
-          </Grid>
+              <Grid item xs={12} md={4}>
+                <EcommerceWidgetSummary
+                  title="Tổng Đơn Hàng"
+                  percent={2}
+                  total={totalBill?.totalOrder || 0}
+                  // chartColor={theme.palette.chart.green[0]}
+                  chartData={[56, 47, 40, 62, 73, 30, 23, 54, 67, 68]}
+                  type='order'
+                  color='info'
+                />
+              </Grid>
 
-          <Grid item xs={12} md={6} lg={4}>
-            <EcommerceSaleByGender />
-          </Grid>
+              <Grid item xs={12} md={4}>
+                <EcommerceWidgetSummary
+                  title="Tổng Sản Phẩm Đã Bán"
+                  percent={0.6}
+                  total={totalBill?.totalSold || 0}
+                  type='product_sold'
+                  // chartColor={theme.palette.chart.red[0]}
+                  chartData={[40, 70, 75, 70, 50, 28, 7, 64, 38, 27]}
+                  color='warning'
+                />
+              </Grid>
 
-          <Grid item xs={12} md={6} lg={8}>
-            <EcommerceYearlySales />
-          </Grid>
+              <Grid item xs={12} md={6} lg={4}>
+                <EcommerceSaleByGender totalCount={totalCount || 0} totalPercent={totalPercent || []} />
+              </Grid>
 
+              <Grid item xs={12} md={6} lg={8}>
+                <EcommerceYearlySales years={years} month={revenueByMonth} />
+              </Grid>
+
+
+              {/*
           <Grid item xs={12} md={6} lg={8}>
             <EcommerceSalesOverview />
           </Grid>
@@ -83,14 +168,25 @@ export default function GeneralEcommerce() {
           </Grid>
 
           <Grid item xs={12} md={6} lg={8}>
-            <EcommerceBestSalesman />
+            <EcommerceBestSalesman type='product_hot' />
           </Grid>
 
           <Grid item xs={12} md={6} lg={4}>
             <EcommerceLatestProducts />
           </Grid>
-        </Grid>
-      </Container>
+          */}
+
+              <Grid item xs={12} md={12} lg={12}>
+                <EcommerceBestSalesman type='product_hot' products={products} />
+              </Grid>
+
+
+            </Grid>
+          </Container>
+        }
+      </>
     </Page>
   );
 }
+
+const dates = ["Hôm nay", "Tuần này", "Tháng này", "Năm nay"];

@@ -49,6 +49,8 @@ class ProductDetails extends BaseModel
             WHERE P.status = '$productActiveStatus'
         ";
 
+        //where attribute active ??
+
         if ($req->filled('search')) {
             $query .= " AND P.NAME LIKE '%" . $req->search . "%' OR P.CODE LIKE '%" . $req->search . "%' ";
         }

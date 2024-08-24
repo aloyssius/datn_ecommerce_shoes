@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { apiGet, apiPost, apiPut, apiDelete } from '../utils/axios';
+import useConfirm from './useConfirm';
 import useLoading from './useLoading';
 import useNotification from './useNotification';
 
 const useFetch = (url, options = { fetch: true }) => {
   const { onOpenErrorNotify } = useNotification();
   const { onOpenLoading, onCloseLoading } = useLoading();
+  const { showSuccess } = useConfirm();
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [page, setPage] = useState({});
@@ -61,6 +63,14 @@ const useFetch = (url, options = { fetch: true }) => {
       setRes(data.data);
       console.log(data.data);
 
+      if (data.page) {
+        setPage(data.page);
+      }
+
+      if (data.otherData) {
+        setOtherData(data.otherData)
+      }
+
       setIsLoading(false);
       onCloseLoading();
       onFinish?.(response.data.data);
@@ -92,7 +102,7 @@ const useFetch = (url, options = { fetch: true }) => {
     }
   };
 
-  const put = async (url, data, onFinish) => {
+  const put = async (url, data, onFinish, showNoti = true, showModal = false) => {
     onOpenLoading();
     try {
       const response = await apiPut(url, data);
@@ -101,7 +111,12 @@ const useFetch = (url, options = { fetch: true }) => {
     } catch (error) {
       console.log(error);
       onCloseLoading();
-      onOpenErrorNotify(error?.message);
+      if (showNoti) {
+        onOpenErrorNotify(error?.message);
+      }
+      if (showModal) {
+        showSuccess(error?.message, "", 'error');
+      }
     }
   };
 
@@ -125,6 +140,7 @@ const useFetch = (url, options = { fetch: true }) => {
     post,
     put,
     res,
+    setRes,
     remove,
     isLoading,
     firstFetch,

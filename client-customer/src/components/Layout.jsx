@@ -48,6 +48,7 @@ const AccountRegisterSuccess = Loadable(lazy(() => import('./account/AccountRegi
 const ProductList = Loadable(lazy(() => import('./shop/ShopPageCategory')));
 const ProductDetail = Loadable(lazy(() => import('./shop/ShopPageProduct')));
 const CheckoutSuccess = Loadable(lazy(() => import('./shop/ShopPageCheckoutSuccess')));
+const VnPayPayment = Loadable(lazy(() => import('./shop/ShopPageVnPayPayment')));
 const OrderDetails = Loadable(lazy(() => import('./account/AccountPageOrderDetails')));
 
 function Layout(props) {
@@ -64,6 +65,7 @@ function Layout(props) {
         <title>{theme.name}</title>
         <meta name="description" content={theme.fullName} />
       </Helmet>
+
 
       <Quickview />
 
@@ -110,13 +112,22 @@ function Layout(props) {
               )}
             />
 
+            <Route
+              exact
+              path="/tracking-order"
+              render={(props) => (
+                <OrderDetails {...props} trackOrder />
+              )}
+            />
+
             <Route exact path="/product-detail/:sku" component={ProductDetail} />
+            <Route exact path="/vnpay-payment" component={VnPayPayment} />
+
             <Route exact path="/order-completed" component={CheckoutSuccess} />
 
             <Route exact path="/cart" component={MyCart} />
             <Route exact path="/checkout" component={Checkout} />
             <Route exact path="/track-order" component={TrackOrder} />
-            <Route exact path="/track-order/:id" component={OrderDetails} />
 
             <Route path="/account/register-success/:id" render={() => (
               <GuestGuard>
@@ -135,8 +146,14 @@ function Layout(props) {
             )} />
 
             <Route path="/account" render={(props) => (
-              <AuthGuard  >
+              <AuthGuard>
                 <MyAccount {...props} />
+              </AuthGuard>
+            )} />
+
+            <Route path="/order-detail/:code" render={(props) => (
+              <AuthGuard>
+                <OrderDetails {...props} />
               </AuthGuard>
             )} />
 

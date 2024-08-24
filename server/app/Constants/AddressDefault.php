@@ -4,8 +4,8 @@ namespace App\Constants;
 
 class AddressDefault
 {
-    const IS_DEFAULT = 0;
-    const UN_DEFAULT = 1;
+    const IS_DEFAULT = 1;
+    const UN_DEFAULT = 0;
 
     public static function toArray(): array
     {

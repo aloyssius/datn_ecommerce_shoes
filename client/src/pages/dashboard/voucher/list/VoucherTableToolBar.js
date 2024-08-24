@@ -1,9 +1,10 @@
 import PropTypes from 'prop-types';
-import { Stack, InputAdornment, TextField, MenuItem, Button } from '@mui/material';
+import { Stack, InputAdornment, TextField, MenuItem } from '@mui/material';
 import DatePicker from '@mui/lab/DatePicker';
 import { convertVoucherType } from '../../../../utils/ConvertEnum';
 // components
 import Iconify from '../../../../components/Iconify';
+
 // ----------------------------------------------------------------------
 
 const INPUT_WIDTH = 160;
@@ -32,7 +33,7 @@ export default function VoucherTableToolbar({
   optionsType,
 }) {
   return (
-    <Stack spacing={2} direction={{ xs: 'column', md: 'row' }} sx={{ py: 2.5, px: 3 }}>
+    <Stack spacing={2} direction={{ xs: 'column', md: 'row' }} sx={{ py: 2.5, px: 2 }}>
       <TextField
         fullWidth
         select

@@ -97,16 +97,20 @@ export default function ProductVariantTableContainer({ variant, isSubmitted, onR
                 }
                 actions={
                   <Stack spacing={1} direction="row">
+                    {/*
                     <Tooltip title="Cập nhật số lượng" placement='left'>
                       <IconButton color="primary">
                         <Iconify icon={'eva:edit-2-outline'} />
                       </IconButton>
                     </Tooltip>
-                    <Tooltip title="Xóa kích cỡ" placement='right'>
-                      <IconButton color="error" onClick={() => handleRemoveSizes(variant.colorId)}>
-                        <Iconify icon={'eva:trash-2-outline'} />
-                      </IconButton>
-                    </Tooltip>
+                    */}
+                    {!isEdit &&
+                      <Tooltip title="Xóa kích cỡ" placement='right'>
+                        <IconButton color="error" onClick={() => handleRemoveSizes(variant.colorId)}>
+                          <Iconify icon={'eva:trash-2-outline'} />
+                        </IconButton>
+                      </Tooltip>
+                    }
                   </Stack>
                 }
               />
@@ -116,7 +120,7 @@ export default function ProductVariantTableContainer({ variant, isSubmitted, onR
               order={order}
               orderBy={orderBy}
               onSort={onSort}
-              headLabel={TABLE_HEAD}
+              headLabel={!isEdit ? TABLE_HEAD : TABLE_HEAD_EDIT}
               rowCount={data.length}
               numSelected={selected.length}
               onSelectAllRows={(checked) =>
@@ -130,6 +134,7 @@ export default function ProductVariantTableContainer({ variant, isSubmitted, onR
               {dataFiltered?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
                 <ProductVariantTableRow
                   key={row.sizeId}
+                  isEdit={isEdit}
                   row={row}
                   selected={selected.includes(row.sizeId)}
                   onSelectRow={() => onSelectRow(row.sizeId)}
@@ -161,6 +166,12 @@ const TABLE_HEAD = [
   { id: 'quantity', label: 'Số lượng tồn', align: 'left' },
   { id: 'status', label: 'Trạng thái', align: 'left' },
   { id: 'action', label: '', align: 'left' },
+];
+
+const TABLE_HEAD_EDIT = [
+  { id: 'sizeName', label: 'Kích cỡ', align: 'left' },
+  { id: 'quantity', label: 'Số lượng tồn', align: 'left' },
+  { id: 'status', label: 'Trạng thái', align: 'left' },
 ];
 
 function applySortFilter({

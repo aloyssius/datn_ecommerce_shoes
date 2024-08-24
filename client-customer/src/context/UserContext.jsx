@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { useLocation } from 'react-router-dom'
+import { useLocation, useHistory } from 'react-router-dom'
 import { createContext, useEffect, useState } from 'react';
 import { CLIENT_API } from '../api/apiConfig';
 import useAuth from '../hooks/useAuth';
@@ -16,6 +16,7 @@ const initialState = {
   cartItems: [],
   totalCart: 0,
   onUpdateVoucher: () => { },
+  resetCart: () => { },
 }
 
 const UserContext = createContext(initialState);
@@ -30,6 +31,7 @@ function UserProvider({ children }) {
   const { authUser, isInitialized } = useAuth();
   const { onOpenSuccessNotify, onOpenErrorNotify } = useNotification();
   const location = useLocation();
+  const history = useHistory();
 
   const [cartItems, setCartItems] = useState([]);
 
@@ -107,7 +109,7 @@ function UserProvider({ children }) {
 
   }
 
-  const onFinishAddToCartForUser = (res) => {
+  const onFinishAddToCartForUser = (res, buyNow) => {
     let hasError = false;
     if (cartItems.length > 0) {
       const updatedCartItems = cartItems.map(item => {
@@ -148,12 +150,19 @@ function UserProvider({ children }) {
     }
     if (!hasError) {
       onOpenSuccessNotify('Thêm vào giỏ hàng thành công');
+
+      if (buyNow) {
+        history.push(PATH_PAGE.cart.root);
+      }
     }
   }
 
-  const onFinishAddToCartForAccount = (res) => {
+  const onFinishAddToCartForAccount = (res, buyNow) => {
     setCartItems(res);
     onOpenSuccessNotify('Thêm vào giỏ hàng thành công');
+    if (buyNow) {
+      history.push(PATH_PAGE.cart.root);
+    }
   }
 
   const onFinishDeleteCartItemForAccount = (res, onCheckVoucher) => {
@@ -166,16 +175,16 @@ function UserProvider({ children }) {
     }
   }
 
-  const handleUpdateCart = (id) => {
+  const handleUpdateCart = (id, buyNow = false) => {
     if (!authUser) {
-      fetch(CLIENT_API.product.details_size(id), null, (res) => onFinishAddToCartForUser(res));
+      fetch(CLIENT_API.product.details_size(id), null, (res) => onFinishAddToCartForUser(res, buyNow));
     }
     else {
       const body = {
         productItemId: id,
         accountId: authUser?.id,
       }
-      post(CLIENT_API.cart.post, body, (res) => onFinishAddToCartForAccount(res));
+      post(CLIENT_API.cart.post, body, (res) => onFinishAddToCartForAccount(res, buyNow));
     }
   }
 
@@ -264,6 +273,17 @@ function UserProvider({ children }) {
     }
   }
 
+  const resetCart = () => {
+    if (authUser) {
+      setCartItems([]);
+    }
+    else {
+      const cartItemsReset = [];
+      setCartItems(cartItemsReset);
+      localStorage.setItem(LOCAL_STORAGE_CART_ITEMS_KEY, JSON.stringify(cartItemsReset));
+    }
+  }
+
   return (
     <UserContext.Provider
       value={{
@@ -273,6 +293,7 @@ function UserProvider({ children }) {
         onUpdateCartSize: handleUpdateCartItemSize,
         onUpdateCartQuantity: handleUpdateCartItemQuantity,
         totalCart: cartItems && cartItems.reduce((total, item) => total + (item?.price * item?.quantity), 0),
+        resetCart,
       }}
     >
       {children}

@@ -20,9 +20,11 @@ use App\Models\Role;
 use App\Constants\AddressDefault as AddressDefault;
 use App\Constants\ConstantSystem;
 use App\Exceptions\RestApiException;
+use App\Jobs\SendEmailCreateCustomer;
 use App\Models\Address;
 use Carbon\Carbon;
 use DateTime;
+use Illuminate\Support\Str;
 
 class CustomerController extends Controller
 {
@@ -31,12 +33,12 @@ class CustomerController extends Controller
     {
 
         $accounts = Account::join('roles', 'accounts.role_id', '=', 'roles.id')
-            ->select('accounts.id', 'accounts.full_name', 'accounts.code', 'accounts.email', 'accounts.avatar_url', 'accounts.phone_number', 'accounts.birth_date', 'accounts.gender', 'accounts.status', 'accounts.created_at')
+            ->select('accounts.email_verified_at', 'accounts.id', 'accounts.full_name', 'accounts.code', 'accounts.email', 'accounts.avatar_url', 'accounts.phone_number', 'accounts.birth_date', 'accounts.gender', 'accounts.status', 'accounts.created_at')
             ->where('roles.code', '=', RoleEnum::CUSTOMER);
 
         if ($req->filled('search')) {
             $search = $req->search;
-            $searchFields = ['accounts.code', 'accounts.full_name', 'accounts.phone_number'];
+            $searchFields = ['accounts.code', 'accounts.full_name', 'accounts.phone_number', 'accounts.email'];
             QueryHelper::buildQuerySearchContains($accounts, $search, $searchFields);
         }
 
@@ -48,7 +50,8 @@ class CustomerController extends Controller
             QueryHelper::buildQueryEquals($accounts, 'accounts.gender', $req->gender);
         }
 
-        $statusCounts = Account::select(DB::raw('count(status) as count, status'))
+        $statusCounts = Account::join('roles', 'accounts.role_id', '=', 'roles.id')->select(DB::raw('count(status) as count, status'))
+            ->where('roles.code', '=', RoleEnum::CUSTOMER)
             ->groupBy('status')
             ->get();
 
@@ -66,11 +69,52 @@ class CustomerController extends Controller
             throw new NotFoundException("Không tìm thấy khách hàng có id là " . $id);
         }
 
-        $addresses = Address::select(AddressResource::fields())
-            ->where('account_id', '=', $account->id)
-            ->orderBy('created_at', 'desc')
-            ->get();
-        $account['addresses'] = AddressResource::collection($addresses);
+        // $addresses = Address::select(AddressResource::fields())
+        //     ->where('account_id', '=', $account->id)
+        //     ->orderBy('created_at', 'desc')
+        //     ->get();
+        // $account['addresses'] = AddressResource::collection($addresses);
+        return ApiResponse::responseObject(new AccountResource($account));
+    }
+
+    public function update(AccountRequestBody $req)
+    {
+        $account = Account::find($req->id);
+
+        if (!$account) {
+            throw new RestApiException("Không tìm thấy khách hàng");
+        }
+
+        $roleCustomer = Role::where('code', RoleEnum::CUSTOMER)->first();
+
+        if ($req->phoneNumber !== $account->phone_number) {
+            $findPhoneNumberCustomer = Account::where('phone_number', $req->phoneNumber)
+                ->where('role_id', $roleCustomer->id)->first();
+
+            if ($findPhoneNumberCustomer) {
+                throw new RestApiException("SĐT này đã tồn tại");
+            }
+        }
+
+        $birthDate = null;
+        if ($req->birthDate !== null && DateTime::createFromFormat('d-m-Y', $req->birthDate)) {
+            $birthDate = date('Y-m-d', strtotime($req->birthDate));
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $account->full_name = $req->fullName;
+            $account->phone_number = $req->phoneNumber;
+            $account->birth_date = $birthDate === null ? null : $birthDate;
+            $account->gender = $req->gender;
+            $account->save();
+
+            DB::commit();
+        } catch (\Exception $e) {
+            throw new RestApiException($e->getMessage());
+        }
+
 
         return ApiResponse::responseObject(new AccountResource($account));
     }
@@ -96,16 +140,31 @@ class CustomerController extends Controller
             throw new RestApiException("SĐT này đã tồn tại");
         }
 
+        $length = 12;
+        $pass = Str::random($length, 'aA0');
+
         $moreColumns = [
             'code' => CustomCodeHelper::generateCode($account, $prefix),
             'roleId' => $roleCustomer->id,
+            'emailVerifiedAt' => now(),
+            'password' => bcrypt($pass),
         ];
 
         // convert req
         $accountConverted = ConvertHelper::convertColumnsToSnakeCase($req->all(), $moreColumns);
 
         // save
-        $accountCreated = Account::create($accountConverted);
+        try {
+            DB::beginTransaction();
+
+            $accountCreated = Account::create($accountConverted);
+
+            DB::commit();
+        } catch (\Exception $e) {
+            throw new RestApiException($e->getMessage());
+        }
+
+        SendEmailCreateCustomer::dispatch($accountCreated, $pass)->delay(now()->addSeconds(3));
         return ApiResponse::responseObject(new AccountResource($accountCreated));
     }
 

@@ -129,7 +129,7 @@
                     <tr>
                         <td align="center" valign="top" style="padding: 30px 24px;">
                             <a href="/" target="_blank" style="display: inline-block;">
-                                <img src="https://res.cloudinary.com/dgupbx2im/image/upload/v1721838403/products/ltxmvpgst73yvw1ikgfz.png" alt="Logo" border="0" width="200px" style="display: block; width: 200px; max-width: 200px; min-width: 200px;">
+                                <img src="https://res.cloudinary.com/dgupbx2im/image/upload/v1721838403/products/ltxmvpgst73yvw1ikgfz.png" border="0" width="200px" style="display: block; width: 200px; max-width: 200px; min-width: 200px;">
                             </a>
                         </td>
                     </tr>

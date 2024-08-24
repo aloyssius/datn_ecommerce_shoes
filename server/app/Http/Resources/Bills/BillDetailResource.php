@@ -31,10 +31,15 @@ class BillDetailResource extends JsonResource
             'comfirmationDate' => $this->confirmation_date,
             'deliveryDate' => $this->delivery_date,
             'completionDate' => $this->completion_date,
+            'cancellationDate' => $this->cancellation_date,
             'customerId' => $this->customer_id,
             'histories' => $this->histories,
             'payment' => $this->payment,
             'billItems' => $this->billItems,
+            'totalFinal' => $this->totalFinal,
+            'paymentMethod' => $this->payment_method,
+            'token' => $this->token,
+            'account' => $this->account,
         ];
     }
     /**

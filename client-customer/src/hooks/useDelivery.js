@@ -35,6 +35,23 @@ const useDeliveryApi = () => {
     }
   };
 
+  const fetchApiNoLoading = async (url, params = {}) => {
+    try {
+      const response = await axios.get(url, {
+        params: {
+          ...params,
+        },
+        headers: {
+          token,
+          Accept: "application/json",
+        },
+      });
+      return response.data.data;
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const fetchProvinces = async () => {
     const url = `https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/province`;
     const response = await fetchApi(url);
@@ -74,11 +91,35 @@ const useDeliveryApi = () => {
     setShipFee(response.total);
   };
 
+  const fetchProvincesReturn = async () => {
+    const url = `https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/province`;
+    const response = await fetchApiNoLoading(url);
+    return response;
+  };
+
+  const fetchDistrictsByProvinceIdReturn = async (provinceId) => {
+    const url = `https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/district`;
+    const params = {
+      province_id: provinceId,
+    };
+    const response = await fetchApiNoLoading(url, params);
+    return response;
+  };
+
+  const fetchWardsByDistrictIdReturn = async (districtId) => {
+    const url = `https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/ward`;
+    const params = {
+      district_id: districtId,
+    };
+    const response = await fetchApiNoLoading(url, params);
+    return response;
+  };
+
   useEffect(() => {
     fetchProvinces();
   }, [])
 
-  return { provinces, districts, wards, fetchWardsByDistrictId, fetchDistrictsByProvinceId, setWards, setDistricts, shipFee, fetchShipFee, setShipFee };
+  return { provinces, districts, wards, fetchWardsByDistrictId, fetchDistrictsByProvinceId, setWards, setDistricts, shipFee, fetchShipFee, setShipFee, fetchWardsByDistrictIdReturn, fetchDistrictsByProvinceIdReturn, fetchProvincesReturn };
 }
 
 export default useDeliveryApi;

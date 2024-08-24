@@ -34,6 +34,7 @@ export const PATH_PAGE = {
 
 export const PATH_DASHBOARD = {
   root: ROOTS_DASHBOARD,
+  app: path(ROOTS_DASHBOARD, '/app'),
   bill: {
     root: path(ROOTS_DASHBOARD, '/bill'),
     list: path(ROOTS_DASHBOARD, '/bill/list'),

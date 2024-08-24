@@ -119,6 +119,18 @@ export const VoucherTypeDiscount = {
   },
 };
 
+export const VoucherTypeDiscountVoucherTableRow = {
+  en: {
+    VND: 'vnd',
+    PERCENT: 'percent',
+  },
+  vi: {
+    VND: 'VNĐ',
+    PERCENT: '%',
+  },
+};
+
+
 export const AccountStatusTab = {
   en: {
     IS_ACTIVE: 'is_active',

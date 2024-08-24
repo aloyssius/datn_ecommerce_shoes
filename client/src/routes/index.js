@@ -7,7 +7,7 @@ import LogoOnlyLayout from '../layouts/LogoOnlyLayout';
 // guards
 import GuestGuard from '../guards/GuestGuard';
 import AuthGuard from '../guards/AuthGuard';
-// import RoleBasedGuard from '../guards/RoleBasedGuard';
+import RoleBasedGuard from '../guards/RoleBasedGuard';
 // config
 import { PATH_AFTER_LOGIN } from '../config';
 // components
@@ -15,12 +15,15 @@ import LoadingScreen from '../components/LoadingScreen';
 
 // ----------------------------------------------------------------------
 
+const ROLE_ADMIN = 'admin';
+const ROLE_EMP = 'employee';
+
 const Loadable = (Component) => (props) => {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const { pathname } = useLocation();
 
   return (
-    <Suspense fallback={<LoadingScreen isDashboard={pathname.includes('/dashboard')} />}>
+    <Suspense fallback={<LoadingScreen />}>
       <Component {...props} />
     </Suspense>
   );
@@ -39,18 +42,18 @@ export default function Router() {
             </GuestGuard>
           ),
         },
-        {
-          path: 'register',
-          element: (
-            <GuestGuard>
-              <Register />
-            </GuestGuard>
-          ),
-        },
-        { path: 'login-unprotected', element: <Login /> },
-        { path: 'register-unprotected', element: <Register /> },
-        { path: 'reset-password', element: <ResetPassword /> },
-        { path: 'verify', element: <VerifyCode /> },
+        // {
+        //   path: 'register',
+        //   element: (
+        //     <GuestGuard>
+        //       <Register />
+        //     </GuestGuard>
+        //   ),
+        // },
+        // { path: 'login-unprotected', element: <Login /> },
+        // { path: 'register-unprotected', element: <Register /> },
+        // { path: 'reset-password', element: <ResetPassword /> },
+        // { path: 'verify', element: <VerifyCode /> },
       ],
     },
 
@@ -58,19 +61,23 @@ export default function Router() {
     {
       path: 'dashboard',
       element: (
-        // <AuthGuard>
-        // </AuthGuard>
-        <DashboardLayout />
+        <AuthGuard>
+          <DashboardLayout />
+        </AuthGuard>
       ),
       children: [
-
-
-        // { element: <Navigate to={PATH_AFTER_LOGIN} replace />, index: true },
-        { path: 'app', element: <GeneralApp /> },
-        { path: 'ecommerce', element: <GeneralEcommerce /> },
-        { path: 'analytics', element: <GeneralAnalytics /> },
-        { path: 'banking', element: <GeneralBanking /> },
-        { path: 'booking', element: <GeneralBooking /> },
+        { element: <Navigate to={PATH_AFTER_LOGIN} replace />, index: true },
+        {
+          path: 'app', element: (
+            <RoleBasedGuard accessibleRoles={[ROLE_ADMIN]}>
+              <GeneralEcommerce />
+            </RoleBasedGuard>
+          )
+        },
+        // { path: 'ecommerce', element: <GeneralEcommerce /> },
+        // { path: 'analytics', element: <GeneralAnalytics /> },
+        // { path: 'banking', element: <GeneralBanking /> },
+        // { path: 'booking', element: <GeneralBooking /> },
 
         {
           path: 'bill',
@@ -87,12 +94,22 @@ export default function Router() {
           children: [
             { element: <Navigate to="/dashboard/product/list" replace />, index: true },
             { path: 'list', element: <ProductList /> },
-            { path: 'new', element: <ProductCreateEdit /> },
-            { path: ':id/edit', element: <ProductCreateEdit /> },
-
+            {
+              path: 'new', element: (
+                <RoleBasedGuard accessibleRoles={[ROLE_ADMIN]}>
+                  <ProductCreateEdit />
+                </RoleBasedGuard>
+              )
+            },
+            {
+              path: ':id/edit', element: (
+                <RoleBasedGuard accessibleRoles={[ROLE_ADMIN]}>
+                  <ProductCreateEdit />
+                </RoleBasedGuard>
+              )
+            },
           ],
         },
-
 
         {
           path: 'attribute',
@@ -142,17 +159,35 @@ export default function Router() {
                 { path: 'list', element: <CustomerList /> },
                 { path: ':id', element: <CustomerNewEdit /> },
                 { path: ':id/edit', element: <CustomerNewEdit /> },
-                // { path: 'new', element: <InvoiceCreate /> },
               ]
             },
             {
               path: 'employee',
               children: [
                 { element: <Navigate to="/dashboard/account/employee/list" replace />, index: true },
-                { path: 'list', element: <EmployeeList /> },
-                { path: ':id', element: <EmployeeNewEdit /> },
-                { path: ':id/edit', element: <EmployeeNewEdit /> },
-                // { path: 'new', element: <InvoiceCreate /> },
+                {
+                  path: 'list', element: (
+                    <RoleBasedGuard accessibleRoles={[ROLE_ADMIN]}>
+                      <EmployeeList />
+                    </RoleBasedGuard>
+                  )
+                },
+                {
+                  path: ':id', element: (
+
+                    <RoleBasedGuard accessibleRoles={[ROLE_ADMIN]}>
+                      <EmployeeNewEdit />
+                    </RoleBasedGuard>
+                  )
+                },
+                {
+                  path: ':id/edit', element: (
+
+                    <RoleBasedGuard accessibleRoles={[ROLE_ADMIN]}>
+                      <EmployeeNewEdit />
+                    </RoleBasedGuard>
+                  )
+                },
               ],
             },
           ],
@@ -161,94 +196,112 @@ export default function Router() {
         {
           path: 'discount',
           children: [
-            {
-              path: 'promotion',
-              children: [
-                { element: <Navigate to="/dashboard/discount/Promotion/list" replace />, index: true },
-                { path: 'list', element: <PromotionList /> },
-                // { path: ':id', element: <InvoiceDetails /> },
-                // { path: ':id/edit', element: <InvoiceEdit /> },
-                // { path: 'new', element: <InvoiceCreate /> },
-              ]
-            },
+            // {
+            //   path: 'promotion',
+            //   children: [
+            //     { element: <Navigate to="/dashboard/discount/Promotion/list" replace />, index: true },
+            //     { path: 'list', element: <PromotionList /> },
+            //     // { path: ':id', element: <InvoiceDetails /> },
+            //     // { path: ':id/edit', element: <InvoiceEdit /> },
+            //     // { path: 'new', element: <InvoiceCreate /> },
+            //   ]
+            // },
             {
               path: 'voucher',
               children: [
                 { element: <Navigate to="/dashboard/discount/voucher/list" replace />, index: true },
-                { path: 'list', element: <VoucherList /> },
+                {
+                  path: 'list', element: (
+                    <RoleBasedGuard accessibleRoles={[ROLE_ADMIN]}>
+                      <VoucherList />
+                    </RoleBasedGuard>
+                  )
+                },
                 // { path: ':id', element: <InvoiceDetails /> },
-                { path: ':id/edit', element: <VoucherCreateEdit /> },
-                { path: 'new', element: <VoucherCreateEdit /> },
+                {
+                  path: ':id/edit', element: (
+
+                    <RoleBasedGuard accessibleRoles={[ROLE_ADMIN]}>
+                      <VoucherCreateEdit />
+                    </RoleBasedGuard>
+                  )
+                },
+                {
+                  path: 'new', element: (
+
+                    <RoleBasedGuard accessibleRoles={[ROLE_ADMIN]}>
+                      <VoucherCreateEdit />
+                    </RoleBasedGuard>
+                  )
+                },
               ],
             },
           ],
         },
 
-
-
-        {
-          path: 'e-commerce',
-          children: [
-            { element: <Navigate to="/dashboard/e-commerce/shop" replace />, index: true },
-            { path: 'shop', element: <EcommerceShop /> },
-            { path: 'product/:name', element: <EcommerceProductDetails /> },
-            { path: 'list', element: <EcommerceProductList /> },
-            { path: 'product/new', element: <EcommerceProductCreate /> },
-            { path: 'product/:name/edit', element: <EcommerceProductCreate /> },
-            { path: 'checkout', element: <EcommerceCheckout /> },
-          ],
-        },
+        // {
+        //   path: 'e-commerce',
+        //   children: [
+        //     { element: <Navigate to="/dashboard/e-commerce/shop" replace />, index: true },
+        //     { path: 'shop', element: <EcommerceShop /> },
+        //     { path: 'product/:name', element: <EcommerceProductDetails /> },
+        //     { path: 'list', element: <EcommerceProductList /> },
+        //     { path: 'product/new', element: <EcommerceProductCreate /> },
+        //     { path: 'product/:name/edit', element: <EcommerceProductCreate /> },
+        //     { path: 'checkout', element: <EcommerceCheckout /> },
+        //   ],
+        // },
         {
           path: 'user',
           children: [
             { element: <Navigate to="/dashboard/user/profile" replace />, index: true },
             { path: 'profile', element: <UserProfile /> },
             { path: 'cards', element: <UserCards /> },
-            { path: 'list', element: <UserList /> },
-            { path: 'new', element: <UserCreate /> },
-            { path: ':name/edit', element: <UserCreate /> },
+            // { path: 'list', element: <UserList /> },
+            // { path: 'new', element: <UserCreate /> },
+            // { path: ':name/edit', element: <UserCreate /> },
             { path: 'account', element: <UserAccount /> },
           ],
         },
-        {
-          path: 'invoice',
-          children: [
-            { element: <Navigate to="/dashboard/invoice/list" replace />, index: true },
-            { path: 'list', element: <InvoiceList /> },
-            { path: ':id', element: <InvoiceDetails /> },
-            { path: ':id/edit', element: <InvoiceEdit /> },
-            { path: 'new', element: <InvoiceCreate /> },
-          ],
-        },
-        {
-          path: 'blog',
-          children: [
-            { element: <Navigate to="/dashboard/blog/posts" replace />, index: true },
-            { path: 'posts', element: <BlogPosts /> },
-            { path: 'post/:title', element: <BlogPost /> },
-            { path: 'new', element: <BlogNewPost /> },
-          ],
-        },
-        {
-          path: 'mail',
-          children: [
-            { element: <Navigate to="/dashboard/mail/all" replace />, index: true },
-            { path: 'label/:customLabel', element: <Mail /> },
-            { path: 'label/:customLabel/:mailId', element: <Mail /> },
-            { path: ':systemLabel', element: <Mail /> },
-            { path: ':systemLabel/:mailId', element: <Mail /> },
-          ],
-        },
-        {
-          path: 'chat',
-          children: [
-            { element: <Chat />, index: true },
-            { path: 'new', element: <Chat /> },
-            { path: ':conversationKey', element: <Chat /> },
-          ],
-        },
-        { path: 'calendar', element: <Calendar /> },
-        { path: 'kanban', element: <Kanban /> },
+        // {
+        //   path: 'invoice',
+        //   children: [
+        //     { element: <Navigate to="/dashboard/invoice/list" replace />, index: true },
+        //     { path: 'list', element: <InvoiceList /> },
+        //     { path: ':id', element: <InvoiceDetails /> },
+        //     { path: ':id/edit', element: <InvoiceEdit /> },
+        //     { path: 'new', element: <InvoiceCreate /> },
+        //   ],
+        // },
+        // {
+        //   path: 'blog',
+        //   children: [
+        //     { element: <Navigate to="/dashboard/blog/posts" replace />, index: true },
+        //     { path: 'posts', element: <BlogPosts /> },
+        //     { path: 'post/:title', element: <BlogPost /> },
+        //     { path: 'new', element: <BlogNewPost /> },
+        //   ],
+        // },
+        // {
+        //   path: 'mail',
+        //   children: [
+        //     { element: <Navigate to="/dashboard/mail/all" replace />, index: true },
+        //     { path: 'label/:customLabel', element: <Mail /> },
+        //     { path: 'label/:customLabel/:mailId', element: <Mail /> },
+        //     { path: ':systemLabel', element: <Mail /> },
+        //     { path: ':systemLabel/:mailId', element: <Mail /> },
+        //   ],
+        // },
+        // {
+        //   path: 'chat',
+        //   children: [
+        //     { element: <Chat />, index: true },
+        //     { path: 'new', element: <Chat /> },
+        //     { path: ':conversationKey', element: <Chat /> },
+        //   ],
+        // },
+        // { path: 'calendar', element: <Calendar /> },
+        // { path: 'kanban', element: <Kanban /> },
       ],
     },
 

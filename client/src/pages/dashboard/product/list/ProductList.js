@@ -25,6 +25,7 @@ import { All, ProductStatusTab, ProductStockOption } from '../../../../constants
 // routes
 import { PATH_DASHBOARD } from '../../../../routes/paths';
 // hooks
+import useAuth from '../../../../hooks/useAuth';
 import useTabs from '../../../../hooks/useTabs';
 import useSettings from '../../../../hooks/useSettings';
 import useTable, { getComparator, emptyRows } from '../../../../hooks/useTable';
@@ -67,6 +68,7 @@ const TABLE_HEAD = [
 
 export default function ProductList() {
   const { themeStretch } = useSettings();
+  const { user } = useAuth();
 
   const { onOpenSuccessNotify } = useNotification();
 
@@ -80,7 +82,7 @@ export default function ProductList() {
     page,
     onChangePage,
     onChangeRowsPerPage,
-  } = useTable({ defaultOrderBy: "createdAt", defaultOrder: "desc" });
+  } = useTable({ defaultOrderBy: 'none' });
 
   const [tabs, setTabs] = useState(
     [
@@ -207,7 +209,7 @@ export default function ProductList() {
           count = statusCounts.reduce((acc, curr) => acc + curr.count, 0);
         } else {
           const statusCount = statusCounts.find(item => item.status === tab.value);
-          count = statusCount ? statusCount.count : tab.count;
+          count = statusCount ? statusCount.count : 0;
         }
 
         return {
@@ -235,6 +237,7 @@ export default function ProductList() {
             { name: 'Danh sách sản phẩm' },
           ]}
           action={
+            user?.role === 'admin' &&
             <Button
               variant="contained"
               component={RouterLink}

@@ -57,7 +57,7 @@ function LoadingProvider({ children }) {
       }}
     >
       <>
-        {isLoading && typeLoading === "backdrop" &&
+        {isLoading &&
           <RootStyle>
             <div className="loader">
               <div />
@@ -67,10 +67,6 @@ function LoadingProvider({ children }) {
               <div />
             </div>
           </RootStyle>
-        }
-
-        {isLoading && typeLoading === "bar" &&
-          <ProgressBar />
         }
       </>
       {children}

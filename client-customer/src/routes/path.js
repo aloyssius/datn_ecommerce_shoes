@@ -16,14 +16,14 @@ export const PATH_PAGE = {
   },
   track_order: {
     root: '/track-order',
-    details: (id) => `/track-order/${id}`,
+    details: `/tracking-order`,
   },
-  root: ROOT_PATH,
   account: {
     root: '/account',
     login_register: '/account/login',
     register_sucess: (id) => `/account/register-success/${id}`,
-    orders: (id) => `/account/orders/${id}`,
+    orders: `/account/orders`,
+    order_detail: (id) => `/order-detail/${id}`,
     my_account: (id) => `/account/${id}`,
   }
 };

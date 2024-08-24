@@ -1,11 +1,15 @@
 import PropTypes from 'prop-types';
 import merge from 'lodash/merge';
 import ReactApexChart from 'react-apexcharts';
+import { FaMoneyCheckAlt } from "react-icons/fa";
+import { HiShoppingBag } from "react-icons/hi2";
+import { BsBoxSeamFill } from "react-icons/bs";
 // @mui
 import { alpha, styled } from '@mui/material/styles';
 import { Box, Card, Typography, Stack } from '@mui/material';
 // utils
 import { fNumber, fPercent } from '../../../../utils/formatNumber';
+import { formatCurrencyVnd } from '../../../../utils/formatCurrency';
 // components
 import Iconify from '../../../../components/Iconify';
 import { BaseOptionChart } from '../../../../components/chart';
@@ -13,15 +17,15 @@ import { BaseOptionChart } from '../../../../components/chart';
 // ----------------------------------------------------------------------
 
 const IconWrapperStyle = styled('div')(({ theme }) => ({
-  width: 24,
-  height: 24,
+  width: 74,
+  height: 74,
   display: 'flex',
   borderRadius: '50%',
   alignItems: 'center',
   justifyContent: 'center',
   marginRight: theme.spacing(1),
   color: theme.palette.success.main,
-  backgroundColor: alpha(theme.palette.success.main, 0.16),
+  // backgroundColor: alpha(theme.palette.success.main, 0.16),
 }));
 
 // ----------------------------------------------------------------------
@@ -34,7 +38,7 @@ EcommerceWidgetSummary.propTypes = {
   total: PropTypes.number,
 };
 
-export default function EcommerceWidgetSummary({ title, percent, total, chartColor, chartData }) {
+export default function EcommerceWidgetSummary({ title, percent, total, chartColor, chartData, type, color = 'primary' }) {
   const chartOptions = merge(BaseOptionChart(), {
     colors: [chartColor],
     chart: { animations: { enabled: true }, sparkline: { enabled: true } },
@@ -58,9 +62,10 @@ export default function EcommerceWidgetSummary({ title, percent, total, chartCol
           {title}
         </Typography>
         <Typography variant="h3" gutterBottom>
-          {fNumber(total)}
+          {type === 'revenue' ? `${formatCurrencyVnd(String(total))}đ` : total}
         </Typography>
 
+        {/*
         <Stack direction="row" alignItems="center">
           <IconWrapperStyle
             sx={{
@@ -81,9 +86,26 @@ export default function EcommerceWidgetSummary({ title, percent, total, chartCol
             &nbsp;than last week
           </Typography>
         </Stack>
+          */}
       </Box>
 
+      {/*
       <ReactApexChart type="line" series={[{ data: chartData }]} options={chartOptions} width={120} height={80} />
+      */}
+      <IconWrapperStyle
+        sx={{
+          color: (theme) => theme.palette[color].dark,
+          ...(percent < 0 && {
+            color: 'error.main',
+            // bgcolor: (theme) => alpha(theme.palette.error.main, 0.16),
+          }),
+        }}
+      >
+        {type === 'revenue' && <FaMoneyCheckAlt size={74} />}
+        {type === 'order' && <HiShoppingBag size={74} />}
+        {type === 'product_sold' && <BsBoxSeamFill size={74} />}
+
+      </IconWrapperStyle>
     </Card>
   );
 }

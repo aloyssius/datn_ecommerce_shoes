@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import useLoading from './useLoading';
 
 const shopID = 189389;
 const serviceID = 53320;
@@ -11,8 +12,11 @@ const useDeliveryApi = () => {
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
   const [wards, setWards] = useState([]);
+  const [shipFee, setShipFee] = useState(0);
+  const { onOpenLoading, onCloseLoading, onResetLoading } = useLoading();
 
   const fetchApi = async (url, params = {}) => {
+    onOpenLoading("backdrop");
     try {
       const response = await axios.get(url, {
         params: {
@@ -27,7 +31,11 @@ const useDeliveryApi = () => {
     } catch (error) {
       console.error(error);
       throw error;
+    } finally {
+      onCloseLoading();
+      onResetLoading();
     }
+
   };
 
   const fetchProvinces = async () => {
@@ -54,11 +62,26 @@ const useDeliveryApi = () => {
     setWards(response);
   };
 
+  const fetchShipFee = async (toDistrictId, toWardCode) => {
+    const url = `https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee`;
+    const params = {
+      from_district_id: shopDistrictId,
+      from_ward_code: String(shopWardCode),
+      service_id: serviceID,
+      to_district_id: parseInt(toDistrictId, 10),
+      to_ward_code: String(toWardCode),
+      shop_id: shopID,
+      weight: 240,
+    };
+    const response = await fetchApi(url, params);
+    setShipFee(response.total);
+  };
+
   useEffect(() => {
     fetchProvinces();
   }, [])
 
-  return { provinces, districts, wards, fetchWardsByDistrictId, fetchDistrictsByProvinceId, setWards, setDistricts };
+  return { provinces, districts, wards, fetchWardsByDistrictId, fetchDistrictsByProvinceId, setWards, setDistricts, shipFee, fetchShipFee, setShipFee };
 }
 
 export default useDeliveryApi;

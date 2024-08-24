@@ -55,7 +55,17 @@ class Product extends Component {
         return;
       }
 
-      fetch();
+      fetch(false);
+    }
+
+    const handleAddProductToCartByBuyNow = () => {
+      this.handleChangeSubmit(true);
+
+      if (sizeId === null) {
+        return;
+      }
+
+      fetch(true);
     }
 
     let prices;
@@ -185,6 +195,7 @@ class Product extends Component {
                   </div>
                   <div className="product__actions-item product__actions-item--addtocart">
                     <button
+                      onClick={() => handleAddProductToCartByBuyNow()}
                       type="button"
                       className='btn btn-primary btn-lg'                        >
                       MUA NGAY

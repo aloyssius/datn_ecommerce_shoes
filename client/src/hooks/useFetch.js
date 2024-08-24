@@ -140,6 +140,42 @@ const useFetch = (url, options = { fetch: true }) => {
     }
   };
 
+  const putEndVoucher = async (url, data, onFinish) => {
+    onOpenLoading('backdrop');
+    try {
+      // Gọi hàm apiPut để thực hiện PUT request
+      const response = await apiPut(url, data);
+      // Đảm bảo bạn lấy dữ liệu đúng từ response
+      onCloseLoading();
+      // Truyền dữ liệu phản hồi vào hàm callback onFinish
+      onFinish?.(response.data.data);
+    } catch (error) {
+      console.log(error);
+      onCloseLoading();
+      onOpenErrorNotify(error?.message);
+    } finally {
+      onResetLoading();
+    }
+  };
+
+  const putRestoreVoucher = async (url, data, onFinish) => {
+    onOpenLoading('backdrop');
+    try {
+      // Gọi hàm apiPut để thực hiện PUT request
+      const response = await apiPut(url, data);
+      // Đảm bảo bạn lấy dữ liệu đúng từ response
+      onCloseLoading();
+      // Truyền dữ liệu phản hồi vào hàm callback onFinish
+      onFinish?.(response.data.data);
+    } catch (error) {
+      console.log(error);
+      onCloseLoading();
+      onOpenErrorNotify(error?.message);
+    } finally {
+      onResetLoading();
+    }
+  };
+
   const remove = async (url, data, onFinish) => {
     onOpenLoading('backdrop');
     try {
@@ -164,6 +200,8 @@ const useFetch = (url, options = { fetch: true }) => {
     formDataFile,
     formDataFilePut,
     put,
+    putEndVoucher,
+    putRestoreVoucher,
     remove,
     firstFetch,
     setParams,

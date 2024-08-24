@@ -16,25 +16,25 @@ import { ADMIN_API } from '../../../../api/apiConfig';
 // ----------------------------------------------------------------------
 
 export default function EmployeeNewEdit() {
-    const { themeStretch } = useSettings();
-    const { pathname } = useLocation();
-    const { id } = useParams();
-    const isEdit = pathname.includes('edit');
-    const { data } = useFetch(ADMIN_API.employee.details(id), { fetch: isEdit })
+  const { themeStretch } = useSettings();
+  const { pathname } = useLocation();
+  const { id } = useParams();
+  const isEdit = pathname.includes('edit');
+  const { data, setData } = useFetch(ADMIN_API.employee.details(id), { fetch: isEdit })
 
-    return (
+  return (
 
-        <Page title={`Quản lý nhân viên - ${!isEdit ? 'Tạo nhân viên' : 'Cập nhật nhân viên'}`}>
-            <Container maxWidth={themeStretch ? false : 'lg'}>
-                <HeaderBreadcrumbs
-                    heading={!isEdit ? 'Tạo nhân viên' : 'Cập nhật nhân viên'}
-                    links={[
-                        { name: 'Danh sách nhân viên', href: PATH_DASHBOARD.account.employee.list },
-                        { name: !isEdit ? 'Tạo nhân viên' : data?.code },
-                    ]}
-                />
-                <EmployeeNewEditForm isEdit={isEdit} currentEmployee={data} />
-            </Container>
-        </Page>
-    );
+    <Page title={`Quản lý nhân viên - ${!isEdit ? 'Tạo nhân viên' : 'Cập nhật nhân viên'}`}>
+      <Container maxWidth={themeStretch ? false : 'lg'}>
+        <HeaderBreadcrumbs
+          heading={!isEdit ? 'Tạo nhân viên' : 'Cập nhật nhân viên'}
+          links={[
+            { name: 'Danh sách nhân viên', href: PATH_DASHBOARD.account.employee.list },
+            { name: !isEdit ? 'Tạo nhân viên' : data?.code },
+          ]}
+        />
+        <EmployeeNewEditForm isEdit={isEdit} currentEmployee={data} onUpdate={(dataEmp) => setData(dataEmp)} />
+      </Container>
+    </Page>
+  );
 }

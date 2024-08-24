@@ -47,11 +47,11 @@ class Handler extends ExceptionHandler
                 ConstantSystem::BAD_REQUEST,
                 $exception->getMessage(),
             );
-        } else if ($exception instanceof RestApiObjectException) {
-            return ApiResponse::responseObject(
+        } else if ($exception instanceof VNPayException) {
+            return ApiResponse::responseErrorVnPay(
+                $exception->getRspCode(),
+                $exception->getMessage(),
                 ConstantSystem::BAD_REQUEST_CODE,
-                ConstantSystem::BAD_REQUEST,
-                $exception->getErrors(),
             );
         } else if ($exception instanceof NotFoundException) {
             return ApiResponse::responseError(

@@ -33,26 +33,24 @@ const ProductNewEditVariant = ({ variants, isSubmitted, onRemoveColor, onRemoveS
           <Box sx={{ px: 2, py: 1 }}>
             <Stack direction="row" justifyContent="space-between" alignItems="center">
               <LabelStyleVariant>{`'${variant.colorName}'`}</LabelStyleVariant>
-              <TableMoreMenu
-                key={variant.colorId}
-                actions={
-                  <>
-                    <MenuItem
-                      sx={{ color: 'primary.main' }}
-                    >
-                      <Iconify icon={'eva:plus-circle-outline'} />
-                      Thêm kích cỡ
-                    </MenuItem>
-                    <MenuItem
-                      onClick={() => onRemoveColor(variant.colorId)}
-                      sx={{ color: 'error.main' }}
-                    >
-                      <Iconify icon={'eva:trash-2-outline'} />
-                      Xóa
-                    </MenuItem>
-                  </>
-                }
-              />
+              {!isEdit &&
+                <TableMoreMenu
+                  key={variant.colorId}
+                  actions={
+                    <>
+                      {!isEdit &&
+                        <MenuItem
+                          onClick={() => onRemoveColor(variant.colorId)}
+                          sx={{ color: 'error.main' }}
+                        >
+                          <Iconify icon={'eva:trash-2-outline'} />
+                          Xóa
+                        </MenuItem>
+                      }
+                    </>
+                  }
+                />
+              }
             </Stack>
           </Box>
           <Divider />
@@ -74,6 +72,15 @@ const ProductNewEditVariant = ({ variants, isSubmitted, onRemoveColor, onRemoveS
     </>
   );
 };
+
+// { isEdit &&
+//   <MenuItem
+//     sx={{ color: 'primary.main' }}
+//   >
+//     <Iconify icon={'eva:plus-circle-outline'} />
+//     Thêm kích cỡ
+//   </MenuItem>
+//  }
 
 ProductNewEditVariant.propTypes = {
   variants: PropTypes.array,

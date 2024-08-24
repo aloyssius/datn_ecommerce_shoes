@@ -46,8 +46,8 @@ function ShopPageProduct(props) {
     }
   }
 
-  const handleAddProductToCart = () => {
-    onUpdateCart(selectedSizeId);
+  const handleAddProductToCart = (buyNow = false) => {
+    onUpdateCart(selectedSizeId, buyNow);
   }
 
   useEffect(() => {

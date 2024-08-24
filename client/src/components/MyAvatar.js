@@ -13,11 +13,11 @@ export default function MyAvatar({ ...other }) {
   return (
     <Avatar
       src={user?.photoURL}
-      alt={user?.displayName}
-      color={user?.photoURL ? 'default' : createAvatar(user?.displayName).color}
+      alt={user?.fullName}
+      color={user?.photoURL ? 'default' : createAvatar(user?.fullName).color}
       {...other}
     >
-      {createAvatar(user?.displayName).name}
+      {createAvatar(user?.fullName).name}
     </Avatar>
   );
 }

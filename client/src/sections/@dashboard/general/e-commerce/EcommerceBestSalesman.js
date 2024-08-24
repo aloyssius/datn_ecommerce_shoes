@@ -24,57 +24,35 @@ import Scrollbar from '../../../../components/Scrollbar';
 
 // ----------------------------------------------------------------------
 
-export default function EcommerceBestSalesman() {
+export default function EcommerceBestSalesman({ type = "product_hot", products }) {
   const theme = useTheme();
 
   return (
     <Card>
-      <CardHeader title="Best Salesman" sx={{ mb: 3 }} />
+      <CardHeader title={type === "product_hot" ? "Top sản phẩm bán chạy" : "Danh sách sản phẩm sắp hết hàng"} sx={{ mb: 3 }} />
       <Scrollbar>
         <TableContainer sx={{ minWidth: 720 }}>
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Seller</TableCell>
-                <TableCell>Product</TableCell>
-                <TableCell>Country</TableCell>
-                <TableCell>Total</TableCell>
-                <TableCell align="right">Rank</TableCell>
+                <TableCell>Sản phẩm</TableCell>
+                <TableCell align="center">Số lượng đã bán</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {_ecommerceBestSalesman.map((row) => (
-                <TableRow key={row.name}>
+              {products?.map((row) => (
+                <TableRow key={row.code}>
                   <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <Avatar alt={row.name} src={row.avatar} />
-                      <Box sx={{ ml: 2 }}>
-                        <Typography variant="subtitle2"> {row.name}</Typography>
-                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                          {row.email}
+                      <Image alt="product image" src={row?.pathUrl} sx={{ width: 64, height: 64, borderRadius: 1.5, mr: 2 }} />
+                      <Box>
+                        <Typography noWrap variant="subtitle2" sx={{ maxWidth: 240 }}>
+                          {`${row?.name} (${row?.code})`}
                         </Typography>
                       </Box>
                     </Box>
                   </TableCell>
-                  <TableCell>{row.category}</TableCell>
-                  <TableCell>
-                    <Image src={row.flag} alt="country flag" sx={{ maxWidth: 28 }} />
-                  </TableCell>
-                  <TableCell>{fCurrency(row.total)}</TableCell>
-                  <TableCell align="right">
-                    <Label
-                      variant={theme.palette.mode === 'light' ? 'ghost' : 'filled'}
-                      color={
-                        (row.rank === 'Top 1' && 'primary') ||
-                        (row.rank === 'Top 2' && 'info') ||
-                        (row.rank === 'Top 3' && 'success') ||
-                        (row.rank === 'Top 4' && 'warning') ||
-                        'error'
-                      }
-                    >
-                      {row.rank}
-                    </Label>
-                  </TableCell>
+                  <TableCell align='center'>{row?.totalSold}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -84,3 +62,73 @@ export default function EcommerceBestSalesman() {
     </Card>
   );
 }
+
+//           <TableBody>
+//             {products.map((product) => {
+//               const { billDetailId, name, sizeName, price, colorName, pathUrl, quantity } = product;
+//               return (
+//                 <TableRow key={billDetailId}>
+//                   <TableCell>
+//                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
+//                       <Image alt="product image" src={pathUrl} sx={{ width: 64, height: 64, borderRadius: 1.5, mr: 2 }} />
+//                       <Box>
+//                         <Typography noWrap variant="subtitle2" sx={{ maxWidth: 240 }}>
+//                           {`${name} ${colorName}`}
+//                         </Typography>
+//
+//                         <Box
+//                           sx={{
+//                             display: 'flex',
+//                             alignItems: 'center',
+//                           }}
+//                         >
+//                           <Typography variant="body2">
+//                             <Typography component="span" variant="body2" sx={{ color: 'text.secondary' }}>
+//                               Kích cỡ:&nbsp;
+//                             </Typography>
+//                             {sizeName}
+//                           </Typography>
+//                           {/*
+//                           <Divider orientation="vertical" sx={{ mx: 1, height: 16 }} />
+//                           <Typography variant="body2">
+//                             <Typography component="span" variant="body2" sx={{ color: 'text.secondary' }}>
+//                               Màu sắc:&nbsp;
+//                             </Typography>
+//                             {getColorName(color)}
+//                           </Typography>
+//                           */}
+//                         </Box >
+//                       </Box >
+//                     </Box >
+//                   </TableCell >
+//
+//                   <TableCell align="center">{formatCurrency(String(price))}</TableCell>
+//
+//                   <TableCell align="center">
+//                     <Incrementer
+//                       quantity={quantity}
+//                     />
+//                   </TableCell>
+//
+//                   <TableCell align="center">{formatCurrency(String(price * quantity))}</TableCell>
+//
+// {/* (status === BillStatusTab.en.PENDING_CONFIRM || status === BillStatusTab.en.WAITTING_DELIVERY) && !isOrderTransferNotYetPayment() &&
+//                     <TableCell align="right">
+//                       <Stack spacing={0.1} direction="row">
+//                         <Tooltip title="Cập nhật">
+//                           <IconButton onClick={() => handleOpen(product)} color="primary">
+//                             <Iconify icon={'eva:edit-2-outline'} width={20} height={20} />
+//                           </IconButton>
+//                         </Tooltip>
+//                         <Tooltip title="Xóa">
+//                           <IconButton onClick={() => onDelete(billDetailId)} color="error">
+//                             <Iconify icon={'eva:trash-2-outline'} width={20} height={20} />
+//                           </IconButton>
+//                         </Tooltip>
+//                       </Stack>
+//                     </TableCell>
+//                   */}
+//                 </TableRow >
+//               );
+//             })}
+//           </TableBody >
