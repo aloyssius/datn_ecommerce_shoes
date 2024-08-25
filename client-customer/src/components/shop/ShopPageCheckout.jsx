@@ -266,7 +266,7 @@ function ShopPageCheckout() {
         fetchWardsByDistrictId(addressDefault?.districtId);
       }
 
-      if (addressDefault?.wardCode) {
+      if (addressDefault?.wardCode && parseInt(totalCart) < FREE_SHIP_AMOUNT) {
         fetchShipFee(addressDefault?.districtId, addressDefault?.wardCode);
       }
     }
