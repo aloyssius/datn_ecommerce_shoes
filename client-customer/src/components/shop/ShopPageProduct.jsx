@@ -114,7 +114,7 @@ function ShopPageProduct(props) {
               fetch={handleAddProductToCart}
               key={key}
             />
-            <ProductTabs />
+            <ProductTabs desc={data?.description} />
           </div>
         </div>
 

@@ -20,8 +20,8 @@ export default [
     url: '/product-list/female',
   },
   {
-    title: 'LIÊN HỆ',
-    url: '/contact',
+    title: 'CHÍNH SÁCH',
+    url: '/site/policy',
   },
   // {
   //   title: 'Shop',

@@ -7,6 +7,7 @@ const AUTH_API = '/api/auth';
 
 export const CLIENT_API = {
   root: ROOTS_API,
+  reset_pass: path(AUTH_API, '/forgot-password'),
   bill: {
     post: path(ROOTS_API, '/bills'),
     details: path(ROOTS_API, `/tracking-order`),
@@ -27,6 +28,8 @@ export const CLIENT_API = {
 
   product: {
     all: path(ROOTS_API, '/product-list'),
+    male: path(ROOTS_API, '/product-list/male'),
+    female: path(ROOTS_API, '/product-list/female'),
     home: path(ROOTS_API, '/product-home'),
     details: (sku) => path(ROOTS_API, `/product-details/${sku}`),
     details_size: (id) => path(ROOTS_API, `/product-detail/${id}`),
@@ -40,6 +43,7 @@ export const CLIENT_API = {
     verify: (id) => path(AUTH_API, `/account/verify/${id}`),
     details: path(AUTH_API, `/account/my-account`),
     put: path(AUTH_API, '/account/update'),
+    change_pass: path(AUTH_API, '/change-password'),
 
     bills: path(AUTH_API, `/account/bills`),
     billDetail: path(AUTH_API, `/account/bill-detail`),

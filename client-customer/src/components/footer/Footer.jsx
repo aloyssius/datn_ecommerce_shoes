@@ -12,23 +12,23 @@ import theme from '../../data/theme';
 
 export default function Footer() {
   const informationLinks = [
-    { title: 'About Us', url: '' },
-    { title: 'Delivery Information', url: '' },
-    { title: 'Privacy Policy', url: '' },
-    { title: 'Brands', url: '' },
-    { title: 'Contact Us', url: '' },
-    { title: 'Returns', url: '' },
-    { title: 'Site Map', url: '' },
+    { title: 'Tuyển dụng', url: '' },
+    { title: 'Liên hệ nhượng quyền', url: '' },
+    { title: 'Về ĐKN Shop', url: '' },
+    // { title: 'Brands', url: '' },
+    // { title: 'Contact Us', url: '' },
+    // { title: 'Returns', url: '' },
+    // { title: 'Site Map', url: '' },
   ];
 
   const accountLinks = [
-    { title: 'Store Location', url: '' },
-    { title: 'Order History', url: '' },
-    { title: 'Wish List', url: '' },
-    { title: 'Newsletter', url: '' },
-    { title: 'Specials', url: '' },
-    { title: 'Gift Certificates', url: '' },
-    { title: 'Affiliate', url: '' },
+    { title: 'FAQs', url: '' },
+    { title: 'Bảo mật thông tin', url: '' },
+    { title: 'Chính sách chung', url: '' },
+    { title: 'Tra cứu đơn hàng', url: '' },
+    // { title: 'Specials', url: '' },
+    // { title: 'Gift Certificates', url: '' },
+    // { title: 'Affiliate', url: '' },
   ];
 
   return (
@@ -40,10 +40,10 @@ export default function Footer() {
               <FooterContacts />
             </div>
             <div className="col-6 col-md-3 col-lg-2">
-              <FooterLinks title="Information" items={informationLinks} />
+              <FooterLinks title="Về Công Ty" items={informationLinks} />
             </div>
             <div className="col-6 col-md-3 col-lg-2">
-              <FooterLinks title="My Account" items={accountLinks} />
+              <FooterLinks title="Hỗ Trợ" items={accountLinks} />
             </div>
             <div className="col-12 col-md-12 col-lg-4">
               <FooterNewsletter />

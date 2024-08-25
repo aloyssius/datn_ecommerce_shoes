@@ -1,8 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 // @mui
 import { useTheme } from '@mui/material/styles';
 import { TextField, Container, Grid, Stack, Typography, MenuItem } from '@mui/material';
 import DatePicker from '@mui/lab/DatePicker';
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
+import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear } from 'date-fns';
 import { ADMIN_API } from '../../api/apiConfig';
 // hooks
 import useSettings from '../../hooks/useSettings';
@@ -27,13 +30,52 @@ import {
 export default function GeneralEcommerce() {
   const theme = useTheme();
   const { themeStretch } = useSettings();
-  const { data } = useFetch(ADMIN_API.statistics);
+  const { data, isLoading, fetch } = useFetch(null, { fetch: false });
 
-  const { totalBill, totalCount, totalPercent, products, years, revenueByMonth } = data;
+  const { totalBill, totalCount, totalPercent, products, revenueByMonth } = data;
 
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
   const [date, setDate] = useState("Hôm nay");
+  const [key, setKey] = useState(0);
+
+  useEffect(() => {
+    if (date === "Hôm nay") {
+      setStartDate(new Date());
+      setEndDate(new Date());
+    }
+
+    if (date === "Tuần này") {
+      setStartDate(startOfWeek(new Date(), { weekStartsOn: 1 }));
+      setEndDate(endOfWeek(new Date(), { weekStartsOn: 1 }));
+    }
+
+    if (date === "Tháng này") {
+      setStartDate(startOfMonth(new Date()));
+      setEndDate(endOfMonth(new Date()));
+    }
+    if (date === "Năm nay") {
+      setStartDate(startOfYear(new Date()));
+      setEndDate(endOfYear(new Date()));
+    }
+
+  }, [date])
+
+  const onFinish = () => {
+    setKey((key) => key + 1);
+  }
+
+  useEffect(async () => {
+    if (startDate && endDate) {
+      const params = {
+        startDate: startDate ? dayjs(startDate).format('DD-MM-YYYY') : null,
+        endDate: endDate ? dayjs(endDate).format('DD-MM-YYYY') : null,
+      }
+      console.log(params);
+      await fetch(ADMIN_API.statistics, params);
+      onFinish();
+    }
+  }, [startDate, endDate])
 
   return (
     <Page title="Thống kê - DKN Shop">
@@ -115,9 +157,10 @@ export default function GeneralEcommerce() {
 
               <Grid item xs={12} md={4}>
                 <EcommerceWidgetSummary
+                  key={key}
                   title="Tổng Doanh Thu"
                   percent={2.6}
-                  total={parseInt(totalBill?.totalMoney, 10) || '0đ'}
+                  total={parseInt(totalBill?.totalMoney, 10) || 0}
                   chartColor={theme.palette.primary.main}
                   // chartData={[22, 8, 35, 50, 82, 84, 77, 12, 87, 43]}
                   type='revenue'
@@ -127,6 +170,7 @@ export default function GeneralEcommerce() {
 
               <Grid item xs={12} md={4}>
                 <EcommerceWidgetSummary
+                  key={key}
                   title="Tổng Đơn Hàng"
                   percent={2}
                   total={totalBill?.totalOrder || 0}
@@ -139,9 +183,10 @@ export default function GeneralEcommerce() {
 
               <Grid item xs={12} md={4}>
                 <EcommerceWidgetSummary
+                  key={key}
                   title="Tổng Sản Phẩm Đã Bán"
                   percent={0.6}
-                  total={totalBill?.totalSold || 0}
+                  total={parseInt(totalBill?.totalSold, 10) || 0}
                   type='product_sold'
                   // chartColor={theme.palette.chart.red[0]}
                   chartData={[40, 70, 75, 70, 50, 28, 7, 64, 38, 27]}
@@ -150,11 +195,11 @@ export default function GeneralEcommerce() {
               </Grid>
 
               <Grid item xs={12} md={6} lg={4}>
-                <EcommerceSaleByGender totalCount={totalCount || 0} totalPercent={totalPercent || []} />
+                <EcommerceSaleByGender key={key} totalCount={totalCount} loading={isLoading} totalPercent={totalPercent || []} />
               </Grid>
 
               <Grid item xs={12} md={6} lg={8}>
-                <EcommerceYearlySales years={years} month={revenueByMonth} />
+                <EcommerceYearlySales key={key} month={revenueByMonth} />
               </Grid>
 
 
@@ -177,7 +222,7 @@ export default function GeneralEcommerce() {
           */}
 
               <Grid item xs={12} md={12} lg={12}>
-                <EcommerceBestSalesman type='product_hot' products={products} />
+                <EcommerceBestSalesman key={key} type='product_hot' products={products} />
               </Grid>
 
 

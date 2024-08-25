@@ -62,7 +62,7 @@ export default function EcommerceWidgetSummary({ title, percent, total, chartCol
           {title}
         </Typography>
         <Typography variant="h3" gutterBottom>
-          {type === 'revenue' ? `${formatCurrencyVnd(String(total))}đ` : total}
+          {type === 'revenue' ? `${formatCurrency(String(total))}` : total}
         </Typography>
 
         {/*
@@ -108,4 +108,11 @@ export default function EcommerceWidgetSummary({ title, percent, total, chartCol
       </IconWrapperStyle>
     </Card>
   );
+}
+
+const formatCurrency = (data) => {
+  if (data === 0 || data === "0" || data === "" || !data || data === null || data === undefined) {
+    return "0đ";
+  }
+  return `${formatCurrencyVnd(data)} đ`;
 }

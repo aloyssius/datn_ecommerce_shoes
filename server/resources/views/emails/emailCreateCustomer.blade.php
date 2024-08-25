@@ -5,7 +5,7 @@
 
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <title>Xác nhận địa chỉ email của bạn</title>
+    <title></title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style type="text/css">
         /**
@@ -180,16 +180,15 @@
                     <!-- start copy -->
                     <tr>
                         <td align="left" bgcolor="#ffffff" style="padding: 24px; font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 24px;">
-                            <p style="margin-bottom: 15px;">Xin chào,
-                                Bạn vừa được tạo tài khoản tại ĐKN Shop, dưới đây là thông tin đăng nhập của bạn
-                            </p>
-                            <p>
-                                Email: {{$user->email}}
-                            </p>
-                            <p>
-                                Mật khẩu: {{$pass}}
-                            </p>
-                        </td>
+                            @if ($type == 'reset')
+                            <p style="margin-bottom: 15px;">Xin chào,</p>
+                            <p>Mật khẩu mới của bạn là: {{ $pass }}</p>
+                            @else
+                            <p style="margin-bottom: 15px;">Xin chào,</p>
+                            <p>Bạn vừa được tạo tài khoản tại ĐKN Shop, dưới đây là thông tin đăng nhập của bạn:</p>
+                            <p>Email: {{ $user->email }}</p>
+                            <p>Mật khẩu: {{ $pass }}</p>
+                            @endif
                     </tr>
                     <!-- end copy -->
 

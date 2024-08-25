@@ -20,6 +20,7 @@ export const PATH_PAGE = {
   },
   account: {
     root: '/account',
+    info: '/account/info',
     login_register: '/account/login',
     register_sucess: (id) => `/account/register-success/${id}`,
     orders: `/account/orders`,

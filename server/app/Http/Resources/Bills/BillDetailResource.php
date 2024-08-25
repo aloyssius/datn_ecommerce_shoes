@@ -29,6 +29,7 @@ class BillDetailResource extends JsonResource
             'note' => $this->note,
             'createdAt' => Carbon::parse($this->created_at)->format('H:i:s d/m/Y'),
             'comfirmationDate' => $this->confirmation_date,
+            'cancellationDate' => $this->cancellation_date,
             'deliveryDate' => $this->delivery_date,
             'completionDate' => $this->completion_date,
             'customerId' => $this->customer_id,

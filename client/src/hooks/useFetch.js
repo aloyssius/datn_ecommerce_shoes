@@ -58,9 +58,11 @@ const useFetch = (url, options = { fetch: true }) => {
     }
   }, [url, options.fetch, params])
 
-  const fetch = async (url, params) => {
-    setIsLoading(true);
-    onOpenLoading();
+  const fetch = async (url, params, loading = true) => {
+    if (loading) {
+      setIsLoading(true);
+      onOpenLoading();
+    }
     try {
       const response = await apiGet(url, params);
       const data = response.data;
@@ -69,6 +71,7 @@ const useFetch = (url, options = { fetch: true }) => {
 
       onCloseLoading();
       setIsLoading(false);
+      setFirstFetch(true);
 
     } catch (error) {
       console.log(error);
