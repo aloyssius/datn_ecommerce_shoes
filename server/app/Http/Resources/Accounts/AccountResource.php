@@ -32,6 +32,7 @@ class AccountResource extends JsonResource
             'cartItems' => $this->cartItems,
             'role' => $this->role,
             'active' => $this->email_verified_at,
+            'notifies' => $this->notifies,
         ];
     }
     /**

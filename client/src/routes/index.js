@@ -52,7 +52,13 @@ export default function Router() {
         // },
         // { path: 'login-unprotected', element: <Login /> },
         // { path: 'register-unprotected', element: <Register /> },
-        // { path: 'reset-password', element: <ResetPassword /> },
+        {
+          path: 'reset-password', element: (
+            <GuestGuard>
+              <ResetPassword />
+            </GuestGuard>
+          )
+        },
         // { path: 'verify', element: <VerifyCode /> },
       ],
     },

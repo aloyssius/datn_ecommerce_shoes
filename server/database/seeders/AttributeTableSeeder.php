@@ -50,22 +50,22 @@ class AttributeTableSeeder extends Seeder
             'created_at' => $created_at3,
             'updated_at' => $created_at3,
         ]);
-        DB::table('categories')->insert([
-            'id' => $faker->uuid,
-            'code' => "DM0004",
-            'name' => "Thể thao",
-            'status' => CommonStatus::IS_ACTIVE,
-            'created_at' => $created_at4,
-            'updated_at' => $created_at4,
-        ]);
-        DB::table('categories')->insert([
-            'id' => $faker->uuid,
-            'code' => "DM0005",
-            'name' => "Thời trang",
-            'status' => CommonStatus::IS_ACTIVE,
-            'created_at' => $created_at5,
-            'updated_at' => $created_at5,
-        ]);
+        // DB::table('categories')->insert([
+        //     'id' => $faker->uuid,
+        //     'code' => "DM0004",
+        //     'name' => "Thể thao",
+        //     'status' => CommonStatus::IS_ACTIVE,
+        //     'created_at' => $created_at4,
+        //     'updated_at' => $created_at4,
+        // ]);
+        // DB::table('categories')->insert([
+        //     'id' => $faker->uuid,
+        //     'code' => "DM0005",
+        //     'name' => "Thời trang",
+        //     'status' => CommonStatus::IS_ACTIVE,
+        //     'created_at' => $created_at5,
+        //     'updated_at' => $created_at5,
+        // ]);
         DB::table('brands')->insert([
             'id' => $faker->uuid,
             'code' => "TH0001",

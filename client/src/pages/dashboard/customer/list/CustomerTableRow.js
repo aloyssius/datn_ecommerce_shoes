@@ -39,14 +39,14 @@ export default function CustomerTableRow({ row, onEditRow }) {
         </Avatar>
 
         <Stack>
-          {fullName ? 
-          <Link noWrap variant="subtitle2" onClick={onEditRow} sx={{ color: 'primary.main', cursor: 'pointer' }}>
-            {fullName}
-          </Link>
+          {fullName ?
+            <Link noWrap variant="subtitle2" onClick={onEditRow} sx={{ color: 'primary.main', cursor: 'pointer' }}>
+              {fullName}
+            </Link>
             :
-          <Typography variant="subtitle2" noWrap>
-            {"Chưa cập nhật"}
-          </Typography>
+            <Typography variant="subtitle2" noWrap>
+              {"Chưa cập nhật"}
+            </Typography>
           }
         </Stack>
       </TableCell>
@@ -57,13 +57,13 @@ export default function CustomerTableRow({ row, onEditRow }) {
 
       <TableCell align="left">
         {(() => {
-        if (gender === null) {
+          if (gender === null) {
             return "Chưa cập nhật";
-        } if (gender === 0) {
+          } if (gender === 0) {
             return "Nam";
-        } 
-            return "Nữ";
-    })()}
+          }
+          return "Nữ";
+        })()}
       </TableCell>
 
       <TableCell align="left">

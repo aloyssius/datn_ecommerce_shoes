@@ -2,7 +2,7 @@ import merge from 'lodash/merge';
 import ReactApexChart from 'react-apexcharts';
 // @mui
 import { useTheme, styled } from '@mui/material/styles';
-import { Card, CardHeader } from '@mui/material';
+import { Card, CardHeader, Typography } from '@mui/material';
 // utils
 import { fNumber } from '../../../../utils/formatNumber';
 //
@@ -33,13 +33,13 @@ const ChartWrapperStyle = styled('div')(({ theme }) => ({
 
 const CHART_DATA = [44, 75];
 
-export default function EcommerceSaleByGender({ totalCount, totalPercent }) {
+export default function EcommerceSaleByGender({ totalCount, totalPercent, isLoading }) {
   const theme = useTheme();
 
-  const completed = totalPercent && totalPercent?.find((item) => item?.status === "completed")?.percentage;
-  const canceled = totalPercent && totalPercent?.find((item) => item?.status === "canceled")?.percentage;
+  const completed = totalPercent?.find((item) => item?.status === "completed")?.percentage;
+  const canceled = totalPercent?.find((item) => item?.status === "canceled")?.percentage;
 
-  const chartOptions = totalPercent && totalCount ? merge(BaseOptionChart(), {
+  const chartOptions = merge(BaseOptionChart(), {
     labels: ['Đã giao', 'Đã hủy'],
     colors: [theme.palette.primary.main, theme.palette.error.main],
     legend: { floating: true, horizontalAlign: 'center' },
@@ -82,63 +82,21 @@ export default function EcommerceSaleByGender({ totalCount, totalPercent }) {
         },
       },
     },
-  }) :
-    merge(BaseOptionChart(), {
-      labels: ['Đã giao', 'Đã hủy'],
-      colors: [theme.palette.primary.main, theme.palette.error.main],
-      legend: { floating: true, horizontalAlign: 'center' },
-      fill: {
-        type: 'gradient',
-        gradient: {
-          colorStops: [
-            [
-              {
-                offset: 0,
-                color: theme.palette.primary.light,
-              },
-              {
-                offset: 100,
-                color: theme.palette.primary.main,
-              },
-            ],
-            [
-              {
-                offset: 0,
-                color: theme.palette.error.light,
-              },
-              {
-                offset: 100,
-                color: theme.palette.error.main,
-              },
-            ],
-          ],
-        },
-      },
-      plotOptions: {
-        radialBar: {
-          hollow: { size: '68%' },
-          dataLabels: {
-            value: { offsetY: 16 },
-            total: {
-              label: "Tổng cộng",
-              formatter: () => 0,
-            },
-          },
-        },
-      },
-    })
-    ;
+  });
 
   return (
-        <>
-      {totalCount && totalPercent &&
-    <Card>
-          <CardHeader title="Biểu đồ trạng thái đơn hàng" />
+    <>
+      <Card>
+        <CardHeader title="Biểu đồ trạng thái đơn hàng" />
+        {totalCount === 0 ?
+          <Typography variant='h5' sx={{ p: 5, textAlign: 'center' }}>
+            Chưa có dữ liệu
+          </Typography> :
           <ChartWrapperStyle dir="ltr">
-            <ReactApexChart type="radialBar" series={[parseInt(completed, 10), parseInt(canceled, 10)]} options={chartOptions} height={310} />
+            <ReactApexChart type="radialBar" series={[parseInt(completed, 10) || 0, parseInt(canceled, 10) || 0]} options={chartOptions} height={310} />
           </ChartWrapperStyle>
-    </Card>
-      }
-        </>
+        }
+      </Card>
+    </>
   );
 }

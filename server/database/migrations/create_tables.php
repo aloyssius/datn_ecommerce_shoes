@@ -78,6 +78,7 @@ return new class extends Migration
             $table->boolean('is_seen')->default(false);
             $table->string('url', ConstantSystem::URL_MAX_LENGTH);
             $table->foreignUuid('account_id')->references('id')->on('accounts');
+            // $table->foreignUuid('account_id')->nullable()->references('id')->on('accounts');
         });
 
         // Voucher

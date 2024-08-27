@@ -26,7 +26,7 @@ export default [
   },
   {
     label: 'TRA CỨU ĐƠN HÀNG',
-    url: '/site/about-us',
+    url: '/track-order',
     type: 'link',
   },
   // {

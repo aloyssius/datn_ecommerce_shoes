@@ -21,6 +21,7 @@ const useFetch = (url, options = { fetch: true }) => {
     const fetchData = async () => {
       onOpenLoading();
       setIsLoading(true);
+      console.log(params);
       try {
         const response = await apiGet(url, params);
         const data = response.data;

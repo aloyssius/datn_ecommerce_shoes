@@ -218,7 +218,7 @@ export default function AccountPageLogin() {
                       children={
                         <div className='forgot-password-container'>
                           <small className="form-text text-dark">
-                            <Link to="/"><span className='forgot-password'> Quên mật khẩu</span></Link>
+                            <Link to="/forgot-password"><span className='forgot-password'> Quên mật khẩu</span></Link>
                           </small>
                         </div>
                       }

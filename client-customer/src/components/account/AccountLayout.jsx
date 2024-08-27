@@ -20,10 +20,12 @@ import AccountPageOrders from './AccountPageOrders';
 import AccountPagePassword from './AccountPagePassword';
 import AccountPageProfile from './AccountPageProfile';
 import { PATH_PAGE } from '../../routes/path';
+import useAuth from '../../hooks/useAuth';
 
 
 export default function AccountLayout(props) {
   const { match, location } = props;
+  const { logout } = useAuth();
 
   const breadcrumb = [
     { title: 'Trang chủ', url: PATH_PAGE.root },
@@ -35,18 +37,34 @@ export default function AccountLayout(props) {
     { title: 'Lịch sử mua hàng', url: 'orders' },
     { title: 'Danh sách địa chỉ', url: 'addresses' },
     { title: 'Đổi mật khẩu', url: 'change-password' },
+    { title: 'Đăng xuất', action: () => logout() },
   ].map((link) => {
     const url = `${match.url}/${link.url}`;
     const isActive = matchPath(location.pathname, { path: url });
     const classes = classNames('account-nav__item', {
       'account-nav__item--active': isActive,
     });
-
     return (
       <li key={link.url} className={classes}>
-        <Link className="link" to={url}>{link.title}</Link>
+        {link.url ? (
+          <Link className="link" to={link.url}>
+            {link.title}
+          </Link>
+        ) :
+          <Link className="link" onClick={link.action} to={"/account/info"}>
+            {link.title}
+          </Link>
+        }
       </li>
     );
+
+    // return (
+    //   if (link.url) {
+    //   <li key={link.url} className={classes}>
+    //     <Link className="link" to={url}>{link.title}</Link>
+    //   </li>
+    //   }
+    // );
   });
 
   return (

@@ -35,9 +35,10 @@ class ProductController extends Controller
     public function indexHomeClient()
     {
         $productNews = ProductDetails::getClientProductHome();
+        $productTopSold = ProductDetails::getClientProductTopSold();
 
         $response['new'] = $productNews;
-        $response['top8'] = $productNews;
+        $response['topSold'] = $productTopSold;
 
         return ApiResponse::responseObject($response);
     }
@@ -56,6 +57,41 @@ class ProductController extends Controller
         $otherData['categories'] = $categories;
 
         return ApiResponse::responsePageCustom($products, $statusCounts, $otherData);
+    }
+
+    public function clientIndexMale(ProductRequest $req)
+    {
+        $req->pageSize = 15;
+        $productDetails = ProductDetails::getClientProducts($req, 'male');
+
+        $brands = Brand::select(['id', 'name'])->orderBy('created_at', 'desc')->get();
+        $categories = Category::select(['id', 'name'])->orderBy('created_at', 'desc')->get();
+        $colors = Color::select(['id', 'code', 'name'])->orderBy('created_at', 'desc')->get();
+        $sizes = Size::select(['id', 'name'])->orderBy('name', 'asc')->get();
+
+        $otherData['brands'] = $brands;
+        $otherData['categories'] = $categories;
+        $otherData['colors'] = $colors;
+        $otherData['sizes'] = $sizes;
+
+        return ApiResponse::responsePageCustom($productDetails, [], $otherData);
+    }
+    public function clientIndexFemale(ProductRequest $req)
+    {
+        $req->pageSize = 15;
+        $productDetails = ProductDetails::getClientProducts($req, 'female');
+
+        $brands = Brand::select(['id', 'name'])->orderBy('created_at', 'desc')->get();
+        $categories = Category::select(['id', 'name'])->orderBy('created_at', 'desc')->get();
+        $colors = Color::select(['id', 'code', 'name'])->orderBy('created_at', 'desc')->get();
+        $sizes = Size::select(['id', 'name'])->orderBy('name', 'asc')->get();
+
+        $otherData['brands'] = $brands;
+        $otherData['categories'] = $categories;
+        $otherData['colors'] = $colors;
+        $otherData['sizes'] = $sizes;
+
+        return ApiResponse::responsePageCustom($productDetails, [], $otherData);
     }
 
     public function clientIndex(ProductRequest $req)
@@ -505,7 +541,7 @@ class ProductController extends Controller
 
     public function findBySkuClient($sku)
     {
-        $product = Product::select('PRODUCTS.name', 'BRANDS.NAME as brandName', 'COLORS.NAME as colorName', 'PRODUCTS.status', 'PRODUCT_DETAILS.price', 'PRODUCT_DETAILS.sku', 'PRODUCTS.ID as productId', 'COLORS.ID as colorId')
+        $product = Product::select('PRODUCTS.name', 'BRANDS.NAME as brandName', 'COLORS.NAME as colorName', 'PRODUCTS.status', 'PRODUCT_DETAILS.price', 'PRODUCT_DETAILS.sku', 'PRODUCTS.ID as productId', 'COLORS.ID as colorId', 'PRODUCTS.description')
             ->join('PRODUCT_DETAILS', 'PRODUCTS.ID', '=', 'PRODUCT_DETAILS.PRODUCT_ID')
             ->join('BRANDS', 'PRODUCTS.BRAND_ID', '=', 'BRANDS.ID')
             ->join('COLORS', 'PRODUCT_DETAILS.COLOR_ID', '=', 'COLORS.ID')

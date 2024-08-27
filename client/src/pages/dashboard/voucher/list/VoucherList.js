@@ -71,13 +71,11 @@ export default function VoucherList() {
   const {
     order,
     orderBy,
-    selected,
-    onSelectRow,
-    onSelectAllRows,
-    onSort,
     rowsPerPage,
     page,
     onChangePage,
+    onSelectRow,
+    onSort,
     onChangeRowsPerPage,
   } = useTable({});
 
@@ -232,7 +230,6 @@ export default function VoucherList() {
           <Divider />
 
           <VoucherTableToolbar
-            filterSearch={filterSearch}
             filterType={filterType}
             filterStartDate={filterStartDate}
             filterEndDate={filterEndDate}
@@ -286,22 +283,44 @@ export default function VoucherList() {
                       onSelectRow={() => onSelectRow(row.id)}
                     />
                   ))}
+                  {/*
                   <TableEmptyRows height={emptyRows(page, rowsPerPage, dataFiltered.length)} />
+                  */}
                 </TableBody>
               </Table>
+              {/*
               <TableNoData isNotFound={dataFiltered.length === 0} />
+              */}
             </TableContainer>
           </Scrollbar>
 
-          <TablePagination
-            rowsPerPageOptions={[5, 10, 25]}
-            component="div"
-            count={fetchCount}
-            rowsPerPage={rowsPerPage}
-            page={page}
-            onPageChange={onChangePage}
-            onRowsPerPageChange={onChangeRowsPerPage}
-          />
+          <Divider />
+
+          <Box sx={{ position: 'relative', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', alignItems: 'center' }}>
+            <TablePagination
+              rowsPerPageOptions={[10, 15, 25]}
+              component="div"
+              rowsPerPage={rowsPerPage}
+              page={0}
+              onPageChange={onChangePage}
+              count={0}
+              onRowsPerPageChange={onChangeRowsPerPage}
+              ActionsComponent={() => null}
+              labelDisplayedRows={() => ''}
+              labelRowsPerPage='Số hàng mỗi trang:'
+              sx={{
+                borderTop: 'none',
+              }}
+            />
+
+            <Pagination
+              sx={{ px: 1 }}
+              page={page}
+              count={totalPages}
+              onChange={onChangePage}
+            />
+          </Box>
+
         </Card>
       </Container>
     </Page>

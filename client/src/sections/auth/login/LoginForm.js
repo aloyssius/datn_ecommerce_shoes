@@ -8,7 +8,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { Link, Stack, Alert, IconButton, InputAdornment } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
 // routes
-import { PATH_DASHBOARD } from '../../../routes/paths';
+import { PATH_DASHBOARD, PATH_AUTH } from '../../../routes/paths';
 // hooks
 import useAuth from '../../../hooks/useAuth';
 import useIsMountedRef from '../../../hooks/useIsMountedRef';
@@ -95,7 +95,13 @@ export default function LoginForm() {
       </Stack>
       */}
 
-      <LoadingButton sx={{ my: 3 }} fullWidth size="large" type="submit" variant="contained" loading={isSubmitting}>
+      <Stack direction="row" alignItems="center" justifyContent="flex-end" sx={{mt: 2}}>
+        <Link component={RouterLink} variant="subtitle2" to={PATH_AUTH.resetPassword}>
+          Quên mật khẩu?
+        </Link>
+      </Stack>
+
+      <LoadingButton sx={{ my: 2.5 }} fullWidth size="large" type="submit" variant="contained" loading={isSubmitting}>
         Đăng Nhập
       </LoadingButton>
     </FormProvider>

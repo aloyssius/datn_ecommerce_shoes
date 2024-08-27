@@ -40,17 +40,16 @@ export default function ResetPassword() {
             {!sent ? (
               <>
                 <Typography variant="h3" paragraph>
-                  Forgot your password?
+                  Bạn quên mật khẩu?
                 </Typography>
                 <Typography sx={{ color: 'text.secondary', mb: 5 }}>
-                  Please enter the email address associated with your account and We will email you a link to reset your
-                  password.
+                  Vui lòng nhập địa chỉ email được liên kết với tài khoản của bạn và chúng tôi sẽ gửi cho bạn một liên kết qua email để đặt lại mật khẩu của bạn.
                 </Typography>
 
                 <ResetPasswordForm onSent={() => setSent(true)} onGetEmail={(value) => setEmail(value)} />
 
                 <Button fullWidth size="large" component={RouterLink} to={PATH_AUTH.login} sx={{ mt: 1 }}>
-                  Back
+                  Quay lại
                 </Button>
               </>
             ) : (
@@ -58,17 +57,17 @@ export default function ResetPassword() {
                 <SentIcon sx={{ mb: 5, mx: 'auto', height: 160 }} />
 
                 <Typography variant="h3" gutterBottom>
-                  Request sent successfully
+                  Yêu cầu đã được gửi thành công
                 </Typography>
                 <Typography>
-                  We have sent a confirmation email to &nbsp;
+                  Chúng tôi đã gửi email đặt lại mật khẩu đến &nbsp;
                   <strong>{email}</strong>
                   <br />
-                  Please check your email.
+                  Vui lòng kiểm tra email của bạn.
                 </Typography>
 
                 <Button size="large" variant="contained" component={RouterLink} to={PATH_AUTH.login} sx={{ mt: 5 }}>
-                  Back
+                  Quay lại
                 </Button>
               </Box>
             )}

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Bills;
 use App\Constants\BillHistoryStatusTimeline;
 use App\Constants\ConstantSystem;
 use App\Constants\OrderStatus;
+use App\Constants\Role as ConstantsRole;
 use App\Constants\TransactionType;
 use App\Exceptions\NotFoundException;
 use App\Exceptions\RestApiException;
@@ -28,7 +29,9 @@ use App\Models\Bill;
 use App\Models\BillDetails;
 use App\Models\BillHistory;
 use App\Models\CartDetails;
+use App\Models\Notification;
 use App\Models\ProductDetails;
+use App\Models\Role;
 use App\Models\Transaction;
 use App\Models\Voucher;
 use Carbon\Carbon;
@@ -554,6 +557,18 @@ class BillController extends Controller
             $billHistory->note = "Khách hàng đặt hàng thành công";
             $billHistory->save();
 
+            $roleAdmin = Role::where('code', ConstantsRole::ADMIN)->first();
+            $roleEmp = Role::where('code', ConstantsRole::EMPLOYEE)->first();
+            $accountAdmins = Account::whereIn('role_id', [$roleAdmin->id, $roleEmp->id])->get();
+
+            foreach ($accountAdmins as $ac) {
+                $notify = new Notification();
+                $notify->url = $newBill->id;
+                $notify->content = "Đơn hàng mới đang chờ bạn xác nhận";
+                $notify->account_id = $ac->id;
+                $notify->save();
+            }
+
             $errorQuantity = [];
 
             if (count($req->cartItems) > 0) {
@@ -891,14 +906,43 @@ class BillController extends Controller
 
     public function revenueStatistics(Request $req)
     {
-        $totalBill = Bill::join('bill_details', 'bills.id', '=', 'bill_details.bill_id')
-            ->where('bills.status', OrderStatus::COMPLETED)
-            ->selectRaw('SUM(bills.total_money - COALESCE(bills.discount_amount, 0)) as totalMoney')
-            ->selectRaw('COUNT(bills.id) as totalOrder')
-            ->selectRaw('SUM(bill_details.quantity) as totalSold')
-            ->first();
+        $startDate = $req->startDate;
+        $endDate = $req->endDate;
+
+        $totalBill = DB::table('bills as b')
+        ->join(DB::raw('(
+            SELECT 
+                bd.bill_id, 
+                SUM(bd.quantity) AS totalSold
+            FROM 
+                bill_details bd
+            GROUP BY 
+                bd.bill_id
+        ) as bds'), 'b.id', '=', 'bds.bill_id')
+        ->selectRaw('SUM(b.total_money - COALESCE(b.discount_amount, 0)) as totalMoney')
+        ->selectRaw('COUNT(*) as totalOrder')
+        ->selectRaw('SUM(bds.totalSold) as totalSold')
+        ->where('b.status', 'completed')
+        ->whereBetween('b.created_at', [ Carbon::createFromFormat('d-m-Y', $req->startDate)->startOfDay()->format('Y-m-d H:i:s'), Carbon::createFromFormat('d-m-Y', $req->endDate)->endOfDay()->format('Y-m-d H:i:s')])
+        ->first();
+    
+    
+        // $totalBill = Bill::join('bill_details', 'bills.id', '=', 'bill_details.bill_id')
+        //     ->whereBetween('bills.created_at', [
+        //         Carbon::createFromFormat('d-m-Y', $startDate)->startOfDay(),
+        //         Carbon::createFromFormat('d-m-Y', $endDate)->endOfDay()
+        //     ])
+        //     ->where('bills.status', OrderStatus::COMPLETED)
+        //     ->selectRaw('SUM(bills.total_money - COALESCE(bills.discount_amount, 0)) as totalMoney')
+        //     ->selectRaw('COUNT(bills.id) as totalOrder')
+        //     ->selectRaw('SUM(bill_details.quantity) as totalSold')
+        //     ->first();
 
         $totalStatus = Bill::whereIn('status', [OrderStatus::COMPLETED, OrderStatus::CANCELED])
+            ->whereBetween('created_at', [
+                Carbon::createFromFormat('d-m-Y', $startDate)->startOfDay(),
+                Carbon::createFromFormat('d-m-Y', $endDate)->endOfDay()
+            ])
             ->selectRaw('COUNT(*) as count, status')
             ->groupBy('status')
             ->get();
@@ -908,6 +952,10 @@ class BillController extends Controller
 
         $totalStatusPercent = DB::table('bills')
             ->whereIn('status', [OrderStatus::COMPLETED, OrderStatus::CANCELED])
+            ->whereBetween('created_at', [
+                Carbon::createFromFormat('d-m-Y', $startDate)->startOfDay(),
+                Carbon::createFromFormat('d-m-Y', $endDate)->endOfDay()
+            ])
             ->selectRaw('
         status,
         COUNT(*) AS count,
@@ -915,10 +963,27 @@ class BillController extends Controller
             SELECT COUNT(*)
             FROM bills
             WHERE status IN (\'completed\', \'canceled\')
+            AND created_at BETWEEN ? AND ?
         ), 2) AS percentage
-    ')
+    ', [
+                Carbon::createFromFormat('d-m-Y', $startDate)->startOfDay(),
+                Carbon::createFromFormat('d-m-Y', $endDate)->endOfDay()
+            ])
             ->groupBy('status')
             ->get();
+        //     $totalStatusPercent = DB::table('bills')
+        //         ->whereIn('status', [OrderStatus::COMPLETED, OrderStatus::CANCELED])
+        //         ->selectRaw('
+        //     status,
+        //     COUNT(*) AS count,
+        //     ROUND(COUNT(*) * 100.0 / (
+        //         SELECT COUNT(*)
+        //         FROM bills
+        //         WHERE status IN (\'completed\', \'canceled\')
+        //     ), 2) AS percentage
+        // ')
+        //         ->groupBy('status')
+        //         ->get();
 
         $query = "
             WITH PRODUCT_DEFAULT_IMAGE AS (
@@ -926,31 +991,27 @@ class BillController extends Controller
               FROM IMAGES
               WHERE IS_DEFAULT = 1
             )
-            SELECT P.code, P.name, PDI.path_url as pathUrl, sum(BD.quantity) as totalSold
-FROM BILL_DETAILS BD
+            SELECT PD.sku as code, P.name, C.name as colorName, PDI.path_url as pathUrl, sum(BD.quantity) as totalSold
+            FROM BILL_DETAILS BD
             JOIN BILLS B ON BD.BILL_ID = B.ID
             JOIN PRODUCT_DETAILS PD ON BD.PRODUCT_DETAILS_ID = PD.ID
+            JOIN COLORS C ON PD.COLOR_ID = C.ID
             JOIN PRODUCTS P ON PD.PRODUCT_ID = P.ID
             JOIN PRODUCT_DEFAULT_IMAGE PDI ON PD.PRODUCT_ID = PDI.PRODUCT_ID
             AND PD.COLOR_ID = PDI.PRODUCT_COLOR_ID
             WHERE B.status = 'completed'
-            group by p.code, p.name, PDI.path_url
+            group by pd.sku, p.name, PDI.path_url, c.name
             order by sum(BD.quantity) desc
             limit 5;
         ";
         $products = DB::select($query);
 
-        $years = DB::table('bills')
-            ->selectRaw('DISTINCT YEAR(created_at) as year')
-            ->orderBy('year')
-            ->pluck('year');
-
         $revenueByMonth = DB::table('bills as b')
-            ->join('bill_details as bd', 'b.id', '=', 'bd.bill_id')
-            ->whereYear('b.created_at', 2024)
+            // ->join('bill_details as bd', 'b.id', '=', 'bd.bill_id')
+            // ->whereYear('b.created_at', 2024)
             ->where('b.status', 'completed')
-            ->selectRaw('MONTH(b.created_at) as month, SUM((bd.quantity * bd.price) - COALESCE(b.discount_amount, 0)) as total_revenue')
-            ->groupBy('month')
+            ->selectRaw('MONTH(b.created_at) as month, YEAR(b.created_at) as year, SUM((b.total_money) - COALESCE(b.discount_amount, 0)) as totalRevenue')
+            ->groupBy('month', 'year')
             ->orderBy('month')
             ->get();
 
@@ -958,7 +1019,6 @@ FROM BILL_DETAILS BD
         $response['totalCount'] = $totalCountBillCompletedAndCanceled;
         $response['totalPercent'] = $totalStatusPercent;
         $response['products'] = $products;
-        $response['years'] = $years;
         $response['revenueByMonth'] = $revenueByMonth;
 
         return ApiResponse::responseObject($response);

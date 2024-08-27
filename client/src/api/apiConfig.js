@@ -10,6 +10,8 @@ export const ADMIN_API = {
   my_account: path(ROOTS_API, '/my-account'),
   logout: path(ROOTS_API, '/account/logout'),
   changePass: path(ROOTS_API, '/change-password'),
+  resetPass: path(ROOTS_API, '/forgot-password'),
+  changeNotifies: (id) => path(ROOTS_API, `/notifies/${id}`),
   statistics: path(ROOTS_API, '/statistics'),
   bill: {
     all: path(ROOTS_API, '/bills'),

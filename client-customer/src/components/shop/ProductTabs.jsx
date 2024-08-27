@@ -5,11 +5,10 @@ import React, { Component } from 'react';
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
 
-// application
+// applicationnnn
 import ProductTabDescription from './ProductTabDescription';
 import ProductTabSpecification from './ProductTabSpecification';
 import ProductTabReviews from './ProductTabReviews';
-
 
 class ProductTabs extends Component {
   constructor(props) {
@@ -26,14 +25,14 @@ class ProductTabs extends Component {
 
   render() {
     const { currentTab } = this.state;
-    const { withSidebar } = this.props;
+    const { withSidebar, desc } = this.props;
     const classes = classNames('product-tabs', {
       'product-tabs--layout--sidebar': withSidebar,
     });
 
     const tabs = [
-      { key: 'description', title: 'Mô tả sản phẩm', content: <ProductTabDescription /> },
-      { key: 'specification', title: 'Thông tin sản phẩm', content: <ProductTabSpecification /> },
+      { key: 'description', title: 'Mô tả sản phẩm', content: <ProductTabDescription desc={desc} /> },
+      // { key: 'specification', title: 'Thông tin sản phẩm', content: <ProductTabSpecification /> },
       // { key: 'reviews', title: 'Reviews', content: <ProductTabReviews /> },
     ];
 

@@ -32,10 +32,20 @@ class Bill extends BaseModel
         'discount_amount' => 'float',
     ];
 
+    
+
     public function __construct(array $attributes = [])
     {
         $this->fillable = array_merge(parent::getBaseFillable(), $this->fillable);
         parent::__construct($attributes);
+    }
+
+    public function getCancellationDateAttribute($value)
+    {
+        if ($value !== null) {
+            return Carbon::parse($value)->format('H:i:s d/m/Y');
+        }
+        return null;
     }
 
     public function getConfirmationDateAttribute($value)

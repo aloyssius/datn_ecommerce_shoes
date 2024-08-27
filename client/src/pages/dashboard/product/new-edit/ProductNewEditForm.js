@@ -127,8 +127,16 @@ export default function ProductNewEditForm({ isEdit, currentProduct, onUpdateDat
   const navigate = useNavigate();
 
   const NewProductSchema = Yup.object().shape({
-    name: Yup.string().required('Tên sản phẩm không được để trống'),
-    code: Yup.string().required('Mã sản phẩm không được để trống'),
+    name: Yup.string().test(
+      'max',
+      'Tên sản phẩm quá dài (tối đa 100 ký tự)',
+      value => value.trim().length <= 100
+    ).required('Tên sản phẩm không được để trống'),
+    code: Yup.string().test(
+      'max',
+      'Mã sản phẩm quá dài (tối đa 20 ký tự)',
+      value => value.trim().length <= 20
+    ).required('Mã sản phẩm không được để trống'),
     brand: Yup.object().nullable().required('Bạn chưa chọn thương hiệu'),
     categorys: Yup.array().of(Yup.object()).min(1, "Vui lòng chọn ít nhất 1 danh mục").required(),
     colors: Yup.array().of(Yup.object()).min(1, "Vui lòng chọn ít nhất 1 màu sắc").required(),

@@ -26,6 +26,7 @@ function ProductCard(props) {
     cartAddItem,
     wishlistAddItem,
     compareAddItem,
+    latest,
   } = props;
   const containerClasses = classNames('product-card', {
     'product-card--layout--grid product-card--size--sm': layout === 'grid-sm',
@@ -45,7 +46,7 @@ function ProductCard(props) {
   // if (product.badges.includes('hot')) {
   //   badges.push(<div key="hot" className="product-card__badge product-card__badge--hot">Hot</div>);
   // }
-  // if (product.badges.includes('new')) {
+  // if (latest) {
   //   badges.push(<div key="new" className="product-card__badge product-card__badge--new">New</div>);
   // }
 
